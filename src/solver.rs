@@ -1,5 +1,5 @@
 use network::Network;
-use blob::Blob;
+use phloem::Blob;
 
 enum SolverKind {
     SGD,

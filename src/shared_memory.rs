@@ -1,5 +1,5 @@
 use std::sync::{Arc, RwLock};
-use blob::Blob;
+use phloem::Blob;
 
 /// shared Lock used for our memory blobs
 pub type ArcLock<T> = Arc<RwLock<T>>;

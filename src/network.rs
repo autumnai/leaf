@@ -4,8 +4,7 @@ use std::cmp;
 use shared_memory::*;
 use layer::Layer;
 use layer::LayerConfig;
-use blob::Blob;
-
+use phloem::Blob;
 
 pub struct Network {
     pub name: String,

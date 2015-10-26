@@ -14,6 +14,7 @@ keywords = ["machine learning", "framework"]
 license = "MIT"
 
 [dependencies]
+phloem = { git = "https://github.com/autumnai/phloem.git" }
 rblas = "0.0.9"
 log = "0.3.2"
 clippy = "*"

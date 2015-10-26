@@ -13,9 +13,9 @@
 #[macro_use]
 extern crate log;
 extern crate rblas;
+extern crate phloem;
 mod shared_memory;
 mod math;
-mod blob;
 mod layer;
 mod solver;
 mod network;
