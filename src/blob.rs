@@ -1,7 +1,7 @@
 pub struct Blob<T> {
     data: Vec<T>,
     diff: Vec<T>,
-    shape: Vec<isize>
+    shape: Vec<isize>,
 }
 
 impl <T> Blob<T> {
@@ -14,7 +14,7 @@ impl <T> Blob<T> {
         let mut blob = Blob {
             data: vec![],
             diff: vec![],
-            shape: vec![0]
+            shape: vec![0],
         };
         blob.reshape(new_shape);
 
@@ -24,7 +24,8 @@ impl <T> Blob<T> {
     pub fn reshape(&mut self, new_shape: Vec<isize>) {
         let mut new_capacity = 1;
 
-        for dimension in new_shape.iter() { // not sure if dimension is a fitting description
+        for dimension in new_shape.iter() {
+            // not sure if dimension is a fitting description
             new_capacity *= *dimension;
         }
         self.shape = new_shape;

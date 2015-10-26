@@ -2,19 +2,19 @@ use blob::Blob;
 use math::*;
 
 pub struct Layer {
-    top: Vec<Layer>
+    top: Vec<Layer>,
 }
 
 fn sigmoid(z: f32) -> f32 {
-    return 1f32 / (1f32 + (-z).exp())
+    1f32 / (1f32 + (-z).exp())
 }
 
 fn sigmoid_prime(z: f32) -> f32 {
-    return sigmoid_prime_precalc(sigmoid(z))
+    sigmoid_prime_precalc(sigmoid(z))
 }
 
 fn sigmoid_prime_precalc(sigmoid_z: f32) -> f32 {
-    return sigmoid_z * (1f32 - sigmoid_z)
+    sigmoid_z * (1f32 - sigmoid_z)
 }
 
 impl Layer {
@@ -38,11 +38,11 @@ impl Layer {
 
         // Unlock();
 
-        return loss
+        loss
     }
 
     // forward_cpu for sigmoid layer
-    pub fn forward_cpu(&self, bottom: &Vec<Box<Blob<f32>>>, top: &mut Vec<Box<Blob<f32>>>){
+    pub fn forward_cpu(&self, bottom: &Vec<Box<Blob<f32>>>, top: &mut Vec<Box<Blob<f32>>>) {
         let bottom_data = bottom[0].cpu_data();
         let top_data = top[0].mutable_cpu_data();
 
@@ -52,7 +52,10 @@ impl Layer {
     }
 
     // backward_cpu for sigmoid layer
-    pub fn backward_cpu(&self, top: &Vec<Box<Blob<f32>>>, propagate_down: &Vec<bool>, bottom: &mut Vec<Box<Blob<f32>>>) {
+    pub fn backward_cpu(&self,
+                        top: &Vec<Box<Blob<f32>>>,
+                        propagate_down: &Vec<bool>,
+                        bottom: &mut Vec<Box<Blob<f32>>>) {
         if propagate_down[0] {
             let top_data = top[0].cpu_data();
             let top_diff = top[0].cpu_diff();
@@ -66,6 +69,16 @@ impl Layer {
             }
         }
     }
+
+    pub fn auto_top_blobs(&self) -> bool {
+        false
+    }
+    pub fn min_top_blobs(&self) -> usize {
+        0
+    }
+    pub fn exact_num_top_blobs(&self) -> usize {
+        0
+    }
 }
 
 pub struct LayerConfig {
@@ -75,10 +88,26 @@ pub struct LayerConfig {
     bottoms: Vec<String>, // the name of each bottom blob; called bottom in Caffe
     tops: Vec<String>, // the name of each top blob; called top in Caffe
 
-    // minimal, a lot of Caffe not ported yet
+    // Specifies on which bottoms the backpropagation should be skipped.
+    // The size must be either 0 or equal to the number of bottoms.
+    propagate_down: Vec<bool>, // minimal, a lot of Caffe not ported yet
 }
 
 impl LayerConfig {
-    pub fn top(&self, top_id: usize) -> Option<&String> { return self.tops.get(top_id); }
-    pub fn bottom(&self, bottom_id: usize) -> Option<&String> { return self.bottoms.get(bottom_id); }
+    pub fn top(&self, top_id: usize) -> Option<&String> {
+        self.tops.get(top_id)
+    }
+    pub fn tops_len(&self) -> usize {
+        self.tops.len()
+    }
+    pub fn bottom(&self, bottom_id: usize) -> Option<&String> {
+        self.bottoms.get(bottom_id)
+    }
+    pub fn bottoms_len(&self) -> usize {
+        self.bottoms.len()
+    }
+
+    pub fn check_propagate_down_len(&self) -> bool {
+        self.propagate_down.len() == 0 || self.propagate_down.len() == self.bottoms.len()
+    }
 }

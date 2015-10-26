@@ -8,6 +8,7 @@
         unstable_features,
         unused_import_braces, unused_qualifications)]
 
+#![feature(vec_resize)]
 
 #[macro_use]
 extern crate log;
