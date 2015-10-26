@@ -29,9 +29,6 @@ impl Solver{
 
             let minibatch_size = 10;
 
-            // let noop_bottom = Vec::with_capacity(0);
-            // let noop_bottom = Vec<Box<Blob<f32>>(0);
-            // let noop_bottom = vec![Box::new(Blob<f32>::new())];
             let noop_bottom = vec![Box::new(Blob::new())];
             for _ in 0..minibatch_size {
                 loss += self.net.forward_backward(&noop_bottom);
