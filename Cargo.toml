@@ -1,8 +1,23 @@
 [package]
 name = "leaf"
+description = "Machine Learning Framework"
 version = "0.0.1"
-authors = ["Maximilian Goisser <max@autumnai.com>"]
+authors = [
+  "Maximilian Goisser <max@autumnai.com>",
+  "Michael Hirn <mj@autumnai.com>"
+]
+repository = "https://github.com/autumnai/leaf"
+homepage = "https://github.com/autumnai/leaf"
+documentation = "http://autumnai.github.io/leaf"
+readme = "README.md"
+keywords = ["machine learning", "framework"]
+license = "MIT"
 
 [dependencies]
 rblas = "0.0.9"
 log = "0.3.2"
+clippy = "*"
+
+[features]
+default = []
+dev = [] # possibly for clippy
