@@ -1,8 +1,16 @@
 [package]
 name = "leaf"
 version = "0.0.1"
-authors = ["Maximilian Goisser <max@autumnai.com>"]
+authors = [
+  "Maximilian Goisser <max@autumnai.com>",
+  "Michael Hirn <mj@autumnai.com>"
+]
 
 [dependencies]
 rblas = "0.0.9"
 log = "0.3.2"
+clippy = "*"
+
+[features]
+default = []
+dev = [] # possibly for clippy
