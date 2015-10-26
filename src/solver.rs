@@ -1,18 +1,19 @@
 use network::Network;
 use blob::Blob;
 
-enum SolverKind{
-    SGD
+enum SolverKind {
+    SGD,
 }
 
 struct Solver {
     kind: SolverKind,
     net: Network,
-    iter: i32
+    iter: i32,
 }
 
 impl Solver{
-    // might take a sovler state as argument in the future to resume a stopped solver
+    // might take a solver state as argument in the future to resume a stopped
+    // solver
     fn solve(&mut self) {
         info!("Solving {}", self.net.name);
 
