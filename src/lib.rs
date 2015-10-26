@@ -13,7 +13,7 @@
 #[macro_use]
 extern crate log;
 extern crate rblas;
-mod synced_memory;
+mod shared_memory;
 mod math;
 mod blob;
 mod layer;

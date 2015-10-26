@@ -1,5 +1,6 @@
-use blob::Blob;
 use math::*;
+use shared_memory::*;
+use blob::Blob;
 
 pub struct Layer {
     top: Vec<Layer>,
@@ -18,7 +19,7 @@ fn sigmoid_prime_precalc(sigmoid_z: f32) -> f32 {
 }
 
 impl Layer {
-    pub fn forward(&self, bottom: &Vec<Box<Blob<f32>>>, top: &mut Vec<Box<Blob<f32>>>) -> f32 {
+    pub fn forward(&self, bottom: &[HeapBlob], top: &mut Vec<HeapBlob>) -> f32 {
         // Lock();
         // Reshape(bottom, top); // Reshape the layer to fit top & bottom blob
         let mut loss = 0f32;
@@ -42,7 +43,7 @@ impl Layer {
     }
 
     // forward_cpu for sigmoid layer
-    pub fn forward_cpu(&self, bottom: &Vec<Box<Blob<f32>>>, top: &mut Vec<Box<Blob<f32>>>) {
+    pub fn forward_cpu(&self, bottom: &[HeapBlob], top: &mut Vec<HeapBlob>) {
         let bottom_data = bottom[0].cpu_data();
         let top_data = top[0].mutable_cpu_data();
 
@@ -52,10 +53,7 @@ impl Layer {
     }
 
     // backward_cpu for sigmoid layer
-    pub fn backward_cpu(&self,
-                        top: &Vec<Box<Blob<f32>>>,
-                        propagate_down: &Vec<bool>,
-                        bottom: &mut Vec<Box<Blob<f32>>>) {
+    pub fn backward_cpu(&self, top: &[HeapBlob], propagate_down: &[bool], bottom: &mut Vec<HeapBlob>) {
         if propagate_down[0] {
             let top_data = top[0].cpu_data();
             let top_diff = top[0].cpu_diff();
@@ -108,6 +106,6 @@ impl LayerConfig {
     }
 
     pub fn check_propagate_down_len(&self) -> bool {
-        self.propagate_down.len() == 0 || self.propagate_down.len() == self.bottoms.len()
+        self.propagate_down.is_empty() || self.propagate_down.len() == self.bottoms.len()
     }
 }
