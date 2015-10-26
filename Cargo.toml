@@ -7,7 +7,7 @@ authors = [
   "Michael Hirn <mj@autumnai.com>"
 ]
 repository = "https://github.com/autumnai/leaf"
-homepace = "https://github.com/autumnai/leaf"
+homepage = "https://github.com/autumnai/leaf"
 documentation = "http://autumnai.github.io/leaf"
 readme = "README.md"
 keywords = ["machine learning", "framework"]
