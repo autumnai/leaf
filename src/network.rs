@@ -1,28 +1,30 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 use std::cmp;
+use shared_memory::*;
 use layer::Layer;
 use layer::LayerConfig;
 use blob::Blob;
+
 
 pub struct Network {
     pub name: String,
     layers: Vec<Layer>,
     layer_names: Vec<String>,
 
-    blobs: Vec<Arc<RwLock<Box<Blob<f32>>>>>, // the blobs storing intermediate results between the layer.
+    blobs: Vec<ArcLock<HeapBlob>>, // the blobs storing intermediate results between the layer.
     blob_names: Vec<String>,
     blob_need_backwards: Vec<bool>,
 
     // stores the vectors containing the output for each layer (only references to the blobs)
-    top_vecs: Vec<Vec<Arc<RwLock<Box<Blob<f32>>>>>>,
+    top_vecs: Vec<Vec<ArcLock<HeapBlob>>>,
     top_id_vecs: Vec<Vec<usize>>,
 
-    bottom_vecs: Vec<Vec<Arc<RwLock<Box<Blob<f32>>>>>>, // stores the vectors containing the input for each layer
+    bottom_vecs: Vec<Vec<ArcLock<HeapBlob>>>, // stores the vectors containing the input for each layer
     bottom_id_vecs: Vec<Vec<usize>>,
     bottom_need_backwards: Vec<Vec<bool>>,
 
-    input_blobs: Vec<Arc<RwLock<Box<Blob<f32>>>>>,
+    input_blobs: Vec<ArcLock<HeapBlob>>,
     input_blob_indices: Vec<usize>,
 
     // Vector of weight in the loss (or objective) function of each net blob, indexed by blob_id.
@@ -189,7 +191,7 @@ impl Network {
                 if layer_config.top(top_id).is_some() {
                     blob_name = String::from(layer_config.top(top_id).unwrap().clone());
                 } else {
-                    blob_name = "(automatic)".to_string();
+                    blob_name = "(automatic)".to_owned();
                 }
             }
             None => {
@@ -217,13 +219,13 @@ impl Network {
                 info!("Input {} -> {}", top_id, blob_name);
             }
 
-            let blob_pointer: Arc<RwLock<Box<Blob<f32>>>> = Arc::new(RwLock::new(Box::new(Blob::new())));
+            let blob_pointer: ArcLock<HeapBlob> = Arc::new(RwLock::new(Box::new(Blob::new())));
             let blob_id = self.blobs.len();
             self.blobs.push(blob_pointer.clone());
-            self.blob_names.push(blob_name.to_string());
+            self.blob_names.push(blob_name.to_owned());
             self.blob_need_backwards.push(false);
             if blob_name_to_idx.is_some() {
-                blob_name_to_idx.unwrap().insert(blob_name.to_string(), blob_id);
+                blob_name_to_idx.unwrap().insert(blob_name.to_owned(), blob_id);
             }
 
             match layer_id {
@@ -241,12 +243,12 @@ impl Network {
             }
         }
         if available_blobs.is_some() {
-            available_blobs.unwrap().insert(blob_name.to_string());
+            available_blobs.unwrap().insert(blob_name.to_owned());
         }
     }
 
 
-    pub fn forward_backward(&self, bottom: &Vec<Box<Blob<f32>>>) -> f32 {
+    pub fn forward_backward(&self, bottom: &[HeapBlob]) -> f32 {
         let loss = 0f32; // TODO
 
         // self.forward(bottom, &loss);
