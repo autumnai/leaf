@@ -1,9 +1,12 @@
 use math::*;
 use shared_memory::*;
-use blob::Blob;
 
 pub struct Layer {
     top: Vec<Layer>,
+
+    /// The vector that indicates whether each top blob has a non-zero weight in
+    /// the objective function.
+    loss: Vec<f32>,
 }
 
 fn sigmoid(z: f32) -> f32 {
@@ -27,7 +30,7 @@ impl Layer {
         self.forward_cpu(bottom, top);
 
         for top_layer in top {
-            // if (!this->loss(top_id)) { continue; } // C++
+            // if (!this->loss(top_id)) { continue; } // Caffe
             // if !self.loss(top_layer) { continue; }
             // let count = (**top_layer).len();
             let data = top_layer.cpu_data();
@@ -66,6 +69,10 @@ impl Layer {
                 bottom_diff[i] = top_diff[i] * sigmoid_prime_precalc(sigmoid_x)
             }
         }
+    }
+
+    pub fn loss(&self, id: usize) -> Option<&f32> {
+        self.loss.get(id)
     }
 
     pub fn auto_top_blobs(&self) -> bool {

@@ -144,23 +144,10 @@ impl Network {
                 if self.blob_loss_weights.len() <= self.top_id_vecs[layer_id][top_id] {
                     self.blob_loss_weights.resize(self.top_id_vecs[layer_id][top_id] + 1, 0f32);
                 }
-                // self.blob_loss_weights[self.top_id_vecs[layer_id][top_id]] =
-                // layer.loss(top_id);
+                self.blob_loss_weights[self.top_id_vecs[layer_id][top_id]] = *layer.loss(top_id).unwrap();
+                info!("Top shape: {}", self.top_vecs[layer_id][top_id].read().unwrap().shape_string());
+                info!("   with loss weight {}", *layer.loss(top_id).unwrap());
             }
-
-            // for (int top_id = 0; top_id < top_vecs_[layer_id].size(); ++top_id) {
-            //   if (blob_loss_weights_.size() <= top_id_vecs_[layer_id][top_id]) {
-            //     blob_loss_weights_.resize(top_id_vecs_[layer_id][top_id] + 1, Dtype(0));
-            //   }
-            //   blob_loss_weights_[top_id_vecs_[layer_id][top_id]] = layer->loss(top_id);
-            //   LOG_IF(INFO, Caffe::root_solver())
-            //       << "Top shape: " << top_vecs_[layer_id][top_id]->shape_string();
-            //   if (layer->loss(top_id)) {
-            //     LOG_IF(INFO, Caffe::root_solver())
-            //         << "    with loss weight " << layer->loss(top_id);
-            //   }
-            //   memory_used_ += top_vecs_[layer_id][top_id]->count();
-            // }
         }
     }
 

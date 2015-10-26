@@ -35,6 +35,19 @@ impl <T> Blob<T> {
         }
     }
 
+    pub fn shape_string(&self) -> String {
+        let mut string: String = "".to_owned();
+        for dim in self.shape.clone() {
+            string.push_str(&dim.to_string());
+            string.push_str(" ");
+        }
+        string.push_str("(");
+        string.push_str(&self.shape.len().to_string());
+        string.push_str(")");
+
+        string
+    }
+
     pub fn len(&self) -> usize {
         self.data.len()
     }
@@ -71,5 +84,12 @@ mod tests {
         let shape = vec![2, 3, 2];
         let blob: Blob<f32> = Blob::of_shape(shape);
         assert_eq!(12, blob.data.capacity());
+    }
+
+    #[test]
+    fn shape_string() {
+        let shape = vec![2, 3, 2];
+        let blob: Blob<f32> = Blob::of_shape(shape);
+        assert_eq!("2 3 2 (3)", blob.shape_string());
     }
 }
