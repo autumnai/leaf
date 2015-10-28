@@ -140,16 +140,19 @@ impl<'a> Network<'a> {
         }
         self.layer_names.push(layer_config.name.clone());
         info!("Creating Layer {}", layer_config.name.clone());
-        let need_backward = false;
+        let mut need_backward = false;
 
         // Figure out this layer's input and output
 
         for bottom_id in 0..(layer_config.bottoms_len() - 1) {
-            // TODO
-            // const int blob_id = AppendBottom(param, layer_id, bottom_id,
-            //                                &available_blobs, &blob_name_to_idx);
-            // // If a blob needs backward, this layer should provide it.
-            // need_backward |= blob_need_backward_[blob_id];
+            let blob_id = self.append_bottom(param,
+                                             layer_id,
+                                             bottom_id,
+                                             available_blobs,
+                                             blob_name_to_idx);
+
+            // If a blob needs backward, this layer should provide it.
+            need_backward |= self.blob_need_backwards[blob_id];
         }
         let num_top = layer_config.tops_len();
         for top_id in 0..(num_top - 1) {
@@ -200,7 +203,6 @@ impl<'a> Network<'a> {
 
         info!("Setting up {}", self.layer_names[layer_id]);
         let layer = self.layers.get(layer_id).unwrap(); // TODO: should be safer?
-        // let layer = (&self.layers[layer_id]).clone(); // TODO: should be safer?
         for top_id in 0..(self.top_vecs[layer_id].len() - 1) {
             if self.blob_loss_weights.len() <= self.top_id_vecs[layer_id][top_id] {
                 self.blob_loss_weights.resize(self.top_id_vecs[layer_id][top_id] + 1, 0f32);
@@ -409,6 +411,45 @@ impl<'a> Network<'a> {
         if available_blobs.is_some() {
             available_blobs.unwrap().insert(blob_name.to_owned());
         }
+    }
+
+    fn append_bottom(&mut self,
+                     param: &NetworkConfig,
+                     layer_id: usize,
+                     bottom_id: usize,
+                     available_blobs: &mut HashSet<String>,
+                     blob_name_to_idx: &mut HashMap<String, usize>)
+                     -> usize {
+        let layer_config = param.layer(layer_id).unwrap();
+        let blob_name = layer_config.bottom(bottom_id).unwrap();
+
+        if !available_blobs.contains(blob_name) {
+            error!("Unknown bottom blob {} (layer '{}', bottom index {})",
+                   blob_name,
+                   layer_config.name,
+                   bottom_id);
+        }
+
+        let blob_id = blob_name_to_idx[blob_name];
+        info!("{} <- {}", self.layer_names[layer_id], blob_name);
+
+        self.bottom_vecs[layer_id].push(self.blobs[blob_id].clone());
+        self.bottom_id_vecs[layer_id].push(blob_id);
+        available_blobs.remove(blob_name);
+
+        let mut propagate_down = true;
+        // Check if the backpropagation on bottom_id should be skipped
+        if !layer_config.propagate_down.is_empty() {
+            propagate_down = layer_config.propagate_down[bottom_id];
+        }
+        let need_backward = self.blob_need_backwards[blob_id] && propagate_down;
+        self.bottom_need_backwards[layer_id].push(need_backward);
+
+        blob_id
+    }
+
+    fn append_param(&mut self, param: &NetworkConfig, layer_id: usize, param_id: usize) {
+        unimplemented!();
     }
 
 

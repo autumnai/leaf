@@ -145,7 +145,7 @@ pub struct LayerConfig {
 
     /// Specifies on which bottoms the backpropagation should be skipped.
     /// The size must be either 0 or equal to the number of bottoms.
-    propagate_down: Vec<bool>,
+    pub propagate_down: Vec<bool>,
 
     // minimal, a lot of Caffe not ported yet
 }
