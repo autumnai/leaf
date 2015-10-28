@@ -1,6 +1,7 @@
 #![feature(plugin)]
 #![plugin(clippy)]
 #![allow(dead_code)]
+#![allow(unused_variables)]
 #![warn(missing_docs,
         missing_debug_implementations, missing_copy_implementations,
         trivial_casts, trivial_numeric_casts,
@@ -17,6 +18,7 @@ extern crate phloem;
 mod shared_memory;
 mod math;
 mod layer;
+mod layers;
 mod solver;
 mod network;
 

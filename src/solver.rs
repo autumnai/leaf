@@ -5,13 +5,13 @@ enum SolverKind {
     SGD,
 }
 
-struct Solver {
+struct Solver<'a> {
     kind: SolverKind,
-    net: Network,
+    net: Network<'a>,
     iter: i32,
 }
 
-impl Solver{
+impl<'a> Solver<'a>{
     // might take a solver state as argument in the future to resume a stopped
     // solver
     fn solve(&mut self) {

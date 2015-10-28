@@ -6,14 +6,20 @@ use layer::Layer;
 use layer::LayerConfig;
 use phloem::Blob;
 
-pub struct Network {
+pub struct Network<'a> {
     pub name: String,
-    layers: Vec<Layer>,
+    layers: Vec<Layer<'a>>,
     layer_names: Vec<String>,
+    layer_names_index: HashMap<String, usize>,
+    layer_need_backwards: Vec<bool>,
 
     blobs: Vec<ArcLock<HeapBlob>>, // the blobs storing intermediate results between the layer.
     blob_names: Vec<String>,
+    blob_names_index: HashMap<String, usize>,
     blob_need_backwards: Vec<bool>,
+
+    net_output_blobs: Vec<ArcLock<HeapBlob>>,
+    net_output_blob_indices: Vec<usize>,
 
     // stores the vectors containing the output for each layer (only references to the blobs)
     top_vecs: Vec<Vec<ArcLock<HeapBlob>>>,
@@ -32,11 +38,8 @@ pub struct Network {
     param_id_vecs: Vec<Vec<usize>>,
 }
 
-impl Network {
-    // fn init(&self, bottom: &Vec<Box<Blob<f32>>>) -> f32 {
-
-    fn init(&mut self, in_param: &NetworkConfig) {
-
+impl<'a> Network<'a> {
+    fn init(&mut self, in_param: &'a NetworkConfig) {
         let param = in_param.clone();
         let available_blobs = &mut HashSet::new();
         let blob_name_to_idx = &mut HashMap::<String, usize>::new();
@@ -51,101 +54,268 @@ impl Network {
         self.resize_vecs(param.layers.len());
 
         for (layer_id, _) in param.inputs.iter().enumerate() {
-            // Caffe
-            // bool share_from_root = !Caffe::root_solver()
-            //     && root_net_->layers_[layer_id]->ShareInParallel();
-            // // Inherit phase from net if unset.
-            // if (!param.layer(layer_id).has_phase()) {
-            //   param.mutable_layer(layer_id)->set_phase(phase_);
-            // }
+            self.init_layer(layer_id, param, available_blobs, blob_name_to_idx);
+        }
 
-            // Setup layer.
-            let layer_config = param.layer(layer_id).unwrap(); // TODO: should be safer
-            if !layer_config.check_propagate_down_len() {
-                // TODO: move layer validation to layer
-                error!("propagate_down param must be specified either 0 or bottom_size times")
+        // Go through the net backwards to determine which blobs contribute to the
+        // loss.  We can skip backward computation for blobs that don't contribute
+        // to the loss.
+        // Also checks if all bottom blobs don't need backward computation (possible
+        // because the skip_propagate_down param) and so we can skip bacward
+        // computation for the entire layer
+        let blobs_under_loss = &mut HashSet::<String>::new();
+        let blobs_skip_backp = &mut HashSet::<String>::new();
+        // get mutable references to struct fields because Rust doesn't support
+        // partially borrowed structs
+        let layer_need_backwards = &mut self.layer_need_backwards.clone();
+        let bottom_need_backwards = &mut self.bottom_need_backwards.clone();
+        for (layer_id, _) in self.layers.iter().rev().enumerate() {
+            self.init_backprop(layer_id,
+                               layer_need_backwards,
+                               bottom_need_backwards,
+                               blobs_under_loss,
+                               blobs_skip_backp);
+        }
+
+        if param.force_backward {
+            self.init_force_backward();
+        }
+
+        // In the end, all remaining blobs are considered output blobs.
+        for available_blob in available_blobs.iter() {
+            info!("This network produces output {}", available_blob);
+            let id = blob_name_to_idx[available_blob];
+            self.net_output_blobs.push(self.blobs[id].clone());
+            self.net_output_blob_indices.push(id);
+        }
+
+        // setup names->idx
+        for (blob_id, blob_name) in self.blob_names.iter().enumerate() {
+            self.blob_names_index.insert(blob_name.clone(), blob_id);
+        }
+        for (layer_id, layer_name) in self.layer_names.iter().enumerate() {
+            self.layer_names_index.insert(layer_name.clone(), layer_id);
+        }
+
+        self.share_weights();
+
+        info!("Network initialization done.");
+        unimplemented!();
+    }
+
+    fn init_layer(&mut self,
+                  layer_id: usize,
+                  param: &'a NetworkConfig,
+                  available_blobs: &mut HashSet<String>,
+                  blob_name_to_idx: &mut HashMap<String, usize>) {
+        // Caffe
+        // bool share_from_root = !Caffe::root_solver()
+        //     && root_net_->layers_[layer_id]->ShareInParallel();
+        // // Inherit phase from net if unset.
+        // if (!param.layer(layer_id).has_phase()) {
+        //   param.mutable_layer(layer_id)->set_phase(phase_);
+        // }
+
+        // Setup layer.
+        // let layer_config = Box::new(param.layer(layer_id).take()); // TODO: should
+        // be safer
+        // let layer_config = param.layer(layer_id).unwrap(); // TODO: should be safer
+        // let layer_config = param.layer(layer_id).unwrap(); // TODO: should be safer
+        let layer_config = (&param.layers[layer_id]).clone(); // TODO: should be safer
+        if !layer_config.check_propagate_down_len() {
+            // TODO: move layer validation to layer
+            error!("propagate_down param must be specified either 0 or bottom_size times")
+        }
+
+        // Caffe
+        // if (share_from_root) {
+        //   LOG(INFO) << "Sharing layer " << layer_param.name() << " from root net";
+        //   layers_.push_back(root_net_->layers_[layer_id]);
+        //   layers_[layer_id]->SetShared(true);
+        // else {
+        {
+            self.layers.push(Layer::from_config(&layer_config));
+            // TODO
+            // layers_.push_back(LayerRegistry<Dtype>::CreateLayer(layer_param));
+        }
+        self.layer_names.push(layer_config.name.clone());
+        info!("Creating Layer {}", layer_config.name.clone());
+        let need_backward = false;
+
+        // Figure out this layer's input and output
+
+        for bottom_id in 0..(layer_config.bottoms_len() - 1) {
+            // TODO
+            // const int blob_id = AppendBottom(param, layer_id, bottom_id,
+            //                                &available_blobs, &blob_name_to_idx);
+            // // If a blob needs backward, this layer should provide it.
+            // need_backward |= blob_need_backward_[blob_id];
+        }
+        let num_top = layer_config.tops_len();
+        for top_id in 0..(num_top - 1) {
+            self.append_top(param,
+                            Some(layer_id),
+                            top_id,
+                            Some(available_blobs),
+                            Some(blob_name_to_idx))
+        }
+
+        // If the layer specifies that AutoTopBlobs() -> true and the LayerParameter
+        // specified fewer than the required number (as specified by
+        // ExactNumTopBlobs() or MinTopBlobs()), allocate them here.
+        let auto_top_blobs = self.layers.get(layer_id).unwrap().worker.auto_top_blobs();
+        let min_top_blobs = self.layers.get(layer_id).unwrap().worker.min_top_blobs();
+        let exact_num_top_blobs = self.layers.get(layer_id).unwrap().worker.exact_num_top_blobs();
+        if auto_top_blobs {
+            let needed_num_top = cmp::max(min_top_blobs, exact_num_top_blobs);
+            for _ in 0..(needed_num_top - num_top) {
+                // Add "anonymous" top blobs -- do not modify available_blobs or
+                // blob_name_to_idx as we don't want these blobs to be usable as input
+                // to other layers.
+                info!("Adding anonymous top blob");
+                self.append_top(param, Some(layer_id), num_top, None, None);
             }
+        }
 
-            // Caffe
-            // if (share_from_root) {
-            //   LOG(INFO) << "Sharing layer " << layer_param.name() << " from root net";
-            //   layers_.push_back(root_net_->layers_[layer_id]);
-            //   layers_[layer_id]->SetShared(true);
-            // else {
-            {
-                // TODO
-                // layers_.push_back(LayerRegistry<Dtype>::CreateLayer(layer_param));
+
+        // After this layer is connected, set it up.
+        // Caffe
+        // if (share_from_root) {
+        //   // Set up size of top blobs using root_net_
+        //   const vector<Blob<Dtype>*>& base_top = root_net_->top_vecs_[layer_id];
+        //   const vector<Blob<Dtype>*>& this_top = this->top_vecs_[layer_id];
+        //   for (int top_id = 0; top_id < base_top.size(); ++top_id) {
+        //     this_top[top_id]->ReshapeLike(*base_top[top_id]);
+        //     LOG(INFO) << "Created top blob " << top_id << " (shape: "
+        //         << this_top[top_id]->shape_string() <<  ") for shared layer "
+        //         << layer_param.name();
+        //   }
+        // } else {
+        {
+            // layers_[layer_id]->SetUp(bottom_vecs_[layer_id], top_vecs_[layer_id]);
+            // TODO
+            // self.layers[layer_id].set_up(self.bottom_vecs[layer_id],
+            // self.top_vecs[layer_id]);
+        }
+
+        info!("Setting up {}", self.layer_names[layer_id]);
+        let layer = self.layers.get(layer_id).unwrap(); // TODO: should be safer?
+        // let layer = (&self.layers[layer_id]).clone(); // TODO: should be safer?
+        for top_id in 0..(self.top_vecs[layer_id].len() - 1) {
+            if self.blob_loss_weights.len() <= self.top_id_vecs[layer_id][top_id] {
+                self.blob_loss_weights.resize(self.top_id_vecs[layer_id][top_id] + 1, 0f32);
             }
-            self.layer_names.push(layer_config.name.clone());
-            info!("Creating Layer {}", layer_config.name.clone());
-            let need_backward = false;
+            self.blob_loss_weights[self.top_id_vecs[layer_id][top_id]] = *layer.loss(top_id).unwrap();
+            info!("Top shape: {}",
+                  self.top_vecs[layer_id][top_id].read().unwrap().shape_string());
+            info!("   with loss weight {}", *layer.loss(top_id).unwrap());
+        }
 
-            // Figure out this layer's input and output
+        // TODO: only needed if we allow blobs to be passed along in the layer_config
+        // const int param_size = layer_param.param_size();
+        // const int num_param_blobs = layers_[layer_id]->blobs().size();
+        // CHECK_LE(param_size, num_param_blobs)
+        //     << "Too many params specified for layer " << layer_param.name();
+        // ParamSpec default_param_spec;
+        // for (int param_id = 0; param_id < num_param_blobs; ++param_id) {
+        //   const ParamSpec* param_spec = (param_id < param_size) ?
+        //       &layer_param.param(param_id) : &default_param_spec;
+        //   const bool param_need_backward = param_spec->lr_mult() != 0;
+        //   need_backward |= param_need_backward;
+        //   layers_[layer_id]->set_param_propagate_down(param_id,
+        //                                               param_need_backward);
+        // }
+        // for (int param_id = 0; param_id < num_param_blobs; ++param_id) {
+        //   AppendParam(param, layer_id, param_id);
+        // }
 
-            for bottom_id in 0..(layer_config.bottoms_len() - 1) {
-                // TODO
-                // const int blob_id = AppendBottom(param, layer_id, bottom_id,
-                //                                &available_blobs, &blob_name_to_idx);
-                // // If a blob needs backward, this layer should provide it.
-                // need_backward |= blob_need_backward_[blob_id];
+        // Finally, set the backward flag
+        self.layer_need_backwards.push(need_backward);
+        if need_backward {
+            for top_id in 0..(self.top_id_vecs[layer_id].len() - 1) {
+                self.blob_need_backwards[self.top_id_vecs[layer_id][top_id]] = true;
             }
-            let num_top = layer_config.tops_len();
-            for top_id in 0..(num_top - 1) {
-                self.append_top(param,
-                                Some(layer_id),
-                                top_id,
-                                Some(available_blobs),
-                                Some(blob_name_to_idx))
+        }
+    }
+
+    // Go through the net backwards to determine which blobs contribute to the
+    // loss.  We can skip backward computation for blobs that don't contribute
+    // to the loss.
+    // Also checks if all bottom blobs don't need backward computation (possible
+    // because the skip_propagate_down param) and so we can skip bacward
+    // computation for the entire layer
+    fn init_backprop(&self,
+                     layer_id: usize,
+                     layer_need_backwards: &mut Vec<bool>,
+                     bottom_need_backwards: &mut Vec<Vec<bool>>,
+                     blobs_under_loss: &mut HashSet<String>,
+                     blobs_skip_backp: &mut HashSet<String>) {
+        let mut layer_contributes_loss = false;
+        let mut layer_skip_propagate_down = true;
+        for (top_id, _) in self.top_vecs[layer_id].iter().enumerate() {
+            let blob_name = self.blob_names[self.top_id_vecs[layer_id][top_id]].clone();
+
+            // layer is a loss layer or under a loss layer
+            if self.layers[layer_id].loss(top_id).is_some() || blobs_under_loss.contains(&blob_name) {
+                layer_contributes_loss = true;
             }
-
-            // If the layer specifies that AutoTopBlobs() -> true and the LayerParameter
-            // specified fewer than the required number (as specified by
-            // ExactNumTopBlobs() or MinTopBlobs()), allocate them here.
-            let auto_top_blobs = self.layers.get(layer_id).unwrap().auto_top_blobs();
-            let min_top_blobs = self.layers.get(layer_id).unwrap().min_top_blobs();
-            let exact_num_top_blobs = self.layers.get(layer_id).unwrap().exact_num_top_blobs();
-            if auto_top_blobs {
-                let needed_num_top = cmp::max(min_top_blobs, exact_num_top_blobs);
-                for _ in 0..(needed_num_top - num_top) {
-                    // Add "anonymous" top blobs -- do not modify available_blobs or
-                    // blob_name_to_idx as we don't want these blobs to be usable as input
-                    // to other layers.
-                    info!("Adding anonymous top blob");
-                    self.append_top(param, Some(layer_id), num_top, None, None);
-                }
+            // layer is not marked to skip backprop TODO: confirm doc
+            if !blobs_skip_backp.contains(&blob_name) {
+                layer_skip_propagate_down = false;
             }
-
-
-            // After this layer is connected, set it up.
-            // Caffe
-            // if (share_from_root) {
-            //   // Set up size of top blobs using root_net_
-            //   const vector<Blob<Dtype>*>& base_top = root_net_->top_vecs_[layer_id];
-            //   const vector<Blob<Dtype>*>& this_top = this->top_vecs_[layer_id];
-            //   for (int top_id = 0; top_id < base_top.size(); ++top_id) {
-            //     this_top[top_id]->ReshapeLike(*base_top[top_id]);
-            //     LOG(INFO) << "Created top blob " << top_id << " (shape: "
-            //         << this_top[top_id]->shape_string() <<  ") for shared layer "
-            //         << layer_param.name();
-            //   }
-            // } else {
-            {
-                // layers_[layer_id]->SetUp(bottom_vecs_[layer_id], top_vecs_[layer_id]);
-                // TODO
-                // self.layers[layer_id].set_up(self.bottom_vecs[layer_id],
-                // self.top_vecs[layer_id]);
+            // layer contributes loss to some
+            if layer_contributes_loss && !layer_skip_propagate_down {
+                break;
             }
+        }
 
-            info!("Setting up {}", self.layer_names[layer_id]);
-            let layer = self.layers.get(layer_id).unwrap(); // TODO: should be safer?
-            // let layer = (&self.layers[layer_id]).clone(); // TODO: should be safer?
-            for top_id in 0..(self.top_vecs[layer_id].len() - 1) {
-                if self.blob_loss_weights.len() <= self.top_id_vecs[layer_id][top_id] {
-                    self.blob_loss_weights.resize(self.top_id_vecs[layer_id][top_id] + 1, 0f32);
-                }
-                self.blob_loss_weights[self.top_id_vecs[layer_id][top_id]] = *layer.loss(top_id).unwrap();
-                info!("Top shape: {}", self.top_vecs[layer_id][top_id].read().unwrap().shape_string());
-                info!("   with loss weight {}", *layer.loss(top_id).unwrap());
+        // If this layer can skip backward computation, also all his bottom blobs
+        // don't need backpropagation
+        if layer_need_backwards[layer_id] && layer_skip_propagate_down {
+            layer_need_backwards[layer_id] = false;
+            for (bottom_id, _) in self.bottom_vecs[layer_id].iter().enumerate() {
+                bottom_need_backwards[layer_id][bottom_id] = false;
+            }
+        }
+        // layer doesn't contribute loss so it does not need to be backpropagated
+        if !layer_contributes_loss {
+            layer_need_backwards[layer_id] = false;
+        }
+        // if (Caffe::root_solver()) { // Caffe
+        {
+            info!("{} needs backward computation: {}",
+                  self.layer_names[layer_id],
+                  self.layer_need_backwards[layer_id]);
+        }
+
+        for (bottom_id, _) in self.bottom_vecs[layer_id].iter().enumerate() {
+            let blob_name = &self.blob_names[self.bottom_id_vecs[layer_id][bottom_id]];
+            if layer_contributes_loss {
+                blobs_under_loss.insert(blob_name.clone());
+            } else {
+                bottom_need_backwards[layer_id][bottom_id] = false;
+            }
+            if !self.bottom_need_backwards[layer_id][bottom_id] {
+                blobs_skip_backp.insert(blob_name.clone());
+            }
+        }
+    }
+
+    fn init_force_backward(&mut self) {
+        for (layer_id, layer) in self.layers.iter_mut().enumerate() {
+            self.layer_need_backwards[layer_id] = true;
+            for (bottom_id, _) in self.bottom_need_backwards[layer_id].clone().iter().enumerate() {
+                self.bottom_need_backwards[layer_id][bottom_id] =
+                    *self.bottom_need_backwards[layer_id]
+                         .get(bottom_id)
+                         .unwrap_or(&layer.worker.allow_force_backward(bottom_id));
+                self.blob_need_backwards[self.bottom_id_vecs[layer_id][bottom_id]] =
+                    *self.blob_need_backwards
+                         .get(self.bottom_id_vecs[layer_id][bottom_id])
+                         .unwrap_or(&self.bottom_need_backwards[layer_id][bottom_id])
+            }
+            for (param_id, _) in layer.blobs.clone().iter().enumerate() {
+                layer.set_param_propagate_down(param_id, true);
             }
         }
     }
@@ -159,6 +329,14 @@ impl Network {
         self.bottom_need_backwards.resize(new_len, vec![false]);
     }
 
+    fn share_weights(&mut self) {
+        // for (int i = 0; i < params_.size(); ++i) {
+        //     if (param_owners_[i] < 0) { continue; }
+        //     params_[i]->ShareData(*params_[param_owners_[i]]);
+        //     params_[i]->ShareDiff(*params_[param_owners_[i]]);
+        // }
+        unimplemented!();
+    }
 
     fn append_top(&mut self,
                   config: &NetworkConfig,
@@ -343,7 +521,7 @@ pub struct NetworkConfig {
     // optional NetState state = 6;
     debug_info: bool, // Print debugging information about results
 
-    layers: Vec<LayerConfig>, // The layers that make up the net.
+    pub layers: Vec<LayerConfig>, // The layers that make up the net.
 }
 
 impl NetworkConfig {
