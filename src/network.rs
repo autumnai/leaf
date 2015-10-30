@@ -3,7 +3,7 @@ use std::sync::{Arc, RwLock};
 use std::cmp;
 use shared_memory::*;
 use layer::Layer;
-use layer::LayerConfig;
+use layer::{LayerConfig, ParamConfig, DimCheckMode};
 use phloem::Blob;
 
 pub struct Network<'a> {
@@ -36,6 +36,18 @@ pub struct Network<'a> {
     blob_loss_weights: Vec<f32>,
 
     param_id_vecs: Vec<Vec<usize>>,
+    param_owners: Vec<Option<usize>>,
+    param_display_names: Vec<String>,
+    param_layer_indices: Vec<(usize, usize)>,
+    param_names_index: HashMap<String, usize>,
+
+    /// The parameters in the network.
+    params: Vec<ArcLock<HeapBlob>>,
+    learnable_params: Vec<ArcLock<HeapBlob>>,
+    learnable_param_ids: Vec<usize>,
+
+    params_lr: Vec<Option<f32>>,
+    params_weight_decay: Vec<Option<f32>>,
 }
 
 impl<'a> Network<'a> {
@@ -449,6 +461,101 @@ impl<'a> Network<'a> {
     }
 
     fn append_param(&mut self, param: &NetworkConfig, layer_id: usize, param_id: usize) {
+        let layer_config = self.layers[layer_id].config.clone();
+        let param_size = self.params.len();
+        let param_name = if param_size > param_id {
+                            layer_config.param(param_id).unwrap().name.clone()
+                            } else {
+                              "".to_owned()
+                          };
+
+        // use param_name (or param_id as a fallback) as display_name
+        if !param_name.is_empty() {
+            self.param_display_names.push(param_name.clone());
+        } else {
+            self.param_display_names.push(format!("{}", param_id));
+        }
+
+        // add to tracking vectors
+        let net_param_id = param_size;
+        self.params.push(self.layers[layer_id].blobs[param_id].clone());
+        self.param_id_vecs[layer_id].push(net_param_id);
+        self.param_layer_indices.push((layer_id, param_id));
+
+        let mut param_spec = &ParamConfig::default();
+        if layer_config.params_len() > param_id {
+            param_spec = layer_config.param(param_id).unwrap();
+        }
+        // This layer "owns" this parameter blob -- it is either anonymous
+        // (i.e., not given a param_name) or explicitly given a name that we
+        // haven't already seen.
+        if param_name.is_empty() || !self.param_names_index.contains_key(&param_name) {
+            self.param_owners.push(None);
+            if !param_name.is_empty() {
+                self.param_names_index.insert(param_name.clone(), net_param_id);
+            }
+            let learnable_param_id = self.learnable_params.len();
+            self.learnable_params.push(self.params[net_param_id].clone());
+            self.learnable_param_ids.push(learnable_param_id);
+            //     has_params_lr_.push_back(param_spec->has_lr_mult());
+            //     has_params_decay_.push_back(param_spec->has_decay_mult());
+            self.params_lr.push(param_spec.lr_mult.clone());
+            self.params_weight_decay.push(param_spec.decay_mult.clone());
+        } else {
+            // Named param blob with name we've seen before: share params
+
+            let owner_net_param_id = *self.param_names_index.get(&param_name).unwrap();
+            self.param_owners.push(Some(owner_net_param_id));
+            let (owner_layer_id, owner_param_id) = self.param_layer_indices[owner_net_param_id];
+            info!("Sharing parameters '{}' owned by layer '{}', param index {}",
+                  param_name,
+                  self.layer_names[owner_layer_id],
+                  owner_param_id);
+            let this_blob = self.layers[layer_id].blobs[param_id].clone();
+            let owner_blob = self.layers[owner_layer_id].blobs[owner_param_id].clone();
+            if param_size > param_id {
+                if let Err(e) = layer_config.param(param_id).unwrap().check_dimensions(
+                                                    &this_blob.read().unwrap(),
+                                                    &owner_blob.read().unwrap(),
+                                                    param_name,
+                                                    self.layer_names[owner_layer_id].clone(),
+                                                    self.layer_names[layer_id].clone()) {
+                    error!("{}", e)
+                };
+            }
+
+            let learnable_param_id = self.learnable_param_ids[owner_net_param_id];
+            self.learnable_param_ids.push(learnable_param_id);
+            if let Some(lr_mult) = param_spec.lr_mult {
+                if let Some(owner_lr_mult) = self.params_lr[learnable_param_id] {
+                    if lr_mult != owner_lr_mult {
+
+                    }
+                }
+            }
+
+            //     const int learnable_param_id = learnable_param_ids_[owner_net_param_id];
+            //     learnable_param_ids_.push_back(learnable_param_id);
+            //     if (param_spec->has_lr_mult()) {
+            //       if (has_params_lr_[learnable_param_id]) {
+            //         CHECK_EQ(param_spec->lr_mult(), params_lr_[learnable_param_id])
+            //             << "Shared param '" << param_name << "' has mismatched lr_mult.";
+            //       } else {
+            //         has_params_lr_[learnable_param_id] = true;
+            //         params_lr_[learnable_param_id] = param_spec->lr_mult();
+            //       }
+            //     }
+            //     if (param_spec->has_decay_mult()) {
+            //       if (has_params_decay_[learnable_param_id]) {
+            //         CHECK_EQ(param_spec->decay_mult(),
+            //                  params_weight_decay_[learnable_param_id])
+            //             << "Shared param '" << param_name << "' has mismatched decay_mult.";
+            //       } else {
+            //         has_params_decay_[learnable_param_id] = true;
+            //         params_weight_decay_[learnable_param_id] = param_spec->decay_mult();
+            //       }
+            //     }
+        }
         unimplemented!();
     }
 

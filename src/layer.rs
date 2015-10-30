@@ -1,4 +1,5 @@
 use math::*;
+use phloem::Blob;
 use shared_memory::*;
 use layers::sigmoid_layer::SigmoidLayer;
 
@@ -200,18 +201,91 @@ pub struct ParamConfig {
     /// The names of the parameter blobs -- useful for sharing parameters among
     /// layers, but never required otherwise.  To share a parameter between two
     /// layers, give it a (non-empty) name.
+    ///
+    /// Default: ""
     pub name: String,
     /// Whether to require shared weights to have the same shape, or just the same
     /// count
+    ///
+    /// Default: DimCheckMode::Strict
     pub share_mode: DimCheckMode,
 
     /// The multiplier on the global learning rate for this parameter.
-    // optional float lr_mult = 3 [default = 1.0]; // Caffe
-    pub lr_mult: f32,
+    ///
+    /// Default: 1.0f32
+    pub lr_mult: Option<f32>,
 
     /// The multiplier on the global weight decay for this parameter.
-    // optional float decay_mult = 4 [default = 1.0]; // Caffe
-    pub decay_mult: f32,
+    ///
+    /// Default: 1.0f32
+    pub decay_mult: Option<f32>,
+}
+
+impl Default for ParamConfig {
+    fn default() -> ParamConfig {
+        ParamConfig {
+            name: "".to_owned(),
+            share_mode: DimCheckMode::Strict,
+            lr_mult: None,
+            decay_mult: None,
+        }
+    }
+}
+
+impl ParamConfig {
+    /// Checks dimensions of two blobs according to the share_mode.
+    /// Logs an error if there is a count/shape mismatch.
+    pub fn check_dimensions<T>(&self, blob_one: &Blob<T>, blob_two: &Blob<T>, param_name: String, owner_name: String, layer_name: String) -> Result<(), String> {
+        match self.share_mode {
+            // Permissive dimension checking -- only check counts are the same.
+            DimCheckMode::Permissive => {
+                // TODO: needs capacity of blob instead of len; needs to be exposed in phloem
+                if blob_one.len() != blob_two.len() {
+                    return Err(format!("Cannot share param '{}' owned by layer '{}' with layer '{}';
+                                count mismatch.
+                                Owner layer param shape is {};
+                                Sharing layer param shape is {}",
+                                param_name,
+                                owner_name,
+                                layer_name,
+                                blob_two.shape_string(),
+                                blob_one.shape_string()));
+                }
+            },
+            // Strict dimension checking -- all dims must be the same.
+            DimCheckMode::Strict => {
+                // TODO: check shape instead of shape_string; needs to be exposed in phloem
+                if blob_one.shape_string() != blob_two.shape_string() {
+                    return Err(format!("Cannot share param '{}' owned by layer '{}' with layer '{}';
+                                shape mismatch.
+                                Owner layer param shape is {};
+                                Sharing layer expects param shape {}",
+                                param_name,
+                                owner_name,
+                                layer_name,
+                                blob_two.shape_string(),
+                                blob_one.shape_string()));
+                }
+            },
+        }
+        Ok(())
+    }
+
+    /// The multiplier on the global learning rate for this parameter.
+    pub fn lr_mult(&self) -> f32 {
+        match self.lr_mult {
+            Some(val) => val,
+            None => 1.0f32,
+        }
+    }
+
+    /// The multiplier on the global weight decay for this parameter.
+    pub fn decay_mult(&self) -> f32 {
+        match self.decay_mult {
+            Some(val) => val,
+            None => 1.0f32,
+        }
+    }
 }
 
 pub enum DimCheckMode {
@@ -224,6 +298,7 @@ pub enum DimCheckMode {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use phloem::Blob;
 
     fn new_layer_config() -> LayerConfig {
         LayerConfig::new("foo".to_owned(), LayerType::SigmoidLayer)
@@ -233,5 +308,34 @@ mod tests {
     fn new_layer() {
         let cfg = new_layer_config();
         let layer = Layer::from_config(&cfg);
+    }
+
+    #[test]
+    fn dim_check_strict() {
+        let cfg = ParamConfig { share_mode: DimCheckMode::Strict, .. ParamConfig::default()};
+        let blob_one = Blob::<f32>::of_shape(vec![2, 3, 3]);
+        let blob_two = Blob::<f32>::of_shape(vec![3, 2, 3]);
+        let param_name = "foo".to_owned();
+        let owner_name = "owner".to_owned();
+        let layer_name = "layer".to_owned();
+
+        assert!(cfg.check_dimensions(&blob_one, &blob_one, param_name.clone(), owner_name.clone(), layer_name.clone()).is_ok());
+        assert!(cfg.check_dimensions(&blob_one, &blob_two, param_name.clone(), owner_name.clone(), layer_name.clone()).is_err());
+    }
+
+    // #[test]
+    fn dim_check_permissive() {
+        let cfg = ParamConfig { share_mode: DimCheckMode::Permissive, .. ParamConfig::default()};
+        let blob_one = Blob::<f32>::of_shape(vec![2, 3, 3]);
+        let blob_two = Blob::<f32>::of_shape(vec![3, 2, 3]);
+        let blob_three = Blob::<f32>::of_shape(vec![3, 10, 3]);
+        let param_name = "foo".to_owned();
+        let owner_name = "owner".to_owned();
+        let layer_name = "layer".to_owned();
+
+        assert!(cfg.check_dimensions(&blob_one, &blob_one, param_name.clone(), owner_name.clone(), layer_name.clone()).is_ok());
+        assert!(cfg.check_dimensions(&blob_one, &blob_two, param_name.clone(), owner_name.clone(), layer_name.clone()).is_ok());
+        assert!(cfg.check_dimensions(&blob_one, &blob_three, param_name.clone(), owner_name.clone(), layer_name.clone()).is_err());
+        assert!(cfg.check_dimensions(&blob_two, &blob_three, param_name.clone(), owner_name.clone(), layer_name.clone()).is_err());
     }
 }
