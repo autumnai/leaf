@@ -1,10 +1,9 @@
 use math::*;
-use phloem::Blob;
+use phloem::{Numeric, Blob};
 use shared_memory::*;
 use layers::sigmoid_layer::SigmoidLayer;
 
 pub struct Layer<'a> {
-    // pub config: Box<LayerConfig>,
     pub config: Box<&'a LayerConfig>,
     pub worker: Box<ILayer>,
 
@@ -235,12 +234,11 @@ impl Default for ParamConfig {
 impl ParamConfig {
     /// Checks dimensions of two blobs according to the share_mode.
     /// Logs an error if there is a count/shape mismatch.
-    pub fn check_dimensions<T>(&self, blob_one: &Blob<T>, blob_two: &Blob<T>, param_name: String, owner_name: String, layer_name: String) -> Result<(), String> {
+    pub fn check_dimensions<T: Numeric>(&self, blob_one: &Blob<T>, blob_two: &Blob<T>, param_name: String, owner_name: String, layer_name: String) -> Result<(), String> {
         match self.share_mode {
             // Permissive dimension checking -- only check counts are the same.
             DimCheckMode::Permissive => {
-                // TODO: needs capacity of blob instead of len; needs to be exposed in phloem
-                if blob_one.len() != blob_two.len() {
+                if blob_one.capacity() != blob_two.capacity() {
                     return Err(format!("Cannot share param '{}' owned by layer '{}' with layer '{}';
                                 count mismatch.
                                 Owner layer param shape is {};
@@ -254,8 +252,7 @@ impl ParamConfig {
             },
             // Strict dimension checking -- all dims must be the same.
             DimCheckMode::Strict => {
-                // TODO: check shape instead of shape_string; needs to be exposed in phloem
-                if blob_one.shape_string() != blob_two.shape_string() {
+                if blob_one.shape() != blob_two.shape() {
                     return Err(format!("Cannot share param '{}' owned by layer '{}' with layer '{}';
                                 shape mismatch.
                                 Owner layer param shape is {};
@@ -323,7 +320,7 @@ mod tests {
         assert!(cfg.check_dimensions(&blob_one, &blob_two, param_name.clone(), owner_name.clone(), layer_name.clone()).is_err());
     }
 
-    // #[test]
+    #[test]
     fn dim_check_permissive() {
         let cfg = ParamConfig { share_mode: DimCheckMode::Permissive, .. ParamConfig::default()};
         let blob_one = Blob::<f32>::of_shape(vec![2, 3, 3]);
