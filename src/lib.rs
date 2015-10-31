@@ -1,6 +1,7 @@
 #![feature(plugin)]
 #![plugin(clippy)]
 #![allow(dead_code)]
+#![allow(unused_variables)]
 #![warn(missing_docs,
         missing_debug_implementations, missing_copy_implementations,
         trivial_casts, trivial_numeric_casts,
@@ -8,15 +9,14 @@
         unstable_features,
         unused_import_braces, unused_qualifications)]
 
-#![feature(vec_resize)]
-
 #[macro_use]
 extern crate log;
 extern crate rblas;
-mod synced_memory;
+extern crate phloem;
+mod shared_memory;
 mod math;
-mod blob;
 mod layer;
+mod layers;
 mod solver;
 mod network;
 
