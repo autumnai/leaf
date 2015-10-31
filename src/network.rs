@@ -552,64 +552,26 @@ impl<'a> Network<'a> {
     }
 
 
-    pub fn forward_backward(&self, bottom: &[HeapBlob]) -> f32 {
-        let loss = 0f32; // TODO
+    /// Comute one forward and backward step for the network.
+    pub fn forward_backward(&mut self, bottom: &[ArcLock<HeapBlob>]) -> f32 {
+        let loss = &mut 0f32;
 
-        // self.forward(bottom, &loss);
+        self.forward(bottom, loss);
         // self.backward();
 
-        loss
+        *loss
     }
 
-    // template <typename Dtype>
-    // Dtype Net<Dtype>::ForwardFromTo(int start, int end) {
-    //   CHECK_GE(start, 0);
-    //   CHECK_LT(end, layers_.size());
-    //   Dtype loss = 0;
-    //   if (debug_info_) {
-    //     for (int i = 0; i < net_input_blobs_.size(); ++i) {
-    //       InputDebugInfo(i);
-    //     }
-    //   }
-    //   for (int i = start; i <= end; ++i) {
-    //     // LOG(ERROR) << "Forwarding " << layer_names_[i];
-    //     Dtype layer_loss = layers_[i]->Forward(bottom_vecs_[i], top_vecs_[i]);
-    //     loss += layer_loss;
-    //     if (debug_info_) { ForwardDebugInfo(i); }
-    //   }
-    //   return loss;
-    // }
-    pub fn forward_from_to(&mut self, start: usize, end: usize) -> f32 {
-        assert!(end < self.layers.len());
-
-        let mut loss = 0f32;
-        //  Caffe
-        //   if (debug_info_) {
-        //     for (int i = 0; i < net_input_blobs_.size(); ++i) {
-        //       InputDebugInfo(i);
-        //     }
-        //   }
-
-        for i in start..end {
-            loss += self.layers[i].worker.forward(&self.bottom_vecs[i], &mut self.top_vecs[i]);
+    /// Copy supplied bottom to input blobs and compute one forward step for the network.
+    pub fn forward(&mut self, bottom: &[ArcLock<HeapBlob>], loss: &mut f32) -> &Vec<ArcLock<HeapBlob>> {
+        for (i, btm) in bottom.iter().enumerate() {
+            self.input_blobs[i] = btm.clone();
         }
 
-        // loss;
-        unimplemented!();
+        self.forward_prefilled(Some(loss))
     }
 
-
-    //
-    // template <typename Dtype>
-    // Dtype Net<Dtype>::ForwardFrom(int start) {
-    //   return ForwardFromTo(start, layers_.size() - 1);
-    // }
-    //
-    // template <typename Dtype>
-    // Dtype Net<Dtype>::ForwardTo(int end) {
-    //   return ForwardFromTo(0, end);
-    // }
-
+    /// Compute one forward step for the network after the input blobs have been put into the network.
     pub fn forward_prefilled(&mut self, loss: Option<&mut f32>) -> &Vec<ArcLock<HeapBlob>> {
         let end = self.layers.len() - 1;
         match loss {
@@ -622,17 +584,39 @@ impl<'a> Network<'a> {
             }
         }
 
-        unimplemented!();
+        &self.output_blobs
     }
 
-    pub fn forward(&mut self, bottom: &[ArcLock<HeapBlob>], loss: &mut f32) -> &Vec<ArcLock<HeapBlob>> {
-        // let blob: Blob<f32> = Blob::new();
-        // let blob = vec![Box::new(Blob::new())];
-        for (i, btm) in bottom.iter().enumerate() {
-            self.input_blobs[i] = btm.clone();
+    /// Forward the network from the supplied start to the supplied end.
+    pub fn forward_from_to(&mut self, start: usize, end: usize) -> f32 {
+        assert!(end < self.layers.len());
+
+        let mut loss = 0f32;
+
+        //  Caffe
+        //   if (debug_info_) {
+        //     for (int i = 0; i < net_input_blobs_.size(); ++i) {
+        //       InputDebugInfo(i);
+        //     }
+        //   }
+
+        for i in start..end {
+            loss += self.layers[i].worker.forward(&self.bottom_vecs[i], &mut self.top_vecs[i]);
+            // if (debug_info_) { ForwardDebugInfo(i); }  // Caffe
         }
 
-        self.forward_prefilled(Some(loss))
+        loss
+    }
+
+    /// Forward the network from the supplied start until the end.
+    pub fn forward_from(&mut self, start: usize) -> f32 {
+        let end = self.layers.len() - 1;
+        self.forward_from_to(start, end)
+    }
+
+    /// Forward the network from the start until the supplied end.
+    pub fn forward_to(&mut self, end: usize) -> f32 {
+        self.forward_from_to(0, end)
     }
 }
 
