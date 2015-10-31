@@ -6,7 +6,8 @@ pub struct SigmoidLayer;
 impl ILayer for SigmoidLayer {
     impl_neuron_layer!();
 
-    fn forward_cpu(&self, bottom: &[HeapBlob], top: &mut Vec<HeapBlob>) {
+    // fn forward_cpu(&self, bottom: &[HeapBlob], top: &mut Vec<HeapBlob>) {
+    fn forward_cpu(&self, bottom: &[ReadBlob], top: &mut Vec<&mut WriteBlob>) {
         let bottom_data = bottom[0].cpu_data();
         let top_data = top[0].mutable_cpu_data();
 

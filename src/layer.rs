@@ -1,7 +1,14 @@
 use math::*;
-use phloem::{Numeric, Blob};
+use phloem::{Blob, Numeric};
 use shared_memory::*;
 use layers::sigmoid_layer::SigmoidLayer;
+
+use std::sync::{RwLockReadGuard, RwLockWriteGuard};
+
+/// Read access to a Blob via a RwLock
+pub type ReadBlob<'_> = RwLockReadGuard<'_, HeapBlob>;
+/// Write access to a Blob via a RwLock
+pub type WriteBlob<'_> = RwLockWriteGuard<'_, HeapBlob>;
 
 pub struct Layer<'a> {
     pub config: Box<&'a LayerConfig>,
@@ -20,12 +27,10 @@ pub struct Layer<'a> {
 
 impl<'a> Layer<'a> {
     pub fn from_config(config: &'a LayerConfig) -> Layer {
-        // let ref cl = config.clone();
         let cl = config.clone();
         let cfg = Box::<&'a LayerConfig>::new(cl);
         Layer {
             loss: Vec::new(),
-            // top: Vec::new(),
             blobs: Vec::new(),
 
             param_propagate_down: Vec::new(),
@@ -60,29 +65,36 @@ impl<'a> Layer<'a> {
 pub trait ILayer {
     /// Compute the layer output.
     /// Uses the CPU.
-    fn forward_cpu(&self, bottom: &[HeapBlob], top: &mut Vec<HeapBlob>);
+    fn forward_cpu(&self, bottom: &[ReadBlob], top: &mut Vec<&mut WriteBlob>);
     /// Compute the gradients for the bottom blobs
     /// if the corresponding value of propagate_down is true.
     /// Uses the CPU.
     fn backward_cpu(&self, top: &[HeapBlob], propagate_down: &[bool], bottom: &mut Vec<HeapBlob>);
 
     /// Compute the layer output using the currently set computation method (CPU).
-    fn forward(&self, bottom: &[HeapBlob], top: &mut Vec<HeapBlob>) -> f32 {
+    fn forward(&self, bottom: &[ArcLock<HeapBlob>], top: &mut Vec<ArcLock<HeapBlob>>) -> f32 {
         // Lock();
         // Reshape(bottom, top); // Reshape the layer to fit top & bottom blob
         let mut loss = 0f32;
 
-        self.forward_cpu(bottom, top);
+        let btm: Vec<_> = bottom.iter().map(|b| b.read().unwrap()).collect();
+        // let tp: Vec<_> = top.iter().map(|b| b.write().unwrap()).collect();
+        let tp_ref = top.iter().map(|t| t.clone()).collect::<Vec<_>>();
+        let mut tp = &mut tp_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
+        let mut tpo = &mut tp.iter_mut().map(|a| a).collect::<Vec<_>>();
+        self.forward_cpu(&btm, tpo);
+        // self.forward_cpu(bottom, top);
 
-        for top_layer in top {
+        for (top_id, top_layer) in top.iter().enumerate() {
             // if (!this->loss(top_id)) { continue; } // Caffe
-            // if !self.loss(top_layer) { continue; }
-            // let count = (**top_layer).len();
-            let data = top_layer.cpu_data();
-            let loss_weights = top_layer.cpu_diff();
+            // if !self.loss(top_id) { continue; }
+
+            let top_blob = top_layer.read().unwrap();
+
+            let data = top_blob.cpu_data();
+            let loss_weights = top_blob.cpu_diff();
 
             loss += leaf_cpu_dot(data, loss_weights);
-            // loss += leaf_cpu_dot(count, data, loss_weights);
         }
 
         // Unlock();
@@ -145,9 +157,7 @@ pub struct LayerConfig {
 
     /// Specifies on which bottoms the backpropagation should be skipped.
     /// The size must be either 0 or equal to the number of bottoms.
-    pub propagate_down: Vec<bool>,
-
-    // minimal, a lot of Caffe not ported yet
+    pub propagate_down: Vec<bool>, // minimal, a lot of Caffe not ported yet
 }
 
 pub enum LayerType {
@@ -234,7 +244,13 @@ impl Default for ParamConfig {
 impl ParamConfig {
     /// Checks dimensions of two blobs according to the share_mode.
     /// Logs an error if there is a count/shape mismatch.
-    pub fn check_dimensions<T: Numeric>(&self, blob_one: &Blob<T>, blob_two: &Blob<T>, param_name: String, owner_name: String, layer_name: String) -> Result<(), String> {
+    pub fn check_dimensions<T: Numeric>(&self,
+                                        blob_one: &Blob<T>,
+                                        blob_two: &Blob<T>,
+                                        param_name: String,
+                                        owner_name: String,
+                                        layer_name: String)
+                                        -> Result<(), String> {
         match self.share_mode {
             // Permissive dimension checking -- only check counts are the same.
             DimCheckMode::Permissive => {
@@ -243,13 +259,13 @@ impl ParamConfig {
                                 count mismatch.
                                 Owner layer param shape is {};
                                 Sharing layer param shape is {}",
-                                param_name,
-                                owner_name,
-                                layer_name,
-                                blob_two.shape_string(),
-                                blob_one.shape_string()));
+                                       param_name,
+                                       owner_name,
+                                       layer_name,
+                                       blob_two.shape_string(),
+                                       blob_one.shape_string()));
                 }
-            },
+            }
             // Strict dimension checking -- all dims must be the same.
             DimCheckMode::Strict => {
                 if blob_one.shape() != blob_two.shape() {
@@ -257,13 +273,13 @@ impl ParamConfig {
                                 shape mismatch.
                                 Owner layer param shape is {};
                                 Sharing layer expects param shape {}",
-                                param_name,
-                                owner_name,
-                                layer_name,
-                                blob_two.shape_string(),
-                                blob_one.shape_string()));
+                                       param_name,
+                                       owner_name,
+                                       layer_name,
+                                       blob_two.shape_string(),
+                                       blob_one.shape_string()));
                 }
-            },
+            }
         }
         Ok(())
     }
@@ -309,20 +325,30 @@ mod tests {
 
     #[test]
     fn dim_check_strict() {
-        let cfg = ParamConfig { share_mode: DimCheckMode::Strict, .. ParamConfig::default()};
+        let cfg = ParamConfig { share_mode: DimCheckMode::Strict, ..ParamConfig::default() };
         let blob_one = Blob::<f32>::of_shape(vec![2, 3, 3]);
         let blob_two = Blob::<f32>::of_shape(vec![3, 2, 3]);
         let param_name = "foo".to_owned();
         let owner_name = "owner".to_owned();
         let layer_name = "layer".to_owned();
 
-        assert!(cfg.check_dimensions(&blob_one, &blob_one, param_name.clone(), owner_name.clone(), layer_name.clone()).is_ok());
-        assert!(cfg.check_dimensions(&blob_one, &blob_two, param_name.clone(), owner_name.clone(), layer_name.clone()).is_err());
+        assert!(cfg.check_dimensions(&blob_one,
+                                     &blob_one,
+                                     param_name.clone(),
+                                     owner_name.clone(),
+                                     layer_name.clone())
+                   .is_ok());
+        assert!(cfg.check_dimensions(&blob_one,
+                                     &blob_two,
+                                     param_name.clone(),
+                                     owner_name.clone(),
+                                     layer_name.clone())
+                   .is_err());
     }
 
     #[test]
     fn dim_check_permissive() {
-        let cfg = ParamConfig { share_mode: DimCheckMode::Permissive, .. ParamConfig::default()};
+        let cfg = ParamConfig { share_mode: DimCheckMode::Permissive, ..ParamConfig::default() };
         let blob_one = Blob::<f32>::of_shape(vec![2, 3, 3]);
         let blob_two = Blob::<f32>::of_shape(vec![3, 2, 3]);
         let blob_three = Blob::<f32>::of_shape(vec![3, 10, 3]);
@@ -330,9 +356,29 @@ mod tests {
         let owner_name = "owner".to_owned();
         let layer_name = "layer".to_owned();
 
-        assert!(cfg.check_dimensions(&blob_one, &blob_one, param_name.clone(), owner_name.clone(), layer_name.clone()).is_ok());
-        assert!(cfg.check_dimensions(&blob_one, &blob_two, param_name.clone(), owner_name.clone(), layer_name.clone()).is_ok());
-        assert!(cfg.check_dimensions(&blob_one, &blob_three, param_name.clone(), owner_name.clone(), layer_name.clone()).is_err());
-        assert!(cfg.check_dimensions(&blob_two, &blob_three, param_name.clone(), owner_name.clone(), layer_name.clone()).is_err());
+        assert!(cfg.check_dimensions(&blob_one,
+                                     &blob_one,
+                                     param_name.clone(),
+                                     owner_name.clone(),
+                                     layer_name.clone())
+                   .is_ok());
+        assert!(cfg.check_dimensions(&blob_one,
+                                     &blob_two,
+                                     param_name.clone(),
+                                     owner_name.clone(),
+                                     layer_name.clone())
+                   .is_ok());
+        assert!(cfg.check_dimensions(&blob_one,
+                                     &blob_three,
+                                     param_name.clone(),
+                                     owner_name.clone(),
+                                     layer_name.clone())
+                   .is_err());
+        assert!(cfg.check_dimensions(&blob_two,
+                                     &blob_three,
+                                     param_name.clone(),
+                                     owner_name.clone(),
+                                     layer_name.clone())
+                   .is_err());
     }
 }

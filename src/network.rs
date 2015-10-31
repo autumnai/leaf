@@ -3,7 +3,7 @@ use std::sync::{Arc, RwLock};
 use std::cmp;
 use shared_memory::*;
 use layer::Layer;
-use layer::{LayerConfig, ParamConfig, DimCheckMode};
+use layer::{LayerConfig, ParamConfig};
 use phloem::Blob;
 
 pub struct Network<'a> {
@@ -18,8 +18,8 @@ pub struct Network<'a> {
     blob_names_index: HashMap<String, usize>,
     blob_need_backwards: Vec<bool>,
 
-    net_output_blobs: Vec<ArcLock<HeapBlob>>,
-    net_output_blob_indices: Vec<usize>,
+    output_blobs: Vec<ArcLock<HeapBlob>>,
+    output_blob_indices: Vec<usize>,
 
     // stores the vectors containing the output for each layer (only references to the blobs)
     top_vecs: Vec<Vec<ArcLock<HeapBlob>>>,
@@ -97,8 +97,8 @@ impl<'a> Network<'a> {
         for available_blob in available_blobs.iter() {
             info!("This network produces output {}", available_blob);
             let id = blob_name_to_idx[available_blob];
-            self.net_output_blobs.push(self.blobs[id].clone());
-            self.net_output_blob_indices.push(id);
+            self.output_blobs.push(self.blobs[id].clone());
+            self.output_blob_indices.push(id);
         }
 
         // setup names->idx
@@ -147,8 +147,6 @@ impl<'a> Network<'a> {
         // else {
         {
             self.layers.push(Layer::from_config(&layer_config));
-            // TODO
-            // layers_.push_back(LayerRegistry<Dtype>::CreateLayer(layer_param));
         }
         self.layer_names.push(layer_config.name.clone());
         info!("Creating Layer {}", layer_config.name.clone());
@@ -464,10 +462,10 @@ impl<'a> Network<'a> {
         let layer_config = self.layers[layer_id].config.clone();
         let param_size = self.params.len();
         let param_name = if param_size > param_id {
-                            layer_config.param(param_id).unwrap().name.clone()
-                            } else {
-                              "".to_owned()
-                          };
+            layer_config.param(param_id).unwrap().name.clone()
+        } else {
+            "".to_owned()
+        };
 
         // use param_name (or param_id as a fallback) as display_name
         if !param_name.is_empty() {
@@ -508,55 +506,49 @@ impl<'a> Network<'a> {
             self.param_owners.push(Some(owner_net_param_id));
             let (owner_layer_id, owner_param_id) = self.param_layer_indices[owner_net_param_id];
             info!("Sharing parameters '{}' owned by layer '{}', param index {}",
-                  param_name,
+                  param_name.clone(),
                   self.layer_names[owner_layer_id],
                   owner_param_id);
             let this_blob = self.layers[layer_id].blobs[param_id].clone();
             let owner_blob = self.layers[owner_layer_id].blobs[owner_param_id].clone();
+            // can only share parameters if blobs match by shape or capacity
             if param_size > param_id {
-                if let Err(e) = layer_config.param(param_id).unwrap().check_dimensions(
-                                                    &this_blob.read().unwrap(),
-                                                    &owner_blob.read().unwrap(),
-                                                    param_name,
-                                                    self.layer_names[owner_layer_id].clone(),
-                                                    self.layer_names[layer_id].clone()) {
+                if let Err(e) = layer_config.param(param_id)
+                                            .unwrap()
+                                            .check_dimensions(&this_blob.read().unwrap(),
+                                                              &owner_blob.read().unwrap(),
+                                                              param_name.clone(),
+                                                              self.layer_names[owner_layer_id].clone(),
+                                                              self.layer_names[layer_id].clone()) {
                     error!("{}", e)
-                };
+                }
             }
 
             let learnable_param_id = self.learnable_param_ids[owner_net_param_id];
             self.learnable_param_ids.push(learnable_param_id);
+            // can only share parameters if both have same lr_mult
             if let Some(lr_mult) = param_spec.lr_mult {
                 if let Some(owner_lr_mult) = self.params_lr[learnable_param_id] {
-                    if lr_mult != owner_lr_mult {
-
+                    if !lr_mult.eq(&owner_lr_mult) {
+                        error!("Shared param '{}' has mismatched lr_mult.",
+                               param_name.clone());
                     }
+                } else {
+                    self.params_lr[learnable_param_id] = param_spec.lr_mult;
                 }
             }
-
-            //     const int learnable_param_id = learnable_param_ids_[owner_net_param_id];
-            //     learnable_param_ids_.push_back(learnable_param_id);
-            //     if (param_spec->has_lr_mult()) {
-            //       if (has_params_lr_[learnable_param_id]) {
-            //         CHECK_EQ(param_spec->lr_mult(), params_lr_[learnable_param_id])
-            //             << "Shared param '" << param_name << "' has mismatched lr_mult.";
-            //       } else {
-            //         has_params_lr_[learnable_param_id] = true;
-            //         params_lr_[learnable_param_id] = param_spec->lr_mult();
-            //       }
-            //     }
-            //     if (param_spec->has_decay_mult()) {
-            //       if (has_params_decay_[learnable_param_id]) {
-            //         CHECK_EQ(param_spec->decay_mult(),
-            //                  params_weight_decay_[learnable_param_id])
-            //             << "Shared param '" << param_name << "' has mismatched decay_mult.";
-            //       } else {
-            //         has_params_decay_[learnable_param_id] = true;
-            //         params_weight_decay_[learnable_param_id] = param_spec->decay_mult();
-            //       }
-            //     }
+            // can only share parameters if both have same decay_mult
+            if let Some(decay_mult) = param_spec.decay_mult {
+                if let Some(owner_decay_mult) = self.params_weight_decay[learnable_param_id] {
+                    if !decay_mult.eq(&owner_decay_mult) {
+                        error!("Shared param '{}' has mismatched decay_mult.",
+                               param_name.clone());
+                    }
+                } else {
+                    self.params_weight_decay[learnable_param_id] = param_spec.decay_mult;
+                }
+            }
         }
-        unimplemented!();
     }
 
 
@@ -587,10 +579,11 @@ impl<'a> Network<'a> {
     //   }
     //   return loss;
     // }
-    pub fn forward_from_to(&self, start: usize, end: usize) -> f32 {
-        let mut loss = 0f32;
+    pub fn forward_from_to(&mut self, start: usize, end: usize) -> f32 {
+        assert!(end < self.layers.len());
 
-        // Caffe C++
+        let mut loss = 0f32;
+        //  Caffe
         //   if (debug_info_) {
         //     for (int i = 0; i < net_input_blobs_.size(); ++i) {
         //       InputDebugInfo(i);
@@ -598,10 +591,11 @@ impl<'a> Network<'a> {
         //   }
 
         for i in start..end {
-            // loss += self.layers[i].forward(self.bottom_vecs[i], self.top_vecs[i]);
+            loss += self.layers[i].worker.forward(&self.bottom_vecs[i], &mut self.top_vecs[i]);
         }
 
-        loss
+        // loss;
+        unimplemented!();
     }
 
 
@@ -616,41 +610,30 @@ impl<'a> Network<'a> {
     //   return ForwardFromTo(0, end);
     // }
 
-    // pub fn forward_prefilled(&self, loss: Option<f32>) -> &Vec<Box<Blob<f32>>> {
-    pub fn forward_prefilled(&self, loss: Option<f32>) {
+    pub fn forward_prefilled(&mut self, loss: Option<&mut f32>) -> &Vec<ArcLock<HeapBlob>> {
+        let end = self.layers.len() - 1;
         match loss {
             Some(loss_result) => {
                 // not sure if loss_result will really be changed
-                // loss_result = self.forward_from_to(0, self.layers.len() - 1);
+                *loss_result = self.forward_from_to(0, end);
             }
             None => {
-                self.forward_from_to(0, self.layers.len() - 1);
+                self.forward_from_to(0, end);
             }
         }
 
-        // return net_output_blobs_;
-        // return self.layers; // WRONG
+        unimplemented!();
     }
 
+    pub fn forward(&mut self, bottom: &[ArcLock<HeapBlob>], loss: &mut f32) -> &Vec<ArcLock<HeapBlob>> {
+        // let blob: Blob<f32> = Blob::new();
+        // let blob = vec![Box::new(Blob::new())];
+        for (i, btm) in bottom.iter().enumerate() {
+            self.input_blobs[i] = btm.clone();
+        }
 
-// const vector<Blob<Dtype>*>& Net<Dtype>::Forward(
-//     const vector<Blob<Dtype>*> & bottom, Dtype* loss) {
-//   // Copy bottom to internal bottom
-//   for (int i = 0; i < bottom.size(); ++i) {
-//     net_input_blobs_[i]->CopyFrom(*bottom[i]);
-//   }
-//   return ForwardPrefilled(loss);
-// }
-
-// pub fn forward(&self, bottom: &Vec<Box<Blob<f32>>>, loss: &f32) ->
-// &Vec<Box<Blob<f32>>> {
-//     // let blob: Blob<f32> = Blob::new();
-//     let blob = vec![Box::new(Blob::new())];
-//
-//
-//     return &blob;
-// }
-
+        self.forward_prefilled(Some(loss))
+    }
 }
 
 pub struct NetworkConfig {
