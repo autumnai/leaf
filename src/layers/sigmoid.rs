@@ -1,9 +1,25 @@
+//! Sigmoid Layer
+//!
+//! Non-linearity activation function: y = (1 + e^(-x))^(-1)
 use shared_memory::*;
 use layer::*;
 
-pub struct SigmoidLayer;
+#[derive(Debug, Copy, Clone)]
+/// Sigmoid
+///
+/// Non-linearity activation function: y = (1 + e^(-x))^(-1)
+///
+/// A classic choice in neural networks.
+/// But you might concider ReLu as an alternative.  
+///
+/// ReLu, compared to Sigmoid,  
+/// 1. reduces the likelyhood of vanishing gradients  
+/// 2. increases the likelyhood of a more beneficial sparse representation  
+/// 3. can be computed faster  
+/// 4. is therefore the most popular activation function in DNNs as of this writing (2015).
+pub struct Sigmoid;
 
-impl ILayer for SigmoidLayer {
+impl ILayer for Sigmoid {
     impl_neuron_layer!();
 
     // fn forward_cpu(&self, bottom: &[HeapBlob], top: &mut Vec<HeapBlob>) {
@@ -12,7 +28,7 @@ impl ILayer for SigmoidLayer {
         let top_data = top[0].mutable_cpu_data();
 
         for (i, _) in bottom_data.iter().enumerate() {
-            top_data[i] = SigmoidLayer::sigmoid(bottom_data[i])
+            top_data[i] = Sigmoid::sigmoid(bottom_data[i])
         }
     }
 
@@ -26,19 +42,19 @@ impl ILayer for SigmoidLayer {
             for i in 0..count {
                 let sigmoid_x = top_data[i];
                 // bottom_diff[i] = top_diff[i] * sigmoid_x * (1f32 - sigmoid_x);
-                bottom_diff[i] = top_diff[i] * SigmoidLayer::sigmoid_prime_precalc(sigmoid_x)
+                bottom_diff[i] = top_diff[i] * Sigmoid::sigmoid_prime_precalc(sigmoid_x)
             }
         }
     }
 }
 
-impl SigmoidLayer {
+impl Sigmoid {
     fn sigmoid(z: f32) -> f32 {
         1f32 / (1f32 + (-z).exp())
     }
 
     fn sigmoid_prime(z: f32) -> f32 {
-        SigmoidLayer::sigmoid_prime_precalc(SigmoidLayer::sigmoid(z))
+        Sigmoid::sigmoid_prime_precalc(Sigmoid::sigmoid(z))
     }
 
     fn sigmoid_prime_precalc(sigmoid_z: f32) -> f32 {

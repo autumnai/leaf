@@ -2,11 +2,14 @@ use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 use std::cmp;
 use shared_memory::*;
-use layer::Layer;
+use layer::{Layer, ILayer};
 use layer::{LayerConfig, ParamConfig};
 use phloem::Blob;
 
+#[derive(Debug)]
+/// The Network
 pub struct Network<'a> {
+    /// The name of the `Network`
     pub name: String,
     layers: Vec<Layer<'a>>,
     layer_names: Vec<String>,
@@ -620,33 +623,48 @@ impl<'a> Network<'a> {
     }
 }
 
+#[derive(Debug)]
+/// The Network Configuration
 pub struct NetworkConfig {
+    /// The name of the `Network`
     pub name: String,
-    inputs: Vec<String>, // The input blobs to the network.
-    input_shapes: Vec<Vec<usize>>, // The shape of the input blobs.
 
-    // Whether the network will force every layer to carry out backward operation.
-    // If set False, then whether to carry out backward is determined
-    // automatically according to the net structure and learning rates.
+    /// The names of input `Blob`s to the `Network`
+    inputs: Vec<String>,
+
+    /// The shape of the input `Blob`s.
+    input_shapes: Vec<Vec<usize>>,
+
+    /// Whether the `Network` will force every layer to carry out backward operation.
+    /// If set `false`, then whether to carry out backward is determined
+    /// automatically according to the net structure and learning rates.
     force_backward: bool,
 
     // // The current "state" of the network, including the phase, level, and stage.
     // // Some layers may be included/excluded depending on this state and the states
     // // specified in the layers' include and exclude fields.
     // optional NetState state = 6;
-    debug_info: bool, // Print debugging information about results
 
-    pub layers: Vec<LayerConfig>, // The layers that make up the net.
+    /// Wheter the `Network` will print debugging information about results
+    debug_info: bool,
+
+    /// The `Layers` that make up the `Network`
+    pub layers: Vec<LayerConfig>,
 }
 
 impl NetworkConfig {
+
+    /// Return a specifc `Layer`
     pub fn layer(&self, layer_id: usize) -> Option<&LayerConfig> {
         self.layers.get(layer_id)
     }
 
+    /// Return a specific `Blob`s' name
     pub fn input(&self, input_id: usize) -> Option<&String> {
         self.inputs.get(input_id)
     }
+
+    /// Return a specific `Blob`s' shape
     pub fn input_shape(&self, input_id: usize) -> Option<&Vec<usize>> {
         self.input_shapes.get(input_id)
     }
