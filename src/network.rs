@@ -639,7 +639,7 @@ impl<'a> Network<'a> {
 pub struct NetworkConfig {
     pub name: String,
     inputs: Vec<String>, // The input blobs to the network.
-    input_shapes: Vec<Vec<isize>>, // The shape of the input blobs.
+    input_shapes: Vec<Vec<usize>>, // The shape of the input blobs.
 
     // Whether the network will force every layer to carry out backward operation.
     // If set False, then whether to carry out backward is determined
@@ -663,7 +663,7 @@ impl NetworkConfig {
     pub fn input(&self, input_id: usize) -> Option<&String> {
         self.inputs.get(input_id)
     }
-    pub fn input_shape(&self, input_id: usize) -> Option<&Vec<isize>> {
+    pub fn input_shape(&self, input_id: usize) -> Option<&Vec<usize>> {
         self.input_shapes.get(input_id)
     }
 }
