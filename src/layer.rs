@@ -26,7 +26,7 @@ pub struct Layer<'a> {
     /// The vector that stores shared references to the parameters in the form of blobs.
     pub blobs: Vec<ArcLock<HeapBlob>>,
 
-    /// Vector indicating whether to compute the diff of each param blob. */
+    /// Vector indicating whether to compute the diff of each param blob.
     param_propagate_down: Vec<bool>,
 }
 

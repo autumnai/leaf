@@ -8,8 +8,8 @@
         unsafe_code,
         unused_import_braces, unused_qualifications)]
 
-//! Leaf aims to become a open, fast and well-designed Framework for distributed Deep Learning on
-//! {C, G}PUs.
+//! Leaf aims to become a open, fast and well-designed Framework for
+//! distributed Deep Learning on {C, G}PUs.
 
 #[macro_use]
 extern crate log;

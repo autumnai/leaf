@@ -1,6 +1,6 @@
-# Contributing to Autumn
+# Contributing to Leaf
 
-We love, that you are interested in contributing to Autumn. There are many ways
+We love, that you are interested in contributing to Leaf. There are many ways
 to contribute and we appreciate all of them. This document gives a rough
 overview of how you can contribute to Autumn.
 
@@ -8,7 +8,7 @@ overview of how you can contribute to Autumn.
 * [Bug Reports](#bug-reports)
 * [Feature Requests](#feature-requests)
 
-If you have questions hop on the [Autumn Chat](https://gitter.im/autumnai/autumn)
+If you have questions hop on the [Leaf Chat](https://gitter.im/autumnai/leaf)
 , or reach out to {@[MJ](https://twitter.com/mjhirn), @[Max](https://twitter.com/hobofan)}.
 
 ## Pull Requests
@@ -26,7 +26,7 @@ working on the problem you would love to solve.
 
 #### Making a PR
 
-Pull requests are the primary mechanism we use to change Autumn repos. GitHub
+Pull requests are the primary mechanism we use to change Leaf repos. GitHub
 itself has some [great documentation](https://help.github.com/articles/using-pull-requests/)
 on using the Pull Request feature. We use the 'fork and pull' model described
 there.
@@ -104,5 +104,5 @@ $ RUST_BACKTRACE=1 rustc ...
 
 ## Feature Requests
 
-To request a change to the way that one of the Autumn libraries work, please
+To request a change to the way that one of the Leaf libraries work, please
 open an issue in the repository.

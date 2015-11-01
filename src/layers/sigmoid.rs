@@ -10,7 +10,7 @@ use layer::*;
 /// Non-linearity activation function: y = (1 + e^(-x))^(-1)
 ///
 /// A classic choice in neural networks.
-/// But you might concider ReLu as an alternative.  
+/// But you might consider using ReLu as an alternative.
 ///
 /// ReLu, compared to Sigmoid,  
 /// 1. reduces the likelyhood of vanishing gradients  
@@ -22,7 +22,6 @@ pub struct Sigmoid;
 impl ILayer for Sigmoid {
     impl_neuron_layer!();
 
-    // fn forward_cpu(&self, bottom: &[HeapBlob], top: &mut Vec<HeapBlob>) {
     fn forward_cpu(&self, bottom: &[ReadBlob], top: &mut Vec<&mut WriteBlob>) {
         let bottom_data = bottom[0].cpu_data();
         let top_data = top[0].mutable_cpu_data();

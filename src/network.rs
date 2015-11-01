@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 use std::cmp;
 use shared_memory::*;
-use layer::{Layer, ILayer};
+use layer::{ILayer, Layer};
 use layer::{LayerConfig, ParamConfig};
 use phloem::Blob;
 
