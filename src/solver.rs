@@ -1,5 +1,5 @@
+use shared_memory::*;
 use network::Network;
-use phloem::Blob;
 
 enum SolverKind {
     SGD,
@@ -24,13 +24,16 @@ impl<'a> Solver<'a>{
     fn step(&mut self, iters: i32) {
         let start_iter = self.iter;
         let stop_iter = start_iter + iters;
+        // int average_loss = this->param_.average_loss(); // Caffe
+        let losses = Vec::<f32>::new();
+        let smoothed_loss = 0f32;
 
         while self.iter < stop_iter {
             let mut loss = 0f32;
 
             let minibatch_size = 10;
 
-            let noop_bottom = vec![Box::new(Blob::new())];
+            let noop_bottom = vec![new_shared_heapblob()];
             for _ in 0..minibatch_size {
                 loss += self.net.forward_backward(&noop_bottom);
             }

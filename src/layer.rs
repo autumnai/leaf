@@ -1,7 +1,8 @@
 use math::*;
 use phloem::{Blob, Numeric};
 use shared_memory::*;
-use layers::sigmoid_layer::SigmoidLayer;
+use layers::*;
+use std::fmt;
 
 use std::sync::{RwLockReadGuard, RwLockWriteGuard};
 
@@ -10,8 +11,12 @@ pub type ReadBlob<'_> = RwLockReadGuard<'_, HeapBlob>;
 /// Write access to a Blob via a RwLock
 pub type WriteBlob<'_> = RwLockWriteGuard<'_, HeapBlob>;
 
+#[derive(Debug)]
+/// The generic Layer
 pub struct Layer<'a> {
+    /// The configuration of the Layer
     pub config: Box<&'a LayerConfig>,
+    /// The Layer Interface
     pub worker: Box<ILayer>,
 
     /// The vector that indicates whether each top blob has a non-zero weight in
@@ -21,11 +26,13 @@ pub struct Layer<'a> {
     /// The vector that stores shared references to the parameters in the form of blobs.
     pub blobs: Vec<ArcLock<HeapBlob>>,
 
-    /// Vector indicating whether to compute the diff of each param blob. */
+    /// Vector indicating whether to compute the diff of each param blob.
     param_propagate_down: Vec<bool>,
 }
 
 impl<'a> Layer<'a> {
+
+    /// Creates a new Layer from a LayerConfig
     pub fn from_config(config: &'a LayerConfig) -> Layer {
         let cl = config.clone();
         let cfg = Box::<&'a LayerConfig>::new(cl);
@@ -42,7 +49,7 @@ impl<'a> Layer<'a> {
 
     fn worker_from_config(config: &LayerConfig) -> Box<ILayer> {
         match config.layer_type {
-            LayerType::SigmoidLayer => Box::new(SigmoidLayer),
+            LayerType::Sigmoid => Box::new(Sigmoid),
         }
     }
 
@@ -56,6 +63,7 @@ impl<'a> Layer<'a> {
 
     }
 
+    /// Returns the loss
     pub fn loss(&self, id: usize) -> Option<&f32> {
         self.loss.get(id)
     }
@@ -144,12 +152,26 @@ pub trait ILayer {
     }
 }
 
-pub struct LayerConfig {
-    pub name: String, // the layer name
-    layer_type: LayerType, // the layer type
+impl fmt::Debug for ILayer {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({}, {})", "foo", "bar")
+    }
+}
 
-    tops: Vec<String>, // the name of each top blob
-    bottoms: Vec<String>, // the name of each bottom blob
+#[derive(Debug)]
+/// Layer Configuration Struct
+pub struct LayerConfig {
+    /// The Name of the Layer
+    pub name: String,
+
+    /// The type of the Layer
+    layer_type: LayerType,
+
+    /// The Name for each top Blob
+    tops: Vec<String>,
+
+    /// The Name for each bottom Blob
+    bottoms: Vec<String>,
 
     /// Specifies training parameters (multipliers on global learning constants,
     /// and the name and other settings used for weight sharing).
@@ -157,14 +179,19 @@ pub struct LayerConfig {
 
     /// Specifies on which bottoms the backpropagation should be skipped.
     /// The size must be either 0 or equal to the number of bottoms.
-    pub propagate_down: Vec<bool>, // minimal, a lot of Caffe not ported yet
+    pub propagate_down: Vec<bool>,
 }
 
+#[derive(Debug, Copy, Clone)]
+/// The Layer Types
 pub enum LayerType {
-    SigmoidLayer,
+    /// Sigmoid Layer
+    Sigmoid,
 }
 
 impl LayerConfig {
+
+    /// Creates a new LayerConfig
     pub fn new(name: String, layer_type: LayerType) -> LayerConfig {
         LayerConfig {
             name: name,
@@ -178,32 +205,44 @@ impl LayerConfig {
         }
     }
 
+    /// Returns the Name of the requested top Blob
     pub fn top(&self, top_id: usize) -> Option<&String> {
         self.tops.get(top_id)
     }
+
+    /// Returns the number of top Blobs
     pub fn tops_len(&self) -> usize {
         self.tops.len()
     }
+
+    /// Returns the Name of the requested bottom Blob
     pub fn bottom(&self, bottom_id: usize) -> Option<&String> {
         self.bottoms.get(bottom_id)
     }
+
+    /// Returns the number of bottom Blobs
     pub fn bottoms_len(&self) -> usize {
         self.bottoms.len()
     }
 
+    /// Returns the requested ParamConfig
     pub fn param(&self, param_id: usize) -> Option<&ParamConfig> {
         self.params.get(param_id)
     }
+
+    /// Returns the number of params
     pub fn params_len(&self) -> usize {
         self.params.len()
     }
 
+    /// Checks if propagate down length works out
     pub fn check_propagate_down_len(&self) -> bool {
         self.propagate_down.is_empty() || self.propagate_down.len() == self.bottoms.len()
     }
 }
 
 
+#[derive(Debug)]
 /// Specifies training parameters (multipliers on global learning constants,
 /// and the name and other settings used for weight sharing).
 pub struct ParamConfig {
@@ -301,84 +340,11 @@ impl ParamConfig {
     }
 }
 
+#[derive(Debug, Copy, Clone)]
+/// Enum for specifing the shared weights behaviour
 pub enum DimCheckMode {
     /// Strict requires that shapes match.
     Strict,
     /// Permissive requires only the count of weights to match.
     Permissive,
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use phloem::Blob;
-
-    fn new_layer_config() -> LayerConfig {
-        LayerConfig::new("foo".to_owned(), LayerType::SigmoidLayer)
-    }
-
-    #[test]
-    fn new_layer() {
-        let cfg = new_layer_config();
-        let layer = Layer::from_config(&cfg);
-    }
-
-    #[test]
-    fn dim_check_strict() {
-        let cfg = ParamConfig { share_mode: DimCheckMode::Strict, ..ParamConfig::default() };
-        let blob_one = Blob::<f32>::of_shape(vec![2, 3, 3]);
-        let blob_two = Blob::<f32>::of_shape(vec![3, 2, 3]);
-        let param_name = "foo".to_owned();
-        let owner_name = "owner".to_owned();
-        let layer_name = "layer".to_owned();
-
-        assert!(cfg.check_dimensions(&blob_one,
-                                     &blob_one,
-                                     param_name.clone(),
-                                     owner_name.clone(),
-                                     layer_name.clone())
-                   .is_ok());
-        assert!(cfg.check_dimensions(&blob_one,
-                                     &blob_two,
-                                     param_name.clone(),
-                                     owner_name.clone(),
-                                     layer_name.clone())
-                   .is_err());
-    }
-
-    #[test]
-    fn dim_check_permissive() {
-        let cfg = ParamConfig { share_mode: DimCheckMode::Permissive, ..ParamConfig::default() };
-        let blob_one = Blob::<f32>::of_shape(vec![2, 3, 3]);
-        let blob_two = Blob::<f32>::of_shape(vec![3, 2, 3]);
-        let blob_three = Blob::<f32>::of_shape(vec![3, 10, 3]);
-        let param_name = "foo".to_owned();
-        let owner_name = "owner".to_owned();
-        let layer_name = "layer".to_owned();
-
-        assert!(cfg.check_dimensions(&blob_one,
-                                     &blob_one,
-                                     param_name.clone(),
-                                     owner_name.clone(),
-                                     layer_name.clone())
-                   .is_ok());
-        assert!(cfg.check_dimensions(&blob_one,
-                                     &blob_two,
-                                     param_name.clone(),
-                                     owner_name.clone(),
-                                     layer_name.clone())
-                   .is_ok());
-        assert!(cfg.check_dimensions(&blob_one,
-                                     &blob_three,
-                                     param_name.clone(),
-                                     owner_name.clone(),
-                                     layer_name.clone())
-                   .is_err());
-        assert!(cfg.check_dimensions(&blob_two,
-                                     &blob_three,
-                                     param_name.clone(),
-                                     owner_name.clone(),
-                                     layer_name.clone())
-                   .is_err());
-    }
 }

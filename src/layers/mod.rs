@@ -5,4 +5,7 @@ macro_rules! impl_neuron_layer {
     )
 }
 
-pub mod sigmoid_layer;
+pub use self::sigmoid::Sigmoid;
+
+/// Sigmoid Layer
+pub mod sigmoid;

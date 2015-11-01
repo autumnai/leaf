@@ -2,11 +2,14 @@ use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 use std::cmp;
 use shared_memory::*;
-use layer::Layer;
+use layer::{ILayer, Layer};
 use layer::{LayerConfig, ParamConfig};
 use phloem::Blob;
 
+#[derive(Debug)]
+/// The Network
 pub struct Network<'a> {
+    /// The name of the `Network`
     pub name: String,
     layers: Vec<Layer<'a>>,
     layer_names: Vec<String>,
@@ -552,64 +555,26 @@ impl<'a> Network<'a> {
     }
 
 
-    pub fn forward_backward(&self, bottom: &[HeapBlob]) -> f32 {
-        let loss = 0f32; // TODO
+    /// Comute one forward and backward step for the network.
+    pub fn forward_backward(&mut self, bottom: &[ArcLock<HeapBlob>]) -> f32 {
+        let loss = &mut 0f32;
 
-        // self.forward(bottom, &loss);
+        self.forward(bottom, loss);
         // self.backward();
 
-        loss
+        *loss
     }
 
-    // template <typename Dtype>
-    // Dtype Net<Dtype>::ForwardFromTo(int start, int end) {
-    //   CHECK_GE(start, 0);
-    //   CHECK_LT(end, layers_.size());
-    //   Dtype loss = 0;
-    //   if (debug_info_) {
-    //     for (int i = 0; i < net_input_blobs_.size(); ++i) {
-    //       InputDebugInfo(i);
-    //     }
-    //   }
-    //   for (int i = start; i <= end; ++i) {
-    //     // LOG(ERROR) << "Forwarding " << layer_names_[i];
-    //     Dtype layer_loss = layers_[i]->Forward(bottom_vecs_[i], top_vecs_[i]);
-    //     loss += layer_loss;
-    //     if (debug_info_) { ForwardDebugInfo(i); }
-    //   }
-    //   return loss;
-    // }
-    pub fn forward_from_to(&mut self, start: usize, end: usize) -> f32 {
-        assert!(end < self.layers.len());
-
-        let mut loss = 0f32;
-        //  Caffe
-        //   if (debug_info_) {
-        //     for (int i = 0; i < net_input_blobs_.size(); ++i) {
-        //       InputDebugInfo(i);
-        //     }
-        //   }
-
-        for i in start..end {
-            loss += self.layers[i].worker.forward(&self.bottom_vecs[i], &mut self.top_vecs[i]);
+    /// Copy supplied bottom to input blobs and compute one forward step for the network.
+    pub fn forward(&mut self, bottom: &[ArcLock<HeapBlob>], loss: &mut f32) -> &Vec<ArcLock<HeapBlob>> {
+        for (i, btm) in bottom.iter().enumerate() {
+            self.input_blobs[i] = btm.clone();
         }
 
-        // loss;
-        unimplemented!();
+        self.forward_prefilled(Some(loss))
     }
 
-
-    //
-    // template <typename Dtype>
-    // Dtype Net<Dtype>::ForwardFrom(int start) {
-    //   return ForwardFromTo(start, layers_.size() - 1);
-    // }
-    //
-    // template <typename Dtype>
-    // Dtype Net<Dtype>::ForwardTo(int end) {
-    //   return ForwardFromTo(0, end);
-    // }
-
+    /// Compute one forward step for the network after the input blobs have been put into the network.
     pub fn forward_prefilled(&mut self, loss: Option<&mut f32>) -> &Vec<ArcLock<HeapBlob>> {
         let end = self.layers.len() - 1;
         match loss {
@@ -622,47 +587,84 @@ impl<'a> Network<'a> {
             }
         }
 
-        unimplemented!();
+        &self.output_blobs
     }
 
-    pub fn forward(&mut self, bottom: &[ArcLock<HeapBlob>], loss: &mut f32) -> &Vec<ArcLock<HeapBlob>> {
-        // let blob: Blob<f32> = Blob::new();
-        // let blob = vec![Box::new(Blob::new())];
-        for (i, btm) in bottom.iter().enumerate() {
-            self.input_blobs[i] = btm.clone();
+    /// Forward the network from the supplied start to the supplied end.
+    pub fn forward_from_to(&mut self, start: usize, end: usize) -> f32 {
+        assert!(end < self.layers.len());
+
+        let mut loss = 0f32;
+
+        //  Caffe
+        //   if (debug_info_) {
+        //     for (int i = 0; i < net_input_blobs_.size(); ++i) {
+        //       InputDebugInfo(i);
+        //     }
+        //   }
+
+        for i in start..end {
+            loss += self.layers[i].worker.forward(&self.bottom_vecs[i], &mut self.top_vecs[i]);
+            // if (debug_info_) { ForwardDebugInfo(i); }  // Caffe
         }
 
-        self.forward_prefilled(Some(loss))
+        loss
+    }
+
+    /// Forward the network from the supplied start until the end.
+    pub fn forward_from(&mut self, start: usize) -> f32 {
+        let end = self.layers.len() - 1;
+        self.forward_from_to(start, end)
+    }
+
+    /// Forward the network from the start until the supplied end.
+    pub fn forward_to(&mut self, end: usize) -> f32 {
+        self.forward_from_to(0, end)
     }
 }
 
+#[derive(Debug)]
+/// The Network Configuration
 pub struct NetworkConfig {
+    /// The name of the `Network`
     pub name: String,
-    inputs: Vec<String>, // The input blobs to the network.
-    input_shapes: Vec<Vec<usize>>, // The shape of the input blobs.
 
-    // Whether the network will force every layer to carry out backward operation.
-    // If set False, then whether to carry out backward is determined
-    // automatically according to the net structure and learning rates.
+    /// The names of input `Blob`s to the `Network`
+    inputs: Vec<String>,
+
+    /// The shape of the input `Blob`s.
+    input_shapes: Vec<Vec<usize>>,
+
+    /// Whether the `Network` will force every layer to carry out backward operation.
+    /// If set `false`, then whether to carry out backward is determined
+    /// automatically according to the net structure and learning rates.
     force_backward: bool,
 
     // // The current "state" of the network, including the phase, level, and stage.
     // // Some layers may be included/excluded depending on this state and the states
     // // specified in the layers' include and exclude fields.
     // optional NetState state = 6;
-    debug_info: bool, // Print debugging information about results
 
-    pub layers: Vec<LayerConfig>, // The layers that make up the net.
+    /// Wheter the `Network` will print debugging information about results
+    debug_info: bool,
+
+    /// The `Layers` that make up the `Network`
+    pub layers: Vec<LayerConfig>,
 }
 
 impl NetworkConfig {
+
+    /// Return a specifc `Layer`
     pub fn layer(&self, layer_id: usize) -> Option<&LayerConfig> {
         self.layers.get(layer_id)
     }
 
+    /// Return a specific `Blob`s' name
     pub fn input(&self, input_id: usize) -> Option<&String> {
         self.inputs.get(input_id)
     }
+
+    /// Return a specific `Blob`s' shape
     pub fn input_shape(&self, input_id: usize) -> Option<&Vec<usize>> {
         self.input_shapes.get(input_id)
     }
