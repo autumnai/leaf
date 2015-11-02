@@ -10,7 +10,7 @@ repository = "https://github.com/autumnai/leaf"
 homepage = "https://github.com/autumnai/leaf"
 documentation = "http://autumnai.github.io/leaf"
 readme = "README.md"
-keywords = ["deep learning", "machine learning", "framework"]
+keywords = ["deep-learning", "neural-networks", "machine-learning", "framework"]
 license = "MIT"
 
 [dependencies]
