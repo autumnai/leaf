@@ -2,7 +2,7 @@
 
 We love, that you are interested in contributing to Leaf. There are many ways
 to contribute and we appreciate all of them. This document gives a rough
-overview of how you can contribute to Autumn.
+overview of how you can contribute to Leaf.
 
 * [Pull Requests](#pull-requests)
 * [Bug Reports](#bug-reports)
