@@ -7,6 +7,9 @@ overview of how you can contribute to Leaf.
 * [Pull Requests](#pull-requests)
 * [Bug Reports](#bug-reports)
 * [Feature Requests](#feature-requests)
+* [Appendix](#appendix)
+  * [Git Commit Guidelines](#git-commit-guidelines)
+
 
 If you have questions hop on the [Leaf Chat](https://gitter.im/autumnai/leaf)
 , or reach out to {@[MJ](https://twitter.com/mjhirn), @[Max](https://twitter.com/hobofan)}.
@@ -106,3 +109,75 @@ $ RUST_BACKTRACE=1 rustc ...
 
 To request a change to the way that one of the Leaf libraries work, please
 open an issue in the repository.
+
+## Appendix
+
+### Git Commit Guidelines
+
+We have very precise rules over how git commit messages should be formatted.
+This leads to more readable messages that are easy to follow when looking
+through the project history. But also, we may use the git commit messages to
+auto-generate the Leaf change log.
+
+#### Commit Message Format
+
+Each commit message consists of a header, a body and a footer. The header has a
+special format that includes a type, a scope and a subject:
+
+    <type>/<scope>: <subject>
+    \n
+    <body>
+    \n
+    <footer>
+
+Any line of the commit message cannot be longer 100 characters! This allows the
+message to be easier to read on GitHub as well as in various git tools.
+
+<**type**>:
+
+Must be one of the following:
+
+- *`feat`*: A new feature
+- *`fix`*: A bug fix
+- *`docs`*: Documentation only changes
+- *`style`*: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+- *`refactor`*: A code change that neither fixes a bug nor adds a feature
+- *`perf`*: A code change that improves performance
+- *`test`*: Adding missing tests
+- *`chore`*: Changes to the build process or auxiliary tools and libraries such as documentation generation
+
+<**scope**>:
+
+The scope could be anything that specifies the place of the commit change.
+For example: `feature1`, `tests`, `lib`, etc...
+
+<**subject**>:
+
+The subject contains succinct description of the change:
+- use the imperative, present tense: "change" not "changed" nor "changes"
+- don't capitalize first letter
+- no dot (.) at the end
+
+<**body**>:
+
+The body should include the motivation for the change, contrast this with
+previous behaviour and overall information about, why that commit matters.
+
+- Just as in the `subject`, use the imperative, present tense
+
+<**footer**>:
+
+The footer should contain any information about Breaking Changes and is also the
+place to reference GitHub issues that this commit closes. For Example:
+
+    BREAKING CHANGE: [specify what is breaking]
+
+    { REFERENCE, CLOSE, FIX } #Issue
+
+
+#### Revert
+
+If the commit reverts a previous commit, it should begin with `revert:`,
+followed by the header of the reverted commit. In the body it should say:
+`This reverts commit <hash>.`, where the hash is the SHA of the commit being
+reverted.
