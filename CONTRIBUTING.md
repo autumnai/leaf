@@ -58,7 +58,7 @@ on the pull request with an `r+`. It will look something like this:
 
 This tells @homu, our lovable integration bot, that your pull request has
 been approved. The PR then enters the
-[merge queue][http://buildbot.rust-lang.org/homu/queue/rust], where
+[merge queue](http://buildbot.rust-lang.org/homu/queue/rust), where
 @homu will run all the tests on every platform we support. If it all works
 out, @homu will merge your code into `master` and close the pull request.
 
