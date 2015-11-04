@@ -1,4 +1,5 @@
 #![feature(plugin)]
+#![feature(augmented_assignments)]
 #![plugin(clippy)]
 #![allow(dead_code)]
 #![allow(unused_variables)]
@@ -23,5 +24,7 @@ pub mod layer;
 pub mod layers;
 /// The Solver
 pub mod solver;
+/// The specific Solvers
+pub mod solvers;
 /// The Network
 pub mod network;

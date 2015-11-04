@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 use std::cmp;
+use math::*;
 use shared_memory::*;
 use layer::{ILayer, Layer};
 use layer::{LayerConfig, ParamConfig};
@@ -53,7 +54,59 @@ pub struct Network<'a> {
     params_weight_decay: Vec<Option<f32>>,
 }
 
+impl<'a> Default for Network<'a> {
+    fn default() -> Network<'a> {
+        Network {
+            name: "".to_owned(),
+            layers: vec![],
+            layer_names: vec![],
+            layer_names_index: HashMap::<String, usize>::new(),
+            layer_need_backwards: vec![],
+
+            blobs: vec![],
+            blob_names: vec![],
+            blob_names_index: HashMap::<String, usize>::new(),
+            blob_need_backwards: vec![],
+
+            output_blobs: vec![],
+            output_blob_indices: vec![],
+
+            top_vecs: vec![],
+            top_id_vecs: vec![],
+
+            bottom_vecs: vec![],
+            bottom_id_vecs: vec![],
+            bottom_need_backwards: vec![],
+
+            input_blobs: vec![],
+            input_blob_indices: vec![],
+
+            blob_loss_weights: vec![],
+
+            param_id_vecs: vec![],
+            param_owners: vec![],
+            param_display_names: vec![],
+            param_layer_indices: vec![],
+            param_names_index: HashMap::<String, usize>::new(),
+
+            params: vec![],
+            learnable_params: vec![],
+            learnable_param_ids: vec![],
+
+            params_lr: vec![],
+            params_weight_decay: vec![],
+        }
+    }
+}
+
 impl<'a> Network<'a> {
+    /// Create a `Network` from a `NetworkConfig`
+    pub fn from_config(param: &NetworkConfig) -> Network {
+        let mut network = Network::default();
+        network.init(param);
+        network
+    }
+
     fn init(&mut self, in_param: &'a NetworkConfig) {
         let param = in_param.clone();
         let available_blobs = &mut HashSet::new();
@@ -115,7 +168,6 @@ impl<'a> Network<'a> {
         self.share_weights();
 
         info!("Network initialization done.");
-        unimplemented!();
     }
 
     fn init_layer(&mut self,
@@ -345,12 +397,19 @@ impl<'a> Network<'a> {
     }
 
     fn share_weights(&mut self) {
+        // Caffe / not sure if ported correctly
         // for (int i = 0; i < params_.size(); ++i) {
         //     if (param_owners_[i] < 0) { continue; }
         //     params_[i]->ShareData(*params_[param_owners_[i]]);
         //     params_[i]->ShareDiff(*params_[param_owners_[i]]);
         // }
-        unimplemented!();
+        for (i, param) in self.params.clone().iter().enumerate() {
+            if let Some(j) = self.param_owners[i] {
+                assert!(self.params[i].read().unwrap().cpu_data().capacity() ==
+                        self.params[j].read().unwrap().cpu_data().capacity());
+                self.params[i] = self.params[j].clone(); // sharing whole blob?
+            }
+        }
     }
 
     fn append_top(&mut self,
@@ -621,6 +680,29 @@ impl<'a> Network<'a> {
     pub fn forward_to(&mut self, end: usize) -> f32 {
         self.forward_from_to(0, end)
     }
+
+    /// Clear all the params and zero-init them.
+    pub fn clear_param_diffs(&mut self) {
+        for param in &mut self.learnable_params.iter() {
+            for p in param.write().unwrap().mutable_cpu_diff().iter_mut() {
+                *p = 0f32;
+            }
+        }
+    }
+
+    /// Update the learnable params. Is Blob->Update() in Caffe.
+    pub fn update_params(&mut self) {
+        for param in &self.learnable_params {
+            leaf_cpu_axpy(&-1f32,
+                          param.read().unwrap().cpu_diff(),
+                          param.write().unwrap().mutable_cpu_data());
+        }
+    }
+
+    /// Return learnable params.
+    pub fn learnable_params(&self) -> &Vec<ArcLock<HeapBlob>> {
+        &self.learnable_params
+    }
 }
 
 #[derive(Debug)]
@@ -640,10 +722,10 @@ pub struct NetworkConfig {
     /// automatically according to the net structure and learning rates.
     force_backward: bool,
 
-    // // The current "state" of the network, including the phase, level, and stage.
-    // // Some layers may be included/excluded depending on this state and the states
-    // // specified in the layers' include and exclude fields.
-    // optional NetState state = 6;
+    /// The current "state" of the network, including the phase, level, and stage.
+    /// Some layers may be included/excluded depending on this state and the states
+    /// specified in the layers' include and exclude fields.
+    pub state: NetworkState,
 
     /// Wheter the `Network` will print debugging information about results
     debug_info: bool,
@@ -652,8 +734,23 @@ pub struct NetworkConfig {
     pub layers: Vec<LayerConfig>,
 }
 
-impl NetworkConfig {
+impl Default for NetworkConfig {
+    fn default() -> NetworkConfig {
+        NetworkConfig {
+            name: "".to_owned(),
+            inputs: Vec::new(),
+            input_shapes: Vec::new(),
 
+            force_backward: false,
+            debug_info: false,
+
+            layers: Vec::new(),
+            state: NetworkState::default(),
+        }
+    }
+}
+
+impl NetworkConfig {
     /// Return a specifc `Layer`
     pub fn layer(&self, layer_id: usize) -> Option<&LayerConfig> {
         self.layers.get(layer_id)
@@ -668,4 +765,41 @@ impl NetworkConfig {
     pub fn input_shape(&self, input_id: usize) -> Option<&Vec<usize>> {
         self.input_shapes.get(input_id)
     }
+}
+
+#[derive(Debug)]
+/// The state of a `Network`
+pub struct NetworkState {
+    /// Current phase of the `Network`
+    ///
+    /// Default: Test
+    pub phase: NetworkPhase,
+    /// TODO: what does this do, and could it be of type usize?
+    ///
+    /// Default: 0
+    pub level: isize,
+    /// TODO: what does this do?
+    ///
+    /// Default: vec![]
+    pub stage: Vec<String>,
+}
+
+impl Default for NetworkState {
+    fn default() -> NetworkState {
+        NetworkState {
+            phase: NetworkPhase::Test,
+
+            level: 0,
+            stage: vec![],
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+/// Possible phases of a `Network`
+pub enum NetworkPhase {
+    /// Currently training the `Network`
+    Train,
+    /// Currently testing the `Network`
+    Test,
 }
