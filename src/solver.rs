@@ -62,7 +62,7 @@ impl<'a, S: ISolver> Solver<'a, S>{
 
         // TODO: there currently is no merging; we probably only need solver_default ||
         // net_param
-        let solver_default = NetworkState { phase: NetworkPhase::Train, ..NetworkState::default() };
+        let solver_default = NetworkState { mode: NetworkMode::Train, ..NetworkState::default() };
         param.train_net.state = solver_default;
 
         // Caffe

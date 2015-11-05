@@ -17,7 +17,7 @@ license = "MIT"
 phloem = "0.2.2"
 rblas = "0.0.9"
 log = "0.3.2"
-clippy = "~0.0.22"
+clippy = "0.0.22"
 
 [features]
 default = []

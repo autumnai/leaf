@@ -1,14 +1,67 @@
 use math::*;
 use phloem::{Blob, Numeric};
-use shared_memory::*;
+use shared_memory::{HeapBlob, ArcLock};
 use layers::*;
 use std::fmt;
 
 use std::sync::{RwLockReadGuard, RwLockWriteGuard};
 
-/// Read access to a Blob via a RwLock
+/// Secures sequential execution as bottom Blob for a forward and as top Blob for a backward
+/// operation.
+///
+/// Ensures that no layer is reading the HeapBlob, while the current layer is still writing.
+/// The RwLockReadGuard unlocks automatically as soon as the {forward, backward} operation of
+/// the layer is finished and allows for a quick operation transition to the following layer.
+/// Is automatically created by the {forward, backward} method of a [Layer][1] and passed to the
+/// specific [forward_{cpu, gpu}][2] implementation.
+/// [1]: ./trait.ILayer.html#method.forward
+/// [2]: ./trait.ILayer.html#tymethod.forward_cpu
+///
+/// ## Example
+///
+/// Creates a ReadBlob for seldom scenarios such as testing.
+///
+/// ```
+/// extern crate phloem;
+/// # extern crate leaf;
+/// use phloem::Blob;
+/// use std::sync::{RwLock, RwLockReadGuard};
+/// # use leaf::layer::ReadBlob;
+///
+/// # fn main() {
+/// let lock = RwLock::new(Box::new(Blob::<f32>::of_shape(vec![3])));
+/// let read_blob: ReadBlob = lock.read().unwrap();
+/// # }
+/// ```
 pub type ReadBlob<'_> = RwLockReadGuard<'_, HeapBlob>;
-/// Write access to a Blob via a RwLock
+
+/// Secures sequential execution as top Blob for a forward and as bottom Blob for a backward
+/// operation.
+///
+/// Ensures that no layer is writing to the HeapBlob, while the current layer is still reading it.
+/// The RwLockWriteGuard unlocks automatically as soon as the {forward, backward} operation of
+/// the layer is finished and allows for a quick operation transition to the following layer.
+/// Is automatically created by the {forward, backward} method of a [Layer][1] and passed to the
+/// specific [forward_{cpu, gpu}][2] implementation.
+/// [1]: ./trait.ILayer.html#method.forward
+/// [2]: ./trait.ILayer.html#tymethod.forward_cpu
+///
+/// ## Example
+///
+/// Creates a ReadBlob for seldom scenarios such as testing.
+///
+/// ```
+/// extern crate phloem;
+/// # extern crate leaf;
+/// use phloem::Blob;
+/// use std::sync::{RwLock, RwLockWriteGuard};
+/// # use leaf::layer::WriteBlob;
+///
+/// # fn main() {
+/// let lock = RwLock::new(Box::new(Blob::<f32>::of_shape(vec![3])));
+/// let read_blob: WriteBlob = lock.write().unwrap();
+/// # }
+/// ```
 pub type WriteBlob<'_> = RwLockWriteGuard<'_, HeapBlob>;
 
 #[derive(Debug)]

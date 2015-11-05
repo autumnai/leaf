@@ -9,6 +9,7 @@ overview of how you can contribute to Leaf.
 * [Feature Requests](#feature-requests)
 * [Appendix](#appendix)
   * [Git Commit Guidelines](#git-commit-guidelines)
+  * [Documentation Guidelines](#documentation-guidelines)
 
 
 If you have questions hop on the [Leaf Chat](https://gitter.im/autumnai/leaf)
@@ -181,3 +182,11 @@ If the commit reverts a previous commit, it should begin with `revert:`,
 followed by the header of the reverted commit. In the body it should say:
 `This reverts commit <hash>.`, where the hash is the SHA of the commit being
 reverted.
+
+### Documentation Guidelines
+
+We created an extensive [Documentation Guide][1] for you, which outlines an easy
+and efficient communication Framework for providing developers and users with
+helpful Documentation about the Deep Learning Framework.
+
+[1] https://medium.com/@autumn_eng/increasing-open-source-engagement-with-structural-communication-guidelines-for-code-documentation-e72533de8e45

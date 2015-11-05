@@ -3,42 +3,63 @@
 *A modular, fast and open Deep Learning Framework for distributed
 state of the art Deep Learning on both {C, G}PUs*
 
-For more information see the [Documentation](http://autumnai.github.io/leaf).
+For more information see the [Documentation][documentation].
+
+[documentation]: http://autumnai.github.io/leaf
 
 ## Getting Started
 
-**Disclaimer: Leaf is currently in a very early and heavy stage of development.
-If you are experiencing any bugs that are not due to not yet implemented features,
-feel free to create a issue.**
+> Disclaimer: Leaf is currently in a very early and heavy stage of development.
+> If you are experiencing any bugs that are not due to not yet implemented features,
+> feel free to create a issue.
 
 If you're using Cargo, just add Leaf to your Cargo.toml:
 
     [dependencies]
     leaf = "0.0.1"
 
-If you're using [Cargo Edit](https://github.com/killercup/cargo-edit), you can
+If you're using [Cargo Edit][cargo-edit], you can
 call:
 
     $ cargo add leaf
 
 
-## Contributing
-
-Want to contribute? Awesome! We have [instructions to help you get started contributing code or documentation](CONTRIBUTING.md).
-
-Leaf has a mostly real-time collaboration culture and happens here on Github and
-on the [Leaf Gitter Channels](https://gitter.im/autumnai/leaf).
-You can also reach out to the Maintainers
-{[@MJ](https://twitter.com/mjhirn), [@hobofan](https://twitter.com/hobofan)}.
-
-
-## Examples
-
-You can find examples at [Leaf Examples](https://github.com/autumnai/leaf-examples).
+You can find examples at [Leaf Examples][leaf-examples].
 Leaf Examples provides a CLI, so you can run popular Deep Learning examples with
 Leaf right from the command line.
 
+[cargo-edit]: https://github.com/killercup/cargo-edit
+[leaf-examples]: https://github.com/autumnai/leaf-examples
+
+## Leaf Ecosystem and Extensions
+
+We design Leaf and all other crates for machine learning completely modular and
+as extensible as possible. More helpful crates you can use with Leaf:
+
+- [**Cuticula**][cuticula]: Preprocessing Framework for Machine Learning
+- [**Phloem**][phloem]: Universal CPU/GPU Data Blob for Machine Learning
+
+[cuticula]: https://github.com/autumnai/cuticula
+[phloem]: https://github.com/autumnai/phloem
+
+
+## Contributing
+
+Want to contribute? Awesome! We have
+[instructions to help you get started contributing code or documentation][contributing].
+
+Leaf has a mostly real-time collaboration culture and happens here on Github and
+on the [Leaf Gitter Channels][gitter-leaf].
+You can also reach out to the Maintainers
+{[@MJ][mj], [@hobofan][hobofan]}.
+
+[contributing]: CONTRIBUTING.md
+[gitter-leaf]: https://gitter.im/autumnai/leaf
+[mj]: https://twitter.com/mjhirn
+[hobofan]: https://twitter.com/hobofan
 
 ## License
 
-Leaf is released under the [MIT License](LICENSE).
+Leaf is released under the [MIT License][license].
+
+[license]: LICENSE

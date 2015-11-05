@@ -33,7 +33,7 @@ impl ISolver for SGD {
         let rate = param.get_learning_rate(iter);
 
         self.clip_gradients();
-        for (param_id, param) in net.learnable_params().iter().enumerate() {
+        for (param_id, param) in net.learnable_weights().iter().enumerate() {
             //     Normalize(param_id);
             //     Regularize(param_id);
             //     ComputeUpdateValue(param_id, rate);
