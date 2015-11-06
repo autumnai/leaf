@@ -39,7 +39,7 @@ impl ISolver for SGD {
             //     ComputeUpdateValue(param_id, rate);
             unimplemented!();
         }
-        net.update_params();
+        net.update_weights();
 
         unimplemented!();
     }

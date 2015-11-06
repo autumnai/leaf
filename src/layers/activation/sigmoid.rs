@@ -7,10 +7,11 @@
 //!
 //! ReLu, compared to Sigmoid
 //!
-//! * reduces the likelyhood of vanishing gradients  
-//! * increases the likelyhood of a more beneficial sparse representation  
-//! * can be computed faster  
-//! * is therefore the most popular activation function in DNNs as of this writing (2015).
+//! * reduces the likelyhood of vanishing gradients
+//! * increases the likelyhood of a more beneficial sparse representation
+//! * can be computed faster
+//! * is therefore the most popular activation function in DNNs as of this
+//! writing (2015).
 use shared_memory::*;
 use layer::*;
 

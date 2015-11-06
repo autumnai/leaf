@@ -1,30 +1,39 @@
 //! Provides the fundamental units of computation for the [Network][1].
 //! [1]: ../network/index.html
 //!
-//! These layers provide different type of operations to the data Blobs that flow through them.  
-//! The operations provided by the layers can be grouped roughly into four categories:
+//! These layers provide different type of operations to the data Blobs
+//! that flow through them.
+//! The operations provided by the layers can be
+//! roughly grouped into four categories:
 //!
-//! * __Activation__  
-//! Activation Layers provide element-wise operations and produce one top Blob of the same size as
-//! the bottom Blob. It can be seen as a synonym to nonlinear [Activation Functions][2].
+//! * __Activation__</br>
+//! Activation Layers provide element-wise operations and produce one top Blob
+//! of the same size as the bottom Blob.
+//! It can be seen as a synonym to nonlinear [Activation Functions][2].
 //!
-//! * __Common__  
-//! Common Layers can differ in their connectivity and behavior and are typically all network layer
-//! types which are not covered by activation or loss layers. Examples would be fully connected
+//! * __Common__</br>
+//! Common Layers can differ in their connectivity and behavior and are
+//! typically all network layer
+//! types which are not covered by activation or loss layers.
+//! Examples would be fully connected
 //! layers, covolutional layers, pooling layers, etc.
 //!
-//! * __Loss__  
-//! Loss Layers compare an output to a target value and assign cost to minimize. Loss Layers are
-//! often the last layer in a [Network][1].
+//! * __Loss__</br>
+//! Loss Layers compare an output to a target value and assign cost to
+//! minimize. Loss Layers are often the last layer in a [Network][1].
 //!
-//! * __Utility__  
-//! Utility Layers provide all kind of helpful functionality, which might not be directly related
-//! to machine learning and neural nets. This could be operations for normalizing,
-//! restructuring or transforming information, log and debug behavior or data access.
-//! Utility Layers follow the general behavior of a layer, like the other types do.
+//! * __Utility__</br>
+//! Utility Layers provide all kind of helpful functionality, which might not
+//! be directly related
+//! to machine learning and neural nets. This could be operations for
+//! normalizing,
+//! restructuring or transforming information, log and debug behavior or data
+//! access.
+//! Utility Layers follow the general behavior of a layer, like the other types
+//! do.
 //!
-//! For more information about how all these layers work specifically, see the documentation for
-//! the general [Layer module][3].
+//! For more information about how all these layers work specifically, see the
+//! documentation for the general [Layer module][3].
 //!
 //! ## Examples
 //!

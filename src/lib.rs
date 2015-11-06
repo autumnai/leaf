@@ -1,33 +1,40 @@
-//! Leaf is a open, fast and a well-designed, modular Framework for distributed Deep Learning on
-//! {C, G}PUs.
+//! Leaf is a open, fast and a well-designed, modular Framework for distributed
+//! Deep Learning on {C, G}PUs.
 //!
 //! ## Overview
 //!
-//! To build a Deep Neural Network you create a [Network][network] which is a container for all
-//! different types of [Layers][layers]. These layers are grouped in different types such as
-//! [Activation Layers][activation] and [Loss Layers][loss] which states the characteristics of the
-//! layer.
+//! To build a Deep Neural Network you create a [Network][network] which is a
+//! container for all different types of [Layers][layers].
+//! These layers are grouped in different types such as
+//! [Activation Layers][activation] and [Loss Layers][loss] which states the
+//! characteristics of the layer.
 //!
-//! Now to train your network you will use one of the [Solvers][solvers]. The Solver defines the
-//! [Optimization Method][optimization] and keeps track on the learning progress.
+//! Now to train your network you will use one of the [Solvers][solvers].
+//! The Solver defines the [Optimization Method][optimization]
+//! and keeps track on the learning progress.
 //!
-//! The operations can run on different Backends {CPU, GPU} and must not be defined at compile
-//! time, which allows for easy backend swapping.
+//! The operations can run on different Backends {CPU, GPU} and must not be
+//! defined at compile time, which allows for easy backend swapping.
 //!
-//! ## Philosophie
+//! ## Philosophy
 //!
-//! We are strong believers in the technology of Machine Learning. We put our experience in
-//! software engineering into Leaf, to solve our own need for a modern, performant and easy-to-use
-//! Deep Learning Framework. These principles direct our decisions on Leaf and related projects.
+//! We are strong believers in the technology of Machine Learning.
+//! We put our experience in
+//! software engineering into Leaf, to solve our own need for a modern,
+//! performant and easy-to-use Deep Learning Framework.
+//! These principles direct our decisions on Leaf and related projects.
 //!
-//! * __Performance__: For research and industry speed and efficency are curcial for
+//! * __Performance__:</br>
+//! For research and industry speed and efficency are curcial for
 //! state-of-the-art machine learning over massive data and networks.
-//! * __Architecture__: Designing an open architecture that follows best practices and concepts in
-//! Engineering such as modularity, flexibility and expressiveness is critical to stimulate future
-//! innovation.
-//! * __Documentation__: A well-written documentation that addresses both concepts and
-//! implementations, empowers developers and researchers to contribute their unique experience to
-//! the project for the benefit of everyone.
+//! * __Architecture__:</br>
+//! Designing an open architecture that follows best practices and concepts in
+//! Engineering such as modularity, flexibility and expressiveness is critical
+//! to stimulate future innovation.
+//! * __Documentation__:</br>
+//! A well-written documentation that addresses both concepts and
+//! implementations, empowers developers and researchers to contribute their
+//! unique experience to the project for the benefit of everyone.
 //!
 //! ## Examples
 //!
@@ -41,9 +48,9 @@
 //! ## Development
 //!
 //! The implementation of various Layers is pretty scarce at the moment.<br/>
-//! There are around a dozen layers, which are really important and would increase the value and
-//! functionality of Leaf tremendously.<br/>
-//! Progress get tracked at<br/>
+//! There are around a dozen layers, which are really important and would
+//! increase the value and functionality of Leaf tremendously.<br/>
+//! Progress is tracked at<br/>
 //!
 //! - [Issue #18 for Loss Layers][issue-loss]
 //! - [Issue #19 for Activation Layers][issue-activation]

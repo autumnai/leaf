@@ -1,6 +1,6 @@
 use math::*;
 use phloem::{Blob, Numeric};
-use shared_memory::{HeapBlob, ArcLock};
+use shared_memory::{ArcLock, HeapBlob};
 use layers::*;
 use std::fmt;
 
@@ -69,23 +69,39 @@ pub type WriteBlob<'_> = RwLockWriteGuard<'_, HeapBlob>;
 pub struct Layer<'a> {
     /// The configuration of the Layer
     pub config: Box<&'a LayerConfig>,
-    /// The Layer Interface
+    /// The [implementation][1] of the Layer.
+    /// [1]: ../layers/index.html
+    ///
+    /// This is the part that does most of the work ([forward][2]/[backward][3]).
+    /// [2]: ./trait.ILayer.html#method.forward
+    /// [3]: ./trait.ILayer.html#method.backward
     pub worker: Box<ILayer>,
 
-    /// The vector that indicates whether each top blob has a non-zero weight in
-    /// the objective function.
+    /// The vector that indicates whether each top blob contributes to
+    /// the [loss][1] of the network and with which weight.
+    /// [1]: http://caffe.berkeleyvision.org/tutorial/loss.html
     loss: Vec<f32>,
 
-    /// The vector that stores shared references to the parameters in the form of blobs.
+    /// The vector that stores shared references to the weights in the form of blobs.
     pub blobs: Vec<ArcLock<HeapBlob>>,
 
-    /// Vector indicating whether to compute the diff of each param blob.
-    param_propagate_down: Vec<bool>,
+    /// Vector indicating whether to compute the diff of each weight blob.
+    ///
+    /// You can safely ignore false values and always compute gradients
+    /// for all weights, but possibly with wasteful computation.
+    ///
+    /// Can be used by some [Layer implementations][1] to optimize performance.
+    /// [1]: ../layers/index.html
+    weight_propagate_down: Vec<bool>,
 }
 
 impl<'a> Layer<'a> {
-
-    /// Creates a new Layer from a LayerConfig
+    /// Creates a new Layer from a [LayerConfig][1].
+    /// [1]: ./struct.LayerConfig.html
+    ///
+    /// Used during [Network][2] initalization.
+    ///
+    /// [2]: ../network/struct.Network.html
     pub fn from_config(config: &'a LayerConfig) -> Layer {
         let cl = config.clone();
         let cfg = Box::<&'a LayerConfig>::new(cl);
@@ -93,13 +109,17 @@ impl<'a> Layer<'a> {
             loss: Vec::new(),
             blobs: Vec::new(),
 
-            param_propagate_down: Vec::new(),
+            weight_propagate_down: Vec::new(),
 
             worker: Layer::worker_from_config(&cfg),
             config: cfg,
         }
     }
 
+    /// Helper for [from_config] to match a [LayerType][2] to its [implementation][3].
+    /// [1]: #method.from_config
+    /// [2]: ./enum.LayerType.html
+    /// [3]: ../layers/index.html
     fn worker_from_config(config: &LayerConfig) -> Box<ILayer> {
         match config.layer_type {
             LayerType::Sigmoid => Box::new(Sigmoid),
@@ -107,32 +127,48 @@ impl<'a> Layer<'a> {
     }
 
     /// Sets whether the layer should compute gradients w.r.t. a
-    /// parameter at a particular index given by param_id.
-    pub fn set_param_propagate_down(&mut self, param_id: usize, value: bool) {
-        if self.param_propagate_down.len() <= param_id {
-            self.param_propagate_down.resize(param_id + 1, true);
+    /// weight at a particular index given by `weight_id`.
+    ///
+    /// See [`weight_propagate_down`][1]
+    /// ./struct.Layer.html
+    pub fn set_weight_propagate_down(&mut self, weight_id: usize, value: bool) {
+        if self.weight_propagate_down.len() <= weight_id {
+            self.weight_propagate_down.resize(weight_id + 1, true);
         }
-        self.param_propagate_down[param_id] = value;
+        self.weight_propagate_down[weight_id] = value;
 
     }
 
-    /// Returns the loss
-    pub fn loss(&self, id: usize) -> Option<&f32> {
-        self.loss.get(id)
+    /// Returns the [loss weight][1] associated with the weight blob
+    /// with id `weight_id`.
+    /// [1]: http://caffe.berkeleyvision.org/tutorial/loss.html
+    pub fn loss(&self, weight_id: usize) -> Option<&f32> {
+        self.loss.get(weight_id)
     }
 }
 
-/// A Layer in a Neural Network that can handle forward and backward of a computation step.
+/// A Layer in a [Neural Network][1] that can handle forward and backward of a computation step.
+/// [1]: ../network/index.html
 pub trait ILayer {
-    /// Compute the layer output.
+    /// Compute the [feedforward][1] layer output.
     /// Uses the CPU.
+    /// [1]: https://en.wikipedia.org/wiki/Feedforward_neural_network
     fn forward_cpu(&self, bottom: &[ReadBlob], top: &mut Vec<&mut WriteBlob>);
     /// Compute the gradients for the bottom blobs
     /// if the corresponding value of propagate_down is true.
     /// Uses the CPU.
     fn backward_cpu(&self, top: &[HeapBlob], propagate_down: &[bool], bottom: &mut Vec<HeapBlob>);
 
-    /// Compute the layer output using the currently set computation method (CPU).
+    /// Compute the [feedforward][1] layer output using the currently set computation method.
+    /// [1]: https://en.wikipedia.org/wiki/Feedforward_neural_network
+    ///
+    /// Aquires read locks for the bottom blobs ([ReadBlob][2])
+    /// and write locks for the top blobs ([WriteBlob][3]) to ensure sequential computation,
+    /// and then passes them to computation method specific function ([forward_cpu][4]).
+    ///
+    /// [2]: ./type.ReadBlob.html
+    /// [3]: ./type.WriteBlob.html
+    /// [3]: #method.forward_cpu
     fn forward(&self, bottom: &[ArcLock<HeapBlob>], top: &mut Vec<ArcLock<HeapBlob>>) -> f32 {
         // Lock();
         // Reshape(bottom, top); // Reshape the layer to fit top & bottom blob
@@ -214,21 +250,20 @@ impl fmt::Debug for ILayer {
 #[derive(Debug)]
 /// Layer Configuration Struct
 pub struct LayerConfig {
-    /// The Name of the Layer
+    /// The name of the Layer
     pub name: String,
 
     /// The type of the Layer
     layer_type: LayerType,
 
-    /// The Name for each top Blob
+    /// The name for each top Blob
     tops: Vec<String>,
 
-    /// The Name for each bottom Blob
+    /// The name for each bottom Blob
     bottoms: Vec<String>,
 
-    /// Specifies training parameters (multipliers on global learning constants,
-    /// and the name and other settings used for weight sharing).
-    params: Vec<ParamConfig>,
+    /// Specifies training configuration for each weight blob.
+    params: Vec<WeightConfig>,
 
     /// Specifies on which bottoms the backpropagation should be skipped.
     /// The size must be either 0 or equal to the number of bottoms.
@@ -243,7 +278,6 @@ pub enum LayerType {
 }
 
 impl LayerConfig {
-
     /// Creates a new LayerConfig
     pub fn new(name: String, layer_type: LayerType) -> LayerConfig {
         LayerConfig {
@@ -278,8 +312,8 @@ impl LayerConfig {
         self.bottoms.len()
     }
 
-    /// Returns the requested ParamConfig
-    pub fn param(&self, param_id: usize) -> Option<&ParamConfig> {
+    /// Returns the requested WeightConfig
+    pub fn param(&self, param_id: usize) -> Option<&WeightConfig> {
         self.params.get(param_id)
     }
 
@@ -288,7 +322,7 @@ impl LayerConfig {
         self.params.len()
     }
 
-    /// Checks if propagate down length works out
+    /// Checks if propagate down length is sane
     pub fn check_propagate_down_len(&self) -> bool {
         self.propagate_down.is_empty() || self.propagate_down.len() == self.bottoms.len()
     }
@@ -296,11 +330,10 @@ impl LayerConfig {
 
 
 #[derive(Debug)]
-/// Specifies training parameters (multipliers on global learning constants,
-/// and the name and other settings used for weight sharing).
-pub struct ParamConfig {
-    /// The names of the parameter blobs -- useful for sharing parameters among
-    /// layers, but never required otherwise.  To share a parameter between two
+/// Specifies training configuration for a weight blob.
+pub struct WeightConfig {
+    /// The name of the weight blob -- useful for sharing weights among
+    /// layers, but never required otherwise. To share a weight between two
     /// layers, give it a (non-empty) name.
     ///
     /// Default: ""
@@ -322,9 +355,9 @@ pub struct ParamConfig {
     pub decay_mult: Option<f32>,
 }
 
-impl Default for ParamConfig {
-    fn default() -> ParamConfig {
-        ParamConfig {
+impl Default for WeightConfig {
+    fn default() -> WeightConfig {
+        WeightConfig {
             name: "".to_owned(),
             share_mode: DimCheckMode::Strict,
             lr_mult: None,
@@ -333,9 +366,9 @@ impl Default for ParamConfig {
     }
 }
 
-impl ParamConfig {
-    /// Checks dimensions of two blobs according to the share_mode.
-    /// Logs an error if there is a count/shape mismatch.
+impl WeightConfig {
+    /// Checks dimensions of two blobs according to the `share_mode`.
+    /// Returns an error if there is a count/shape mismatch.
     pub fn check_dimensions<T: Numeric>(&self,
                                         blob_one: &Blob<T>,
                                         blob_two: &Blob<T>,
@@ -347,10 +380,10 @@ impl ParamConfig {
             // Permissive dimension checking -- only check counts are the same.
             DimCheckMode::Permissive => {
                 if blob_one.capacity() != blob_two.capacity() {
-                    return Err(format!("Cannot share param '{}' owned by layer '{}' with layer '{}';
+                    return Err(format!("Cannot share weight '{}' owned by layer '{}' with layer '{}';
                                 count mismatch.
-                                Owner layer param shape is {};
-                                Sharing layer param shape is {}",
+                                Owner layer weight shape is {};
+                                Sharing layer weight shape is {}",
                                        param_name,
                                        owner_name,
                                        layer_name,
@@ -361,10 +394,10 @@ impl ParamConfig {
             // Strict dimension checking -- all dims must be the same.
             DimCheckMode::Strict => {
                 if blob_one.shape() != blob_two.shape() {
-                    return Err(format!("Cannot share param '{}' owned by layer '{}' with layer '{}';
+                    return Err(format!("Cannot share weight '{}' owned by layer '{}' with layer '{}';
                                 shape mismatch.
-                                Owner layer param shape is {};
-                                Sharing layer expects param shape {}",
+                                Owner layer weight shape is {};
+                                Sharing layer expects weight shape {}",
                                        param_name,
                                        owner_name,
                                        layer_name,
@@ -376,7 +409,7 @@ impl ParamConfig {
         Ok(())
     }
 
-    /// The multiplier on the global learning rate for this parameter.
+    /// The multiplier on the global learning rate for this weight blob.
     pub fn lr_mult(&self) -> f32 {
         match self.lr_mult {
             Some(val) => val,
@@ -384,7 +417,7 @@ impl ParamConfig {
         }
     }
 
-    /// The multiplier on the global weight decay for this parameter.
+    /// The multiplier on the global weight decay for this weight blob.
     pub fn decay_mult(&self) -> f32 {
         match self.decay_mult {
             Some(val) => val,

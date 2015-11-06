@@ -2,17 +2,10 @@ use shared_memory::*;
 use network::*;
 use solvers::*;
 
-#[derive(Debug, Copy, Clone)]
-/// Enum that holds all possible types of sovlers.
-pub enum SolverKind {
-    /// SGD = Stochastic Gradient Descent
-    SGD,
-}
-
 #[derive(Debug)]
-/// Solver that optimizes a `Network`
+/// Solver that optimizes a [Network][1].
+/// [1] ../network/struct.Network.html
 pub struct Solver<'a, S> {
-    kind: SolverKind,
     net: Network<'a>,
     /// The implementation of the Solver
     pub worker: Box<S>,
@@ -20,8 +13,6 @@ pub struct Solver<'a, S> {
     param: SolverConfig,
     /// The current iteration / number of times weights have been updated
     iter: usize,
-    /// The current step (for the learning rate)
-    current_step: usize,
 }
 
 impl<'a, S: ISolver> Solver<'a, S>{
@@ -44,7 +35,6 @@ impl<'a, S: ISolver> Solver<'a, S>{
             info!("Solver scaffolding done.");
         }
         self.iter = 0;
-        self.current_step = 0;
     }
 
     /// Initialize the training net
@@ -76,11 +66,6 @@ impl<'a, S: ISolver> Solver<'a, S>{
         unimplemented!();
     }
 
-    /// Initialize all the test nets
-    fn init_test_nets(&mut self) {
-        unimplemented!();
-    }
-
     // might take a solver state as argument in the future to resume a stopped
     // solver
     fn solve(&mut self) {
@@ -100,7 +85,7 @@ impl<'a, S: ISolver> Solver<'a, S>{
         while self.iter < stop_iter {
             let mut loss = 0f32;
 
-            self.net.clear_param_diffs();
+            self.net.clear_weight_diffs();
             // if self.param.test_interval.is_some() && self.iter % self.param
 
             // run tests all `test_interval` iterations
@@ -203,8 +188,24 @@ impl<'a, S: ISolver> Solver<'a, S>{
 }
 
 /// Implementation of a specific Solver.
+///
+/// See [Solvers][1]
+/// [1]: ../solvers/index.html
 pub trait ISolver {
-    /// TODO: what does this do?
+    /// Update the weights of the net with part of the gradient.
+    ///
+    /// The [second phase of backpropagation learning][1].
+    /// Calculates the gradient update that should be applied to the network,
+    /// and then applies that gradient to the network, changing its weights.
+    ///
+    /// [1]: https://en.wikipedia.org/wiki/Backpropagation#Phase_2:_Weight_update
+    ///
+    /// Used by [step][2] to optimize the network.
+    ///
+    /// [2]: ./struct.Solver.html#method.step
+    //
+    // TODO: the actual update can probably be pulled out of this function,
+    // since that should be the same idependent of solver type.
     fn apply_update(&self, param: &SolverConfig, network: &mut Network, iter: usize);
 }
 
@@ -213,11 +214,14 @@ pub trait ISolver {
 pub struct SolverConfig {
     /// Name of the solver.
     pub name: String,
-    /// The `NetworkConfig` that is used to initialize the training network.
+    /// The [NetworkConfig][1] that is used to initialize the training network.
+    /// [1]: ../network/struct.NetworkConfig.html
     pub train_net: NetworkConfig,
     /// Display the loss averaged over the last average_loss iterations.
     ///
     /// Default: 1
+    ///
+    /// TODO: this might become part of the Solver struct
     pub average_loss: usize,
     /// The number of iterations between two testing phases.
     ///
@@ -272,35 +276,36 @@ impl Default for SolverConfig {
 
 impl SolverConfig {
     /// Return test interval (configured value or default of 0).
+    ///
+    /// Used by the Solver to determine how many iterations a network should be trained
+    /// until it is tested again.
     pub fn test_interval(&self) -> usize {
         self.test_interval.unwrap_or(0)
     }
 
-    /// Return the current learning rate. The currently implemented learning rate
-    /// policies are as follows:
-    ///    - fixed: always return base_lr.
-    ///    - step: return base_lr * gamma ^ (floor(iter / step))
-    ///    - exp: return base_lr * gamma ^ iter
-    ///    - inv: return base_lr * (1 + gamma * iter) ^ (- power)
-    ///    - multistep: similar to step but it allows non uniform steps defined by
-    ///      stepvalue
-    ///    - poly: the effective learning rate follows a polynomial decay, to be
-    ///      zero by the max_iter. return base_lr (1 - iter/max_iter) ^ (power)
-    ///    - sigmoid: the effective learning rate follows a sigmod decay
-    ///      return base_lr ( 1/(1 + exp(-gamma * (iter - stepsize))))
+    /// Return the learning rate for a supplied iteration.
     ///
-    /// where base_lr, max_iter, gamma, step, stepvalue and power are defined
-    /// in the solver config, and iter is the current iteration.
+    /// The way the learning rate is calculated depends on the configured [LRPolicy][1].
+    ///
+    /// [1]: ./enum.LRPolicy.html
+    ///
+    /// Used by the [Solver][2] to calculate the learning rate for the current iteration.
+    /// The calculated learning rate has a different effect on training dependent on what
+    /// [type of Solver][3] you are using.
+    ///
+    /// [2]: ./struct.Solver.html
+    /// [3]: ../solvers/index.html
     pub fn get_learning_rate(&self, iter: usize) -> f32 {
         match self.lr_policy() {
             LRPolicy::Fixed => {
                 self.base_lr()
             }
             LRPolicy::Step => {
-                let current_step = iter / self.stepsize();
+                let current_step = self.step(iter);
                 self.base_lr() * self.gamma().powf(current_step as f32)
             }
             LRPolicy::Multistep => {
+                // TODO: the current step can be calculated on-demand
                 //   if (this->current_step_ < this->param_.stepvalue_size() &&
                 //         this->iter_ >= this->param_.stepvalue(this->current_step_)) {
                 //     this->current_step_++;
@@ -335,6 +340,13 @@ impl SolverConfig {
         }
     }
 
+    /// Return current step at iteration `iter`.
+    ///
+    /// Small helper for learning rate calculation.
+    fn step(&self, iter: usize) -> usize {
+        iter / self.stepsize()
+    }
+
     /// Return learning rate policy.
     fn lr_policy(&self) -> LRPolicy {
         self.lr_policy
@@ -356,9 +368,21 @@ impl SolverConfig {
     }
 }
 
+#[derive(Debug, Copy, Clone)]
+/// Enum that holds all possible types of sovlers.
+pub enum SolverKind {
+    /// SGD = Stochastic Gradient Descent
+    SGD,
+}
 
 #[derive(Debug, Copy, Clone)]
 /// Learning Rate Policy for a Solver
+///
+/// The variables mentioned below are defined in the [SolverConfig][1] apart from
+/// iter, which is the current iteration of the solver, that is supplied as a parameter
+/// for the learning rate calculation.
+///
+/// [1]: ./struct.SolverConfig.html
 pub enum LRPolicy {
     /// always return base_lr
     Fixed,

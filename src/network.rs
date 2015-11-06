@@ -7,29 +7,46 @@
 //! [1]: ./struct.Network.html#method.forward
 //! [2]: ./struct.Network.html#method.backward
 //!
-//! If you are looking to train/test a network, [Solver][3] is usually a better entry point.
+//! If you are looking to train/test a network, [Solver][3] is usually a better
+//! entry point.
 //!
 //! ## Development
 //!
 //! Currently only new networks can be created with [from_config][4].
-//! In the future there should also be a way to load networks with saved weights from a file.
+//! In the future there should also be a way to load networks with saved
+//! weights from a file.
 //! [Issue #14][5].
 //!
-//! Currently the layers are stored in an array and the metadata in another array with matching
+//! Currently the layers are stored in an array and the metadata in another
+//! array with matching
 //! indices.
-//! In the future we would like to take the metadata into the Layer struct. [Issue #16][6].
+//! In the future we would like to take the metadata into the Layer struct.
+//! [Issue #16][6].
 //!
 //! [3]: ../solver/index.html
 //! [4]: #method.from_config
 //! [5]: https://github.com/autumnai/leaf/issues/14
 //! [6]: https://github.com/autumnai/leaf/issues/16
+//!
+//! ## Glossary
+//! ### Input Layers / Blobs
+//!
+//! A input layer is the bottom-most layer of a network.</br>
+//! During a forward step the data is put into the input layer,
+//! passed through all the intermediate (hidden) layers and generates a
+//! result in the output layer.
+//!
+//! The blobs in a input layer contain externally preprocessed data that has
+//! been brought
+//! into a form suitable for consumption by a neural network.
+//! TODO: explanation about feedforward / backpropagation
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 use std::cmp;
 use math::*;
 use shared_memory::*;
 use layer::{ILayer, Layer};
-use layer::{LayerConfig, ParamConfig};
+use layer::{LayerConfig, WeightConfig};
 use phloem::Blob;
 
 #[derive(Debug)]
@@ -63,11 +80,12 @@ pub struct Network<'a> {
     output_blobs: Vec<ArcLock<HeapBlob>>,
     output_blob_indices: Vec<usize>,
 
-    // stores the vectors containing the output for each layer (only references to the blobs)
+    // stores the vectors containing the tops (output in forward) for each layer
+    // (only references to the blobs)
     top_vecs: Vec<Vec<ArcLock<HeapBlob>>>,
     top_id_vecs: Vec<Vec<usize>>,
-
-    bottom_vecs: Vec<Vec<ArcLock<HeapBlob>>>, // stores the vectors containing the input for each layer
+    // stores the vectors containing the bottoms (input in forward) for each layer
+    bottom_vecs: Vec<Vec<ArcLock<HeapBlob>>>,
     bottom_id_vecs: Vec<Vec<usize>>,
     bottom_need_backwards: Vec<Vec<bool>>,
 
@@ -143,7 +161,6 @@ impl<'a> Default for Network<'a> {
 
 impl<'a> Network<'a> {
     /// Creates a Network from a [NetworkConfig][1].
-    ///
     /// [1]: ./struct.NetworkConfig.html
     ///
     /// ## Examples
@@ -159,12 +176,13 @@ impl<'a> Network<'a> {
         network
     }
 
-    /// Initializes a network
+    /// Initializes a network.
     ///
-    /// TODO: [DOC] What and Why is it doing exactly?
+    /// Sets up the whole structure of the network. It reads the supplied [NetworkConfig][1],
+    /// appends the top and bottom blobs to each layer and determines if the backpropagation has
+    /// to be executed for each blob and layer.
     ///
-    /// TODO: [DOC] Dependend on the TODO above, consider creating tests
-    /// TODO: [DOC] Create Benchmarks
+    /// [1]: ./struct.NetworkConfig.html
     fn init(&mut self, in_config: &'a NetworkConfig) {
         let config = in_config.clone();
         let available_blobs = &mut HashSet::new();
@@ -228,13 +246,17 @@ impl<'a> Network<'a> {
         info!("Network initialization done.");
     }
 
-    /// Initializes the layers of a network
+    /// Initializes a single layer of the network.
     ///
-    /// TODO: [DOC] What does it do and why exactly?
+    /// Appends [top][1] and [bottom blobs][2] to the [Layer][3]. Apart from explicitly named
+    /// top blobs it will also append anonymous top blobs that are required by the specific
+    /// [Layer implemenations][4]. It also sets up the [loss weights],
+    /// and backpropagation flags.
     ///
-    /// TODO: [DOC] Dependend on the TODO above, consider creating tests
-    /// TODO: [DOC] Create Benchmarks
-    /// TODO: [DOC] Clear the Caffe comments
+    /// [1]: ../layer/index.html
+    /// [2]: ../layer/index.html
+    /// [3]: ../layer/struct.Layer.html
+    /// [4]: ../layers/index.html
     fn init_layer(&mut self,
                   layer_id: usize,
                   config: &'a NetworkConfig,
@@ -249,10 +271,6 @@ impl<'a> Network<'a> {
         // }
 
         // Setup layer.
-        // let layer_config = Box::new(param.layer(layer_id).take()); // TODO: should
-        // be safer
-        // let layer_config = param.layer(layer_id).unwrap(); // TODO: should be safer
-        // let layer_config = param.layer(layer_id).unwrap(); // TODO: should be safer
         let layer_config = (&config.layers[layer_id]).clone(); // TODO: should be safer
         if !layer_config.check_propagate_down_len() {
             // TODO: move layer validation to layer
@@ -369,19 +387,14 @@ impl<'a> Network<'a> {
         }
     }
 
-    // Go through the net backwards to determine which blobs contribute to the
-    // loss.  We can skip backward computation for blobs that don't contribute
-    // to the loss.
-    // Also checks if all bottom blobs don't need backward computation (possible
-    // because the skip_propagate_down param) and so we can skip bacward
-    // computation for the entire layer
-    /// Initializes [backpropagation][1]
-    /// [1]: What does that mean in this context?
+    /// Initializes network for [backpropagation][1]
+    /// [1]: https://en.wikipedia.org/wiki/Backpropagation
     ///
-    /// TODO: [DOC] What and Why does it do exactly?
-    ///
-    /// TODO: [DOC] Dependend on the TODO above, consider creating tests
-    /// TODO: [DOC] Create Benchmarks
+    /// Go through all the blobs of a layer to determine which blobs contribute to the
+    /// loss of the next layer. We can skip backward computation for blobs that don't contribute
+    /// to the loss.
+    /// If all of the blobs skip backpropagation we set a flag to skip backpropagation
+    /// of the whole layer.
     fn init_backprop(&self,
                      layer_id: usize,
                      layer_need_backwards: &mut Vec<bool>,
@@ -439,11 +452,11 @@ impl<'a> Network<'a> {
         }
     }
 
-    /// ???
+    /// Set [backpropagation][1] flags to force all layers to backpropagate.
+    /// [1]: https://en.wikipedia.org/wiki/Backpropagation
     ///
-    /// TODO: What and Why is this doing?
-    ///
-    /// TODO: [DOC] Tests, Benchmarks to allow for refactoring
+    /// Is executed during Network initalization if [NetworkConfig][2].force_backward is true.
+    /// Forcing backpropagation is useful for debugging.
     fn init_force_backward(&mut self) {
         for (layer_id, layer) in self.layers.iter_mut().enumerate() {
             self.layer_need_backwards[layer_id] = true;
@@ -457,15 +470,18 @@ impl<'a> Network<'a> {
                          .get(self.bottom_id_vecs[layer_id][bottom_id])
                          .unwrap_or(&self.bottom_need_backwards[layer_id][bottom_id])
             }
-            for (param_id, _) in layer.blobs.clone().iter().enumerate() {
-                layer.set_param_propagate_down(param_id, true);
+            for (weight_id, _) in layer.blobs.clone().iter().enumerate() {
+                layer.set_weight_propagate_down(weight_id, true);
             }
         }
     }
 
-    /// ???
+    /// Resize Vectors that hold the [HeapBlob][1] references and the layer metadata.
+    /// [1]: ../shared_memory/type.HeapBlob.html
     ///
-    /// TODO: [DOC] When would you use/need this?
+    /// Used during Network initalization.
+    /// It is unclear if this provides any (speed) benefit since the Vecs only hold
+    /// references, so reallocation should be cheap.
     fn resize_vecs(&mut self, new_len: usize) {
         self.bottom_vecs.resize(new_len, vec![Arc::new(RwLock::new(Box::new(Blob::new())))]);
         self.top_vecs.resize(new_len, vec![Arc::new(RwLock::new(Box::new(Blob::new())))]);
@@ -572,9 +588,19 @@ impl<'a> Network<'a> {
         }
     }
 
-    /// ???
+    /// Append blob as [bottom blob][1] to a [Layer][2].
+    /// [1]: ../layer/index.html
+    /// [2]: ../layer/struct.Layer.html
     ///
-    /// TODO: [DOC] Why? What is the purpose of this?
+    /// During network initalization the blobs will be appended to the [Layer][2]s as per their
+    /// [LayerConfig][3]. It is also determined if a bottom blob skips backpropagation
+    /// from [LayerConfig.propagate_down][3] (see also [init_backprop][5]).
+    ///
+    /// Currently these things are tracked in metadata arrays: [Issue #16]][4].
+    ///
+    /// [3]: ../layer/struct.LayerConfig.html
+    /// [4]: https://github.com/autumnai/leaf/issues/16
+    /// [5]: #method.init_backprop
     fn append_bottom(&mut self,
                      config: &NetworkConfig,
                      layer_id: usize,
@@ -640,9 +666,9 @@ impl<'a> Network<'a> {
         self.weight_id_vecs[layer_id].push(net_weight_id);
         self.weight_layer_indices.push((layer_id, weight_id));
 
-        let mut param_spec = &ParamConfig::default();
+        let mut weight_config = &WeightConfig::default();
         if layer_config.params_len() > weight_id {
-            param_spec = layer_config.param(weight_id).unwrap();
+            weight_config = layer_config.param(weight_id).unwrap();
         }
         // This layer "owns" this weight blob -- it is either anonymous
         // (i.e., not given a weight_name) or explicitly given a name that we
@@ -655,10 +681,10 @@ impl<'a> Network<'a> {
             let learnable_weight_id = self.learnable_weights.len();
             self.learnable_weights.push(self.weights[net_weight_id].clone());
             self.learnable_weight_ids.push(learnable_weight_id);
-            //     has_weights_lr_.push_back(param_spec->has_lr_mult());
+            //     has_weights_lr_.push_back(weight_config->has_lr_mult());
             //     has_params_decay_.push_back(param_spec->has_decay_mult());
-            self.weights_lr.push(param_spec.lr_mult.clone());
-            self.weights_weight_decay.push(param_spec.decay_mult.clone());
+            self.weights_lr.push(weight_config.lr_mult.clone());
+            self.weights_weight_decay.push(weight_config.decay_mult.clone());
         } else {
             // Named weight blob with name we've seen before: share weights
 
@@ -687,38 +713,41 @@ impl<'a> Network<'a> {
             let learnable_weight_id = self.learnable_weight_ids[owner_net_weight_id];
             self.learnable_weight_ids.push(learnable_weight_id);
             // can only share parameters if both have same lr_mult
-            if let Some(lr_mult) = param_spec.lr_mult {
+            if let Some(lr_mult) = weight_config.lr_mult {
                 if let Some(owner_lr_mult) = self.weights_lr[learnable_weight_id] {
                     if !lr_mult.eq(&owner_lr_mult) {
                         error!("Shared param '{}' has mismatched lr_mult.",
                                weight_name.clone());
                     }
                 } else {
-                    self.weights_lr[learnable_weight_id] = param_spec.lr_mult;
+                    self.weights_lr[learnable_weight_id] = weight_config.lr_mult;
                 }
             }
             // can only share weights if both have same decay_mult
-            if let Some(decay_mult) = param_spec.decay_mult {
+            if let Some(decay_mult) = weight_config.decay_mult {
                 if let Some(owner_decay_mult) = self.weights_weight_decay[learnable_weight_id] {
                     if !decay_mult.eq(&owner_decay_mult) {
                         error!("Shared param '{}' has mismatched decay_mult.",
                                weight_name.clone());
                     }
                 } else {
-                    self.weights_weight_decay[learnable_weight_id] = param_spec.decay_mult;
+                    self.weights_weight_decay[learnable_weight_id] = weight_config.decay_mult;
                 }
             }
         }
     }
 
 
-    /// Computes [forward][1] and [backward][2] step for the network and returns [???][3]
+    /// Computes [forward][1] and [backward][2] step for the network and returns [the total loss.][3]
     /// [1]: #method.forward
     /// [2]: #method.backward
-    /// [3]: ???
+    /// [3]: http://caffe.berkeleyvision.org/tutorial/loss.html
     ///
-    /// TODO: [DOC] Why does this method exist?
-    /// TODO: [DOC] Where would you use it?
+    /// Used by the [Solver][4] to conveniently compute one [forward- and one backward-propagation
+    /// step][5] together, which is all the network has to do while training it.
+    ///
+    /// [4]: ../solver/struct.Solver.html
+    /// [5]: https://en.wikipedia.org/wiki/Backpropagation#Phase_1:_Propagation
     pub fn forward_backward(&mut self, bottom: &[ArcLock<HeapBlob>]) -> f32 {
         let loss = &mut 0f32;
 
@@ -728,31 +757,34 @@ impl<'a> Network<'a> {
         *loss
     }
 
-    /// Copies supplied [bottom Blobs][1] to [input Blobs][2], computes [forward step][3] for the
-    /// network and returns [<???>][4].
-    /// [1]: ???
-    /// [2]: ???
-    /// [3]: ???
-    /// [4]: ???
+    /// Copies supplied [input Blobs][1] into the network, computes [forward step][2] for the
+    /// network and returns [the output blobs.][3].
+    /// [1]: ./index.html#input-layers--blobs
+    /// [2]: https://en.wikipedia.org/wiki/Feedforward_neural_network
+    /// [3]: http://caffe.berkeleyvision.org/tutorial/loss.html
     ///
-    /// TODO: [DOC] Why would you use this?
-    /// TODO: [DOC] Why does it do what it does? Why does it copy the bottom to input?
-    pub fn forward(&mut self, bottom: &[ArcLock<HeapBlob>], loss: &mut f32) -> &Vec<ArcLock<HeapBlob>> {
-        for (i, btm) in bottom.iter().enumerate() {
-            self.input_blobs[i] = btm.clone();
+    /// Does not actually copy data, only references to the input blobs.
+    ///
+    /// This is the go-to if you just want to feed data to your network and get the corresponding
+    /// output.
+    pub fn forward(&mut self, input: &[ArcLock<HeapBlob>], loss: &mut f32) -> &Vec<ArcLock<HeapBlob>> {
+        for (i, inp) in input.iter().enumerate() {
+            self.input_blobs[i] = inp.clone();
         }
 
         self.forward_prefilled(Some(loss))
     }
 
-    /// Computes [forward step][1] for the network after the [input blobs][2] have been put into
-    /// the network and returns [???][3]
-    /// [1]: ???
-    /// [2]: ???
-    /// [3]: ???
+    /// Computes [forward step][1] for a network whose [input blob][2] references have been set
+    /// and returns [the output blobs.][3]
+    /// [1]: https://en.wikipedia.org/wiki/Feedforward_neural_network
+    /// [2]: ./index.html#input-layers--blobs
+    /// [3]: http://caffe.berkeleyvision.org/tutorial/loss.html
     ///
-    /// TODO: [DOC] Why would you use this?
-    /// TODO: [DOC] Why does it do what it does? Why does it copy the bottom to input?
+    /// Can be used if you need more control over how to put data into the network (debugging),
+    /// otherwise [forward][4] is the prefered method to forward through the whole network.
+    ///
+    /// [4]: #method.forward
     pub fn forward_prefilled(&mut self, loss: Option<&mut f32>) -> &Vec<ArcLock<HeapBlob>> {
         let end = self.layers.len() - 1;
         match loss {
@@ -768,13 +800,18 @@ impl<'a> Network<'a> {
         &self.output_blobs
     }
 
-    /// Computes [forward step][1] for the network from [start][2] to [end][3].
-    /// [1]: ???
-    /// [2]: ???
-    /// [3]: ???
+    /// Compute [forward step][1] for a part of (or the whole) network and returns the [total loss][2].
+    /// [1]: https://en.wikipedia.org/wiki/Feedforward_neural_network
+    /// [2]: http://caffe.berkeleyvision.org/tutorial/loss.html
     ///
-    /// TODO: [DOC] When would you use this?
-    /// TODO: Remove Caffe comments
+    /// Computes the forward step from the layer with index `start` to the layer with index `end`
+    /// and return the total [scalar loss][2] over all loss layers.
+    ///
+    /// If you want to compute a foward step for the whole layer
+    /// you should use [forward_prefilled][3].
+    /// Computing a forward on a part of the network is usually only done for debugging purposes.
+    ///
+    /// [3]: #method.forward_prefilled
     pub fn forward_from_to(&mut self, start: usize, end: usize) -> f32 {
         assert!(end < self.layers.len());
 
@@ -795,32 +832,15 @@ impl<'a> Network<'a> {
         loss
     }
 
-    /// Computes [forward step][1] for the network from [start][2] to the overall end.
-    /// [1]: ???
-    /// [2]: ???
+    /// Clears the [weights][1] diffs and zero-inits them.
+    /// [1]: https://en.wikipedia.org/wiki/Synaptic_weight
     ///
-    /// TODO: [DOC] When would you use this?
-    pub fn forward_from(&mut self, start: usize) -> f32 {
-        let end = self.layers.len() - 1;
-        self.forward_from_to(start, end)
-    }
-
-    /// Computes [forward step][1] for the network from the overall begininng to the [end][2].
-    /// [1]: ???
-    /// [2]: ???
+    /// The diffs for the weights accumulate over the backpropagation steps of
+    /// a [Solver][2] minibatch and are cleared between each minibatch
+    /// to start over with a clean slate.
     ///
-    /// TODO: [DOC] When would you use this?
-    pub fn forward_to(&mut self, end: usize) -> f32 {
-        self.forward_from_to(0, end)
-    }
-
-    /// Clears the [learnable params][1] and zero-inits them.
-    /// [1]: ???
-    ///
-    /// TODO: [DOC] When would you use this?
-    /// TODO: [DOC] What purpose does this have?
-    /// TODO: [DOC] Remove `unwrap()` with proper Error Handling
-    pub fn clear_param_diffs(&mut self) {
+    /// [2]: ../solver/struct.Solver.html
+    pub fn clear_weight_diffs(&mut self) {
         for weight_blob in &mut self.learnable_weights.iter() {
             for p in weight_blob.write().unwrap().mutable_cpu_diff().iter_mut() {
                 *p = 0f32;
@@ -828,16 +848,15 @@ impl<'a> Network<'a> {
         }
     }
 
-    /// Updates the [learnable params][1] with [???][2].
-    /// [1]: ???
-    /// [2]: ???
+    /// Updates the [weights][1] with the weight update computed by the [Solver][2].
+    /// [1]: https://en.wikipedia.org/wiki/Synaptic_weight
+    /// [2]: ../solver/struct.Solver.html
     ///
-    /// This is similar to Caffes' `Blob->Update()`.
+    /// Updating the weights is the last step of computing a [Solver][2] minibatch.
+    /// The update value is computed in previous steps according to the [learning rate policy][3]
     ///
-    /// TODO: [DOC] When would you use this?
-    /// TODO: [DOC] What purpose does this have?
-    /// TODO: [DOC] Remove `unwrap()` with proper Error Handling
-    pub fn update_params(&mut self) {
+    /// [3]: ../solver/enum.LRPolicy.html
+    pub fn update_weights(&mut self) {
         for weight_blob in &self.learnable_weights {
             leaf_cpu_axpy(&-1f32,
                           weight_blob.read().unwrap().cpu_diff(),
@@ -862,25 +881,29 @@ pub struct NetworkConfig {
     /// Defines the name the network.
     pub name: String,
 
-    /// Defines the names of the [input Blobs][1].
-    /// [1]: ???
+    /// Defines the names of the [input blobs][1].
+    /// [1]: ./index.html#input-layers--blobs
     ///
-    /// TODO: [DOC] Why do you need the input Blob names here?
-    /// TODO: [DOC] Can you leave them empty?
+    /// The input blobs are identified by name so they can be referenced as [bottom blobs][2]
+    /// in a [LayerConfig][3].
+    ///
+    /// [2]: ../layer/index.html
+    /// [3]: ../layer/struct.LayerConfig.html
     inputs: Vec<String>,
 
-    /// Defines the [shape][1] of the [input Blobs][2].
+    /// Defines the [shape][1] of the [input blobs][2].
     /// [1]: ???
-    /// [2]: ???
+    /// [2]: ./index.html#input-layers--blobs
     ///
-    /// TODO: [DOC] Why do you need the input Blob shapes here?
-    /// TODO: [DOC] Why not just input Blobs?
+    /// The number of input_shapes supplied should match the number of inputs supplied.
+    /// The shape of the input blobs has to be known so that the right connections to the
+    /// upper layers can be set up.
     input_shapes: Vec<Vec<usize>>,
 
-    /// Defines if the network will force every layer to do [backward operations][1].
-    /// [1]: ???
+    /// Defines if the network will force every layer to do [backpropagation][1].
+    /// [1]: https://en.wikipedia.org/wiki/Backpropagation
     ///
-    /// If set to `false`, then the doing of backward operations is determined automatically
+    /// If set to `false`, then the execution of backpropagation is determined automatically
     /// according to the net structure and learning rates.
     ///
     /// Default: `false`
@@ -898,8 +921,8 @@ pub struct NetworkConfig {
     /// Default: `false`
     debug_info: bool,
 
-    /// Defines the [layers][1] for the network.
-    /// [1]: ???
+    /// Defines the layers of the network via [LayerConfig][1]s.
+    /// [1]: ../layer/struct.LayerConfig.html
     pub layers: Vec<LayerConfig>,
 }
 

@@ -19,7 +19,7 @@ mod layer_spec {
 
     #[test]
     fn dim_check_strict() {
-        let cfg = ParamConfig { share_mode: DimCheckMode::Strict, ..ParamConfig::default() };
+        let cfg = WeightConfig { share_mode: DimCheckMode::Strict, ..WeightConfig::default() };
         let blob_one = Blob::<f32>::of_shape(vec![2, 3, 3]);
         let blob_two = Blob::<f32>::of_shape(vec![3, 2, 3]);
         let param_name = "foo".to_owned();
@@ -42,7 +42,7 @@ mod layer_spec {
 
     #[test]
     fn dim_check_permissive() {
-        let cfg = ParamConfig { share_mode: DimCheckMode::Permissive, ..ParamConfig::default() };
+        let cfg = WeightConfig { share_mode: DimCheckMode::Permissive, ..WeightConfig::default() };
         let blob_one = Blob::<f32>::of_shape(vec![2, 3, 3]);
         let blob_two = Blob::<f32>::of_shape(vec![3, 2, 3]);
         let blob_three = Blob::<f32>::of_shape(vec![3, 10, 3]);
