@@ -40,7 +40,7 @@
 //! [layers]: ./layers/index.html
 //! [activation]: #
 //! [loss]: #
-//! [solver]: ./solvers/index.html
+//! [solvers]: ./solvers/index.html
 //! [optimization]: https://en.wikipedia.org/wiki/Stochastic_optimization
 //!
 //! [issue-loss]: https://github.com/autumnai/leaf/issues/18
@@ -66,7 +66,6 @@ pub mod shared_memory;
 mod math;
 /// The Layer and Layer Interface
 pub mod layer;
-/// The specific Layers
 pub mod layers;
 /// The Solver
 pub mod solver;

@@ -1,22 +1,21 @@
-//! Sigmoid Layer
+//! Apploes the nonlinear Log-Sigmoid function the its bottom Blob.
 //!
 //! Non-linearity activation function: y = (1 + e^(-x))^(-1)
+//!
+//! A classic choice in neural networks.
+//! But you might consider using ReLu as an alternative.
+//!
+//! ReLu, compared to Sigmoid
+//!
+//! * reduces the likelyhood of vanishing gradients  
+//! * increases the likelyhood of a more beneficial sparse representation  
+//! * can be computed faster  
+//! * is therefore the most popular activation function in DNNs as of this writing (2015).
 use shared_memory::*;
 use layer::*;
 
 #[derive(Debug, Copy, Clone)]
-/// Sigmoid
-///
-/// Non-linearity activation function: y = (1 + e^(-x))^(-1)
-///
-/// A classic choice in neural networks.
-/// But you might consider using ReLu as an alternative.
-///
-/// ReLu, compared to Sigmoid,  
-/// 1. reduces the likelyhood of vanishing gradients  
-/// 2. increases the likelyhood of a more beneficial sparse representation  
-/// 3. can be computed faster  
-/// 4. is therefore the most popular activation function in DNNs as of this writing (2015).
+/// Sigmoid Activation Layer
 pub struct Sigmoid;
 
 impl ILayer for Sigmoid {
