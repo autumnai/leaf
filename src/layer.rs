@@ -1,3 +1,5 @@
+//! Provides the generics and interfaces for the specific [Layers][layers].
+//! [layers]: ../layers/index.html
 use math::*;
 use phloem::{Blob, Numeric};
 use shared_memory::{ArcLock, HeapBlob};

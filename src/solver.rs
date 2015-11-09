@@ -1,3 +1,5 @@
+//! Provides the generics and interfaces for the specific [Solvers][solvers].
+//! [solvers]: ../solvers/index.html
 use shared_memory::*;
 use network::*;
 use solvers::*;

@@ -14,10 +14,10 @@ keywords = ["deep-learning", "neural-networks", "machine-learning", "framework"]
 license = "MIT"
 
 [dependencies]
-phloem = "0.2.3"
+phloem = "0.2.4"
 rblas = "0.0.9"
 log = "0.3.2"
-clippy = "0.0.22"
+clippy = "0.0.23"
 
 [features]
 default = []

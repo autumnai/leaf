@@ -24,14 +24,14 @@
 //! performant and easy-to-use Deep Learning Framework.
 //! These principles direct our decisions on Leaf and related projects.
 //!
-//! * __Performance__:</br>
+//! * __Cutting Edge Performance__:</br>
 //! For research and industry speed and efficency are curcial for
 //! state-of-the-art machine learning over massive data and networks.
-//! * __Architecture__:</br>
+//! * __Open and Expressive Architecture__:</br>
 //! Designing an open architecture that follows best practices and concepts in
 //! Engineering such as modularity, flexibility and expressiveness is critical
 //! to stimulate future innovation.
-//! * __Documentation__:</br>
+//! * __Clear and Transparent Documentation__:</br>
 //! A well-written documentation that addresses both concepts and
 //! implementations, empowers developers and researchers to contribute their
 //! unique experience to the project for the benefit of everyone.
@@ -83,11 +83,8 @@ extern crate rblas;
 extern crate phloem;
 pub mod shared_memory;
 mod math;
-/// The Layer and Layer Interface
 pub mod layer;
 pub mod layers;
-/// The Solver
 pub mod solver;
-/// The specific Solvers
 pub mod solvers;
 pub mod network;

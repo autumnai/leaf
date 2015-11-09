@@ -1,4 +1,9 @@
-//! Specifies shared memory ...
+//!
+//!
+//! This is quite unimportant and might be refactored soon.
+//!
+//! See [Issue #22][issue] for more informations.
+//! [issue]: https://github.com/autumnai/leaf/issues/22
 use std::sync::{Arc, RwLock};
 use phloem::Blob;
 
