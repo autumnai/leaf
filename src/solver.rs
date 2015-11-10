@@ -6,41 +6,68 @@ use solvers::*;
 
 #[derive(Debug)]
 /// Solver that optimizes a [Network][1].
-/// [1] ../network/struct.Network.html
-pub struct Solver<'a, S> {
-    net: Network<'a>,
+/// [1]: ../network/struct.Network.html
+pub struct Solver<S> {
+    net: Network,
     /// The implementation of the Solver
-    pub worker: Box<S>,
+    // pub worker: Box<S>,
+    pub worker: S,
 
-    param: SolverConfig,
+    config: SolverConfig,
     /// The current iteration / number of times weights have been updated
     iter: usize,
 }
 
-impl<'a, S: ISolver> Solver<'a, S>{
-    fn init(&'a mut self, param: SolverConfig) {
+impl<S> Solver<S> {
+    /// Create Solver from [SolverConfig][1]
+    /// [1]: ./struct.SolverConfig.html
+    ///
+    /// This is the **preferred method** to create a Solver for traing a neural network.
+    ///
+    /// ## Example
+    ///
+    /// ```
+    /// # use leaf::solver::*;
+    /// let cfg = SolverConfig{
+    ///             solver: SolverKind::SGD(SGDKind::Momentum),
+    ///             ..SolverConfig::default()};
+    /// let solver = Solver::<Box<ISolver>>::from_config(&cfg);
+    /// ```
+    pub fn from_config(config: &SolverConfig) -> Solver<Box<ISolver>> {
+        Solver {
+            net: Network::from_config(&config.train_net),
+            worker: config.solver.with_config(&config),
+            iter: 0,
+
+            config: config.clone(),
+        }
+    }
+
+}
+
+impl<S: ISolver> Solver<S>{
+    fn init(&mut self, config: SolverConfig) {
         // Caffe
         //   CHECK(Caffe::root_solver() || root_solver_)
         //       << "root_solver_ needs to be set for all non-root solvers";
-        info!("Initializing solver from parameters: {:?}", param);
-        self.param = param;
-        assert!(self.param.average_loss > 1);
+        info!("Initializing solver from configuration: {:?}", config);
+        self.config = config;
+        assert!(self.config.average_loss > 1);
         // Caffe
         //   if (Caffe::root_solver() && param_.random_seed() >= 0) {
         //     Caffe::set_random_seed(param_.random_seed());
         //   }
 
-        Solver::<S>::init_train_net(&mut self.param, &mut self.net);
+        Solver::<S>::init_train_net(&mut self.config, &mut self.net);
         // if (Caffe::root_solver()) {
         {
             // self.init_test_nets();
             info!("Solver scaffolding done.");
         }
-        self.iter = 0;
     }
 
     /// Initialize the training net
-    fn init_train_net<'_>(param: &'_ mut SolverConfig, net: &'_ mut Network<'_>) {
+    fn init_train_net(param: &mut SolverConfig, net: &mut Network) {
         // Caffe
         // Set the correct NetState.  We start with the solver defaults (lowest
         // precedence); then, merge in any NetState specified by the net_param itself;
@@ -92,8 +119,8 @@ impl<'a, S: ISolver> Solver<'a, S>{
 
             // run tests all `test_interval` iterations
             // unless it's the first iteration and we are not testing on initialization
-            if let Some(test_interval) = self.param.test_interval {
-                if self.iter % test_interval == 0 && (self.iter > 0 || self.param.test_initialization) {
+            if let Some(test_interval) = self.config.test_interval {
+                if self.iter % test_interval == 0 && (self.iter > 0 || self.config.test_initialization) {
                     // && Caffe::root_solver()) { // Caffe
 
                     // TODO
@@ -114,20 +141,20 @@ impl<'a, S: ISolver> Solver<'a, S>{
             // net_->set_debug_info(display && param_.debug_info());
 
             let noop_bottom = vec![new_shared_heapblob()];
-            for _ in 0..self.param.minibatch_size - 1 {
+            for _ in 0..self.config.minibatch_size - 1 {
                 loss += self.net.forward_backward(&noop_bottom);
             }
             // average the loss across iterations of minibatch
-            loss /= self.param.minibatch_size as f32;
+            loss /= self.config.minibatch_size as f32;
 
             // average the loss across iterations for smoothed reporting
-            if losses.len() < self.param.average_loss {
+            if losses.len() < self.config.average_loss {
                 losses.push(loss);
                 let size = losses.len() as f32;
                 smoothed_loss = (smoothed_loss * (size - 1f32) + loss) / size;
             } else {
-                let idx = (self.iter - start_iter) % self.param.average_loss;
-                smoothed_loss += (loss - losses[idx]) / self.param.average_loss as f32;
+                let idx = (self.iter - start_iter) % self.config.average_loss;
+                smoothed_loss += (loss - losses[idx]) / self.config.average_loss as f32;
                 losses[idx] = loss;
             }
 
@@ -163,7 +190,7 @@ impl<'a, S: ISolver> Solver<'a, S>{
             //   if (this->param_.display() && this->iter_ % this->param_.display() == 0) {
             //     LOG(INFO) << "Iteration " << this->iter_ << ", lr = " << rate;
             //   }
-            self.worker.apply_update(&self.param, &mut self.net, self.iter);
+            self.worker.apply_update(&self.config, &mut self.net, self.iter);
 
             // Increment the internal iter counter -- its value should always indicate
             // the number of times the weights have been updated.
@@ -189,6 +216,17 @@ impl<'a, S: ISolver> Solver<'a, S>{
     }
 }
 
+// impl<'a, S: ISolver> Default for Solver<'a, S> {
+//     fn default() -> Solver<'a, ISolver> {
+//         Solver {
+//             net: Network::default(),
+//             worker: Box::<S>::new(Momentum::new()),
+//             config: SolverConfig::default(),
+//             iter: 0,
+//         }
+//     }
+// }
+
 /// Implementation of a specific Solver.
 ///
 /// See [Solvers][1]
@@ -207,11 +245,11 @@ pub trait ISolver {
     /// [2]: ./struct.Solver.html#method.step
     //
     // TODO: the actual update can probably be pulled out of this function,
-    // since that should be the same idependent of solver type.
-    fn apply_update(&self, param: &SolverConfig, network: &mut Network, iter: usize);
+    // since that should be the same independent of solver type.
+    fn apply_update(&mut self, param: &SolverConfig, network: &mut Network, iter: usize);
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// Configuration for a Solver
 pub struct SolverConfig {
     /// Name of the solver.
@@ -219,6 +257,8 @@ pub struct SolverConfig {
     /// The [NetworkConfig][1] that is used to initialize the training network.
     /// [1]: ../network/struct.NetworkConfig.html
     pub train_net: NetworkConfig,
+    /// TODO
+    pub solver: SolverKind,
     /// Display the loss averaged over the last average_loss iterations.
     ///
     /// Default: 1
@@ -254,6 +294,57 @@ pub struct SolverConfig {
     ///
     /// Default: 10
     pub stepsize: usize,
+    /// The threshold for clipping gradients.
+    ///
+    /// Gradient values will be scaled to their [L2 norm][1] of length `clip_gradients`
+    /// if their L2 norm is larger than `clip_gradients`.
+    /// If set to `None` gradients will not be clipped.
+    ///
+    /// [1]: https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm
+    ///
+    /// Default: None
+    pub clip_gradients: Option<f32>,
+    /// The global [weight decay][1] multiplier for [regularization][2].
+    /// [1]: http://www.alglib.net/dataanalysis/improvinggeneralization.php#header3
+    /// [2]: https://cs231n.github.io/neural-networks-2/#reg
+    ///
+    /// Regularization can prevent [overfitting][3].
+    ///
+    /// If set to `None` no regularization will be performed.
+    ///
+    /// [3]: https://cs231n.github.io/neural-networks-2/#reg
+    pub weight_decay: Option<f32>,
+    /// The method of [regularization][1] to use.
+    /// [1]: https://cs231n.github.io/neural-networks-2/#reg
+    ///
+    /// There are different methods for regularization.
+    /// The two most common ones are [L1 regularization][1] and [L2 regularization][1].
+    ///
+    /// See [RegularizationMethod][2] for all implemented methods.
+    ///
+    /// [2]: ./enum.RegularizationMethod.html
+    ///
+    /// Currently only L2 regularization is implemented.
+    /// See [Issue #23](https://github.com/autumnai/leaf/issues/23).
+    pub regularization_method: Option<RegularizationMethod>,
+    /// The [momentum][1] multiplier for [SGD solvers][2].
+    /// [1]: https://en.wikipedia.org/wiki/Stochastic_gradient_descent#Momentum
+    /// [2]: ../solvers/struct.SGD.html
+    ///
+    /// Momentum in solving neural networks works similar to they way it does in physics.
+    /// If you travel into a a direction with a high velocity, it becomes very hard to
+    /// change (or reverse) the direction in which you are moving.
+    ///
+    /// Similarly when adjusting gradients during solving, keeping a part of the previous
+    /// gradient update can make solving faster, since if you keep adjusting the gradients
+    /// into the same direction you will reach the optimum faster. It also makes solving
+    /// more stable.
+    ///
+    /// The value should always be between 0 and 1 and dictates how much of the previous
+    /// gradient update will be added to the current one.
+    ///
+    /// Default: 0
+    pub momentum: f32,
 }
 
 impl Default for SolverConfig {
@@ -261,6 +352,7 @@ impl Default for SolverConfig {
         SolverConfig {
             name: "".to_owned(),
             train_net: NetworkConfig::default(),
+            solver: SolverKind::SGD(SGDKind::Momentum),
 
             average_loss: 1,
             test_interval: None,
@@ -270,8 +362,14 @@ impl Default for SolverConfig {
             lr_policy: LRPolicy::Fixed,
             base_lr: 0.01f32,
             gamma: 0.1f32,
-
             stepsize: 10,
+
+            clip_gradients: None,
+
+            weight_decay: None,
+            regularization_method: None,
+
+            momentum: 0f32,
         }
     }
 }
@@ -371,20 +469,53 @@ impl SolverConfig {
 }
 
 #[derive(Debug, Copy, Clone)]
-/// Enum that holds all possible types of sovlers.
+/// All available types of solvers.
 pub enum SolverKind {
-    /// SGD = Stochastic Gradient Descent
-    SGD,
+    /// Stochastic Gradient Descent.
+    /// See [SGDKind][1] for all available SGD solvers.
+    /// [1]: ./enum.SGDKind.html
+    SGD(SGDKind),
+}
+
+impl SolverKind {
+    /// Create a Solver of the specified kind with the supplied SolverConfig.
+    pub fn with_config(&self, config: &SolverConfig) -> Box<ISolver> {
+        match *self {
+            SolverKind::SGD(sgd) => {
+                sgd.with_config(config)
+            },
+        }
+    }
 }
 
 #[derive(Debug, Copy, Clone)]
-/// Learning Rate Policy for a Solver
+/// All available types of Stochastic Gradient Descent solvers.
+pub enum SGDKind {
+    /// Stochastic Gradient Descent with Momentum. See [implementation][1]
+    /// [1] ../solvers/
+    Momentum,
+}
+
+impl SGDKind {
+    /// Create a Solver of the specified kind with the supplied SolverConfig.
+    pub fn with_config(&self, config: &SolverConfig) -> Box<ISolver> {
+        match *self {
+            SGDKind::Momentum => {
+                Box::new(Momentum::new())
+            },
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+/// Learning Rate Policy for a [Solver][2]
 ///
 /// The variables mentioned below are defined in the [SolverConfig][1] apart from
 /// iter, which is the current iteration of the solver, that is supplied as a parameter
 /// for the learning rate calculation.
 ///
 /// [1]: ./struct.SolverConfig.html
+/// [2]: ./struct.Solver.html
 pub enum LRPolicy {
     /// always return base_lr
     Fixed,
@@ -405,4 +536,13 @@ pub enum LRPolicy {
     /// the effective learning rate follows a sigmod decay
     /// return base_lr ( 1/(1 + exp(-gamma * (iter - stepsize))))
     Sigmoid,
+}
+
+#[derive(Debug, Copy, Clone)]
+/// [Regularization][1] method for a [Solver][2].
+/// [1]: https://cs231n.github.io/neural-networks-2/#reg
+/// [2]: ./struct.Solver.html
+pub enum RegularizationMethod {
+    /// L2 regularization
+    L2,
 }

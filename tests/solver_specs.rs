@@ -36,4 +36,10 @@ mod network_spec {
         assert!(cfg2.get_learning_rate(1) == 1.25f32);
         assert!(cfg2.get_learning_rate(2) == 0.3125f32);
     }
+
+    #[test]
+    fn instantiate_solver_sgd_momentum() {
+        let cfg = SolverConfig{ solver: SolverKind::SGD(SGDKind::Momentum), ..SolverConfig::default()};
+        Solver::<Box<ISolver>>::from_config(&cfg);
+    }
 }

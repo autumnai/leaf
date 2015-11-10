@@ -51,6 +51,10 @@
 //!
 //! [2]: https://en.wikipedia.org/wiki/Activation_function
 //! [3]: ../layer/index.html
+
+/// Implement [ILayer][1] for [activation layers][2].
+/// [1]: ./layer/trait.ILayer.html
+/// [2]: ./layers/activation/index.html
 macro_rules! impl_neuron_layer {
     () => (
         fn exact_num_top_blobs(&self) -> usize { 1 }

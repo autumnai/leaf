@@ -62,12 +62,12 @@ use phloem::Blob;
 /// A Network is usually used together with a [Solver][6] to optimize the networks' weights.
 ///
 /// [6]: ../solver/struct.Solver.html
-pub struct Network<'a> {
+pub struct Network {
     /// Identifies the Network
     ///
     /// The name is mainly used for logging purposes.
     pub name: String,
-    layers: Vec<Layer<'a>>,
+    layers: Vec<Layer>,
     layer_names: Vec<String>,
     layer_names_index: HashMap<String, usize>,
     layer_need_backwards: Vec<bool>,
@@ -114,8 +114,8 @@ pub struct Network<'a> {
     weights_weight_decay: Vec<Option<f32>>,
 }
 
-impl<'a> Default for Network<'a> {
-    fn default() -> Network<'a> {
+impl Default for Network {
+    fn default() -> Network {
         Network {
             name: "".to_owned(),
             layers: vec![],
@@ -159,7 +159,7 @@ impl<'a> Default for Network<'a> {
     }
 }
 
-impl<'a> Network<'a> {
+impl Network {
     /// Creates a Network from a [NetworkConfig][1].
     /// [1]: ./struct.NetworkConfig.html
     ///
@@ -183,12 +183,12 @@ impl<'a> Network<'a> {
     /// to be executed for each blob and layer.
     ///
     /// [1]: ./struct.NetworkConfig.html
-    fn init(&mut self, in_config: &'a NetworkConfig) {
+    fn init(&mut self, in_config: &NetworkConfig) {
         let config = in_config.clone();
         let available_blobs = &mut HashSet::new();
         let blob_name_to_idx = &mut HashMap::<String, usize>::new();
         for (input_id, _) in config.inputs.iter().enumerate() {
-            self.append_top(config,
+            self.append_top(&config,
                             None,
                             input_id,
                             Some(available_blobs),
@@ -198,7 +198,7 @@ impl<'a> Network<'a> {
         self.resize_vecs(config.layers.len());
 
         for (layer_id, _) in config.inputs.iter().enumerate() {
-            self.init_layer(layer_id, config, available_blobs, blob_name_to_idx);
+            self.init_layer(layer_id, &config, available_blobs, blob_name_to_idx);
         }
 
         // Go through the net backwards to determine which blobs contribute to the
@@ -259,7 +259,7 @@ impl<'a> Network<'a> {
     /// [4]: ../layers/index.html
     fn init_layer(&mut self,
                   layer_id: usize,
-                  config: &'a NetworkConfig,
+                  config: &NetworkConfig,
                   available_blobs: &mut HashSet<String>,
                   blob_name_to_idx: &mut HashMap<String, usize>) {
         // Caffe
@@ -868,9 +868,19 @@ impl<'a> Network<'a> {
     pub fn learnable_weights(&self) -> &Vec<ArcLock<HeapBlob>> {
         &self.learnable_weights
     }
+
+    #[allow(missing_docs)]
+    pub fn weights_weight_decay(&self) -> &Vec<Option<f32>> {
+        &self.weights_weight_decay
+    }
+
+    #[allow(missing_docs)]
+    pub fn weights_lr(&self) -> &Vec<Option<f32>> {
+        &self.weights_lr
+    }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// Defines the configuration of a network.
 ///
 /// TODO: [DOC] When and why would you use this?
@@ -959,7 +969,7 @@ impl NetworkConfig {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// Defines the state of a network.
 pub struct NetworkState {
     /// Defines the current mode of the network.

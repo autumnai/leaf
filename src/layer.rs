@@ -68,9 +68,9 @@ pub type WriteBlob<'_> = RwLockWriteGuard<'_, HeapBlob>;
 
 #[derive(Debug)]
 /// The generic Layer
-pub struct Layer<'a> {
+pub struct Layer {
     /// The configuration of the Layer
-    pub config: Box<&'a LayerConfig>,
+    pub config: Box<LayerConfig>,
     /// The [implementation][1] of the Layer.
     /// [1]: ../layers/index.html
     ///
@@ -97,16 +97,16 @@ pub struct Layer<'a> {
     weight_propagate_down: Vec<bool>,
 }
 
-impl<'a> Layer<'a> {
+impl Layer {
     /// Creates a new Layer from a [LayerConfig][1].
     /// [1]: ./struct.LayerConfig.html
     ///
     /// Used during [Network][2] initalization.
     ///
     /// [2]: ../network/struct.Network.html
-    pub fn from_config(config: &'a LayerConfig) -> Layer {
+    pub fn from_config(config: &LayerConfig) -> Layer {
         let cl = config.clone();
-        let cfg = Box::<&'a LayerConfig>::new(cl);
+        let cfg = Box::<LayerConfig>::new(cl);
         Layer {
             loss: Vec::new(),
             blobs: Vec::new(),
@@ -171,6 +171,7 @@ pub trait ILayer {
     /// [2]: ./type.ReadBlob.html
     /// [3]: ./type.WriteBlob.html
     /// [3]: #method.forward_cpu
+    #[allow(map_clone)]
     fn forward(&self, bottom: &[ArcLock<HeapBlob>], top: &mut Vec<ArcLock<HeapBlob>>) -> f32 {
         // Lock();
         // Reshape(bottom, top); // Reshape the layer to fit top & bottom blob
@@ -178,7 +179,7 @@ pub trait ILayer {
 
         let btm: Vec<_> = bottom.iter().map(|b| b.read().unwrap()).collect();
         // let tp: Vec<_> = top.iter().map(|b| b.write().unwrap()).collect();
-        let tp_ref = top.iter().map(|t| t.clone()).collect::<Vec<_>>();
+        let tp_ref = top.iter().cloned().collect::<Vec<_>>();
         let mut tp = &mut tp_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
         let mut tpo = &mut tp.iter_mut().map(|a| a).collect::<Vec<_>>();
         self.forward_cpu(&btm, tpo);
@@ -249,7 +250,7 @@ impl fmt::Debug for ILayer {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// Layer Configuration Struct
 pub struct LayerConfig {
     /// The name of the Layer
@@ -331,7 +332,7 @@ impl LayerConfig {
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// Specifies training configuration for a weight blob.
 pub struct WeightConfig {
     /// The name of the weight blob -- useful for sharing weights among
