@@ -42,7 +42,7 @@ For more information,
 [rust]: https://www.rust-lang.org/
 [autumn]: http://autumnai.com
 [tensorflow]: https://github.com/tensorflow/tensorflow
-[benchmarks-issue]: 
+[benchmarks-issue]: https://github.com/autumnai/leaf/issues/26
 [documentation]: http://autumnai.github.io/leaf
 
 > Disclaimer: Leaf is currently in a very early and heavy stage of development.
