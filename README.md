@@ -8,18 +8,18 @@ Leaf is a open source framework for machine intelligence, sharing concepts from
 Leaf was started at [Autumn][autumn] to bridge the gap between research and
 production of deep learning networks. Leaf is written in [Rust][rust], a
 language which is well suited for state-of-the-art machine learning. It allows
-for performance, memory-security and extensibility, that other frameworks
+for the performance, memory-security, and extensibility, that other frameworks
 (TensorFlow, Caffe, Theano) only gain by combining high-level languages (Python)
 with low-level languages (C, C++).
 
 The architecture of Leaf's network is composed of layers, which represent
 operations over n-dimensional numerical inputs into the network, known as Blobs.
-This expressive and highly modular architecture, allows you to deploy and
-distribute your network over multiple devices such as servers, desktops, mobile
-devices and use one or many CPUs or GPUs for computation.  
+This expressive and highly modular architecture allows you to deploy and
+distribute your network over multiple device types, such as servers, desktops, mobile,
+and use a variable number of CPUs or GPUs for computation.  
 Layers usually implement mathematical operations, but can be used for many more
-such as feeding in data, logging or returning results. You can use the layers
-that come already shipped with Leaf (e.g. Convolutional, ReLU, RNN, SVM,
+such as feeding in data, logging, or returning results. You can use the layers
+that ship with Leaf (e.g. Convolutional, ReLU, RNN, SVM,
 etc.) or thanks to Rust, easily extend Leaf with your own layers.
 
 Leaf strives for leading-edge performance
