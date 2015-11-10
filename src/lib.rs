@@ -3,25 +3,25 @@
 //!
 //! ## Overview
 //!
-//! To build a Deep Neural Network you create a [Network][network] which is a
-//! container for all different types of [Layers][layers].
-//! These layers are grouped in different types such as
-//! [Activation Layers][activation] and [Loss Layers][loss] which states the
-//! characteristics of the layer.
+//! To build a Deep Neural Network you first need to create a
+//! [Network][network] which is a container for all different types of
+//! [Layers][layers]. These layers are grouped in different types such as
+//! [Activation Layers][activation] and [Loss Layers][loss] (these state the
+//! characteristics of the layer).
 //!
-//! Now to train your network you will use one of the [Solvers][solvers].
-//! The Solver defines the [Optimization Method][optimization]
-//! and keeps track on the learning progress.
+//! Now to train your network you can use one of the [Solvers][solvers]. The
+//! Solver defines the [Optimization Method][optimization] and keeps track on
+//! the learning progress.
 //!
-//! The operations can run on different Backends {CPU, GPU} and must not be
-//! defined at compile time, which allows for easy backend swapping.
+//! The operations can run on different Backends {CPU, GPU} and doesn't have
+//! to be defined at compile time, which allows for easy backend swapping.
 //!
 //! ## Philosophy
 //!
 //! We are strong believers in the technology of Machine Learning.
-//! We put our experience in
-//! software engineering into Leaf, to solve our own need for a modern,
-//! performant and easy-to-use Deep Learning Framework.
+//!
+//! We put our experience in software engineering into Leaf, to solve our own
+//! need for a modern, performant and easy-to-use Deep Learning Framework.
 //! These principles direct our decisions on Leaf and related projects.
 //!
 //! * __Cutting Edge Performance__:</br>
