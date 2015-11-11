@@ -37,9 +37,7 @@
 //! result in the output layer.
 //!
 //! The blobs in a input layer contain externally preprocessed data that has
-//! been brought
-//! into a form suitable for consumption by a neural network.
-//! TODO: explanation about feedforward / backpropagation
+//! been brought into a form suitable for consumption by a neural network.
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 use std::cmp;

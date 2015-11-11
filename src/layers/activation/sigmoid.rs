@@ -1,4 +1,4 @@
-//! Apploes the nonlinear Log-Sigmoid function the its bottom Blob.
+//! Applies the nonlinear Log-Sigmoid function.
 //!
 //! Non-linearity activation function: y = (1 + e^(-x))^(-1)
 //!
@@ -20,7 +20,7 @@ use layer::*;
 pub struct Sigmoid;
 
 impl ILayer for Sigmoid {
-    impl_neuron_layer!();
+    impl_ilayer_activation!();
 
     fn forward_cpu(&self, bottom: &[ReadBlob], top: &mut Vec<&mut WriteBlob>) {
         let bottom_data = bottom[0].cpu_data();

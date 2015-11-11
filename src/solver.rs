@@ -22,7 +22,7 @@ impl<S> Solver<S> {
     /// Create Solver from [SolverConfig][1]
     /// [1]: ./struct.SolverConfig.html
     ///
-    /// This is the **preferred method** to create a Solver for traing a neural network.
+    /// This is the **preferred method** to create a Solver for training a neural network.
     ///
     /// ## Example
     ///
@@ -257,7 +257,8 @@ pub struct SolverConfig {
     /// The [NetworkConfig][1] that is used to initialize the training network.
     /// [1]: ../network/struct.NetworkConfig.html
     pub train_net: NetworkConfig,
-    /// TODO
+    /// The [Solver implementation][1] to be used.
+    /// [1]: ../solvers/index.html
     pub solver: SolverKind,
     /// Display the loss averaged over the last average_loss iterations.
     ///
@@ -329,16 +330,10 @@ pub struct SolverConfig {
     pub regularization_method: Option<RegularizationMethod>,
     /// The [momentum][1] multiplier for [SGD solvers][2].
     /// [1]: https://en.wikipedia.org/wiki/Stochastic_gradient_descent#Momentum
-    /// [2]: ../solvers/struct.SGD.html
+    /// [2]: ../solvers/sgd/index.html
     ///
-    /// Momentum in solving neural networks works similar to they way it does in physics.
-    /// If you travel into a a direction with a high velocity, it becomes very hard to
-    /// change (or reverse) the direction in which you are moving.
-    ///
-    /// Similarly when adjusting gradients during solving, keeping a part of the previous
-    /// gradient update can make solving faster, since if you keep adjusting the gradients
-    /// into the same direction you will reach the optimum faster. It also makes solving
-    /// more stable.
+    /// For more information see [SGD with momentum][3]
+    /// [3]: ../solvers/sgd/momentum/index.html
     ///
     /// The value should always be between 0 and 1 and dictates how much of the previous
     /// gradient update will be added to the current one.
@@ -508,14 +503,14 @@ impl SGDKind {
 }
 
 #[derive(Debug, Copy, Clone)]
-/// Learning Rate Policy for a [Solver][2]
+/// Learning Rate Policy for a [Solver][1]
+/// [1]: ./struct.Solver.html
 ///
-/// The variables mentioned below are defined in the [SolverConfig][1] apart from
+/// The variables mentioned below are defined in the [SolverConfig][2] apart from
 /// iter, which is the current iteration of the solver, that is supplied as a parameter
 /// for the learning rate calculation.
 ///
-/// [1]: ./struct.SolverConfig.html
-/// [2]: ./struct.Solver.html
+/// [2]: ./struct.SolverConfig.html
 pub enum LRPolicy {
     /// always return base_lr
     Fixed,

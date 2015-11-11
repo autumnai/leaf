@@ -1,5 +1,31 @@
 //! Provides the trainers for the [Network][network].
 //! [network]: ../network/index.html
+//!
+//! The optimal state of a neural network would be the one where
+//! for any given input to the network, it would produce an output perfectly
+//! matching the target function. In that state the loss function would have its
+//! [global minimum][minimum].
+//! This statement can also be reversed to *if we manage to minimize
+//! the loss function of the network, we map the target function*.
+//!
+//! We can change the way a network works by adjusting its individual
+//! [weights][weight]. So to optimize the network we want to adjust
+//! the weights in a way that the loss function will be minimized.
+//! If we want to know how to correctly adjust a single weight,
+//! we have to get to know the effect of that weight
+//! on the loss function (= the *gradient*).
+//! This can be done via a method called [*backpropagation*][backprop].
+//!
+//! There are different methods of how a Solver solves for the minimum of the
+//! loss function. They mostly differ in two ways:
+//!
+//! - How to execute the backpropagation to compute the gradient.
+//! - How to comute the weight update from the gradient.
+//!
+//! [loss]: ../layers/loss/index.html
+//! [weight]: https://en.wikipedia.org/wiki/Synaptic_weight
+//! [minimum]: http://mathworld.wolfram.com/GlobalMinimum.html
+//! [backprop]: https://en.wikipedia.org/wiki/Backpropagation
 
 #[allow(unused_import_braces)]
 pub use self::sgd::{Momentum};

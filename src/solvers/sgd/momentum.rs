@@ -1,4 +1,14 @@
-//! TODO
+//! A [Stochastic Gradient Descent with Momentum][1]
+//! [1]: https://en.wikipedia.org/wiki/Stochastic_gradient_descent#Momentum
+//!
+//! Momentum in solving neural networks works similar to they way it does in physics.
+//! If you travel into a a direction with a high velocity, it becomes very hard to
+//! change (or reverse) the direction in which you are moving.
+//!
+//! Similarly when adjusting gradients during solving, keeping a part of the previous
+//! gradient update can make solving faster, since if you keep adjusting the gradients
+//! into the same direction you will reach the optimum faster. It also makes solving
+//! more stable.
 use math::*;
 use shared_memory::*;
 use network::Network;
@@ -6,20 +16,30 @@ use solver::*;
 use solvers::SGDSolver;
 
 #[derive(Debug, Clone)]
-/// Stochastic Gradient Descent with Momentum
+/// Stochastic Gradient Descent with Momentum.
+///
+/// See [module description][1] for more information.
+/// [1]: ./index.html
 pub struct Momentum {
     /// The gradient update from the previous iteration for each blob.
     history: Vec<ArcLock<HeapBlob>>,
 }
 
 impl Momentum {
-    /// TODO
+    /// Create a new SGD Momentum solver.
+    ///
+    /// Should not be called directly.
+    /// Use [Network::from_config][1] or [Solver::from_config][2] instead.
+    ///
+    /// [1]: ../../../network/struct.Network.html#method.from_config
+    /// [2]: ../../../solver/struct.Solver.html#method.from_config
     pub fn new() -> Momentum {
         Momentum {
             history: Vec::new(),
         }
     }
 
+    /// Initialize the SGD Momentum solver, allocating memory for its history.
     fn init(&mut self, net: &Network) {
         self.history = Vec::with_capacity(net.learnable_weights().len());
 

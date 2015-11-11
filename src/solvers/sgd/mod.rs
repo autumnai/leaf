@@ -1,6 +1,21 @@
 //! Provides [ISolver][1] implementations based on [Stochastic Gradient Descent][2].
 //! [1]: ../solver/trait.ISolver.html
 //! [2]: https://en.wikipedia.org/wiki/Stochastic_gradient_descent
+//!
+//! One of the steps during [backpropagation][backprop] is determining the
+//! gradient for each weight.
+//! In theory this can be achieved very well using [Gradient Descent (GD)][gd].
+//! In practice however applying GD when minimizing an objective function
+//! for large datasets, quickly becomes computationaly unfeasible.
+//!
+//! Luckily GD can be approximated by taking a small random subset from the training
+//! dataset, commonly refered to as *mini-batch*. We then compute the gradients
+//! only for the samples from the mini-batch and average over these gradients,
+//! resulting in an estimate of the global gradient.</br>
+//! This method is refered to as **Stochastic Gradient Descent**.
+//!
+//! [backprop]: https://en.wikipedia.org/wiki/Backpropagation
+//! [gd]: https://en.wikipedia.org/wiki/Gradient_descent
 
 /// Implement [ISolver][1] for [SGD solvers][2].
 /// [1]: ./solver/trait.ISolver.html
