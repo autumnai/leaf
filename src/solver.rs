@@ -10,7 +10,6 @@ use solvers::*;
 pub struct Solver<S> {
     net: Network,
     /// The implementation of the Solver
-    // pub worker: Box<S>,
     pub worker: S,
 
     config: SolverConfig,
@@ -478,7 +477,7 @@ impl SolverKind {
         match *self {
             SolverKind::SGD(sgd) => {
                 sgd.with_config(config)
-            },
+            }
         }
     }
 }
@@ -497,7 +496,7 @@ impl SGDKind {
         match *self {
             SGDKind::Momentum => {
                 Box::new(Momentum::new())
-            },
+            }
         }
     }
 }

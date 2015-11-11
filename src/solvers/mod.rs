@@ -72,9 +72,9 @@ trait SGDSolver {
                 let scale_factor = clip_threshold / l2norm_diff;
                 info!("Gradient clipping: scaling down gradients (L2 norm {} > {})
                         by scale factor {}",
-                    l2norm_diff,
-                    clip_threshold,
-                    scale_factor);
+                      l2norm_diff,
+                      clip_threshold,
+                      scale_factor);
 
                 for weight_blob in net_weights {
                     let mut blob = weight_blob.write().unwrap();
@@ -113,12 +113,12 @@ trait SGDSolver {
                                 leaf_cpu_axpy(&local_decay,
                                               weight_blob.read().unwrap().cpu_data(),
                                               weight_blob.write().unwrap().mutable_cpu_diff());
-                            },
+                            }
                         }
-                    },
+                    }
                     None => {
                         error!("Weight decay multiplier for blob missing.");
-                    },
+                    }
                 }
             }
         }

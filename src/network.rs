@@ -735,7 +735,6 @@ impl Network {
         }
     }
 
-
     /// Computes [forward][1] and [backward][2] step for the network and returns [the total loss.][3]
     /// [1]: #method.forward
     /// [2]: #method.backward
@@ -750,7 +749,7 @@ impl Network {
         let loss = &mut 0f32;
 
         self.forward(bottom, loss);
-        // self.backward();
+        self.backward();
 
         *loss
     }
@@ -805,7 +804,7 @@ impl Network {
     /// Computes the forward step from the layer with index `start` to the layer with index `end`
     /// and return the total [scalar loss][2] over all loss layers.
     ///
-    /// If you want to compute a foward step for the whole layer
+    /// If you want to compute a foward step for the whole network
     /// you should use [forward_prefilled][3].
     /// Computing a forward on a part of the network is usually only done for debugging purposes.
     ///
@@ -828,6 +827,42 @@ impl Network {
         }
 
         loss
+    }
+
+    /// Computes a [backpropagation][1] step for the whole network using the currently set output blobs.
+    /// [1]: https://en.wikipedia.org/wiki/Backpropagation
+    ///
+    /// Computes the backpropagation step for each layer of the Network using [backward_from_to][2].
+    /// [2]: #method.backward_from_to
+    ///
+    /// Called directly only for debugging purposes.
+    /// Backpropagating a network is only useful during training and handled by a [Solver][3]
+    /// [3]: ../solver/index.html
+    pub fn backward(&mut self) {
+        let start = self.layers.len() - 1;
+        self.backward_from_to(start, 0);
+    }
+
+    /// Compute [backpropagation][1] step for a part of (or the whole) network.
+    /// [1]: https://en.wikipedia.org/wiki/Backpropagation
+    ///
+    /// Computes the backpropagation step from the layer with index `start` to the layer with index `end`,
+    /// skipping layers that have been flagged to be skipped (usually in [init_backprop][2]).
+    /// [2]: #method.init_backprop
+    ///
+    /// If you want to compute a foward step for the whole network you should use [backward][3].
+    /// Computing a backward on a part of the network is usually only done for debugging purposes.
+    /// [3]: #method.backward
+    pub fn backward_from_to(&mut self, start: usize, end: usize) {
+        assert!(start < self.layers.len());
+
+        for i in start..end {
+            if self.layer_need_backwards[i] {
+                self.layers[i].worker.backward(&self.top_vecs[i],
+                                               &self.bottom_need_backwards[i],
+                                               &mut self.bottom_vecs[i]);
+            }
+        }
     }
 
     /// Clears the [weights][1] diffs and zero-inits them.
