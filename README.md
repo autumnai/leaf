@@ -27,11 +27,11 @@ Leaf strives for leading-edge performance
 expressive architecture that creates - as we hope - an innovative and active
 community around machine intelligence and fuels future research.
 
-We see Leaf as the core of constructing high-performance learning networks that
-can be distributed and extended with other libraries e.g. for reinforcement
+We see Leaf as the core for constructing high-performance learning networks that
+can be distributed and extended with other libraries; e.g. for reinforcement
 learning (Q-learning), visualizing and monitoring the learning of the network,
-[automated preprocessing of non-numerical data][cuticula] or scale, deploy and
-distribute your network to the cloud.
+[automated preprocessing of non-numerical data][cuticula] or scaling, deploying, and
+distributing your network to the cloud.
 
 For more information,
 
@@ -46,7 +46,7 @@ For more information,
 [documentation]: http://autumnai.github.io/leaf
 
 > Disclaimer: Leaf is currently in a very early and heavy stage of development.
-> If you are experiencing any bugs that are not due to not yet implemented
+> If you are experiencing any bugs that are not due to yet to be implemented
 > features, feel free to create a issue.
 
 ## Getting Started
@@ -71,8 +71,8 @@ Leaf right from the command line.
 
 ## Leaf Ecosystem and Extensions
 
-We design Leaf and all other crates for machine learning completely modular and
-as extensible as possible. More helpful crates you can use with Leaf:
+We've designed Leaf, and all other crates for machine learning, to be as modular and 
+extensible as possible. More helpful crates you can use with Leaf:
 
 - [**Cuticula**][cuticula]: Preprocessing Framework for Machine Learning
 - [**Phloem**][phloem]: Universal CPU/GPU Data Blob for Machine Learning
@@ -86,7 +86,7 @@ as extensible as possible. More helpful crates you can use with Leaf:
 Want to contribute? Awesome! We have
 [instructions to help you get started contributing code or documentation][contributing].
 
-Leaf has a near real-time collaboration culture and happens here on Github and
+Leaf has a near real-time collaboration culture which happens here on Github and
 on the [Leaf Gitter Channels][gitter-leaf].
 You can also reach out to the Maintainers
 {[@MJ][mj], [@hobofan][hobofan]}.
@@ -101,37 +101,37 @@ You can also reach out to the Maintainers
 #### _Why Rust?_
 
 The current hardware just recently became strong enough to support real-world
-usage of machine intelligence e.g. super-human image recognition, self-driving
-cars, etc.. For taking advantage of the computational power of the underlying
-hardware from GPUs to clusters you need a low-level language that allows for
-control of memory. But to make machine intelligence widely accessible you want
-to have a high-level comfortable abstraction over the underlying hardware.
+usage of machine intelligence; e.g. super-human image recognition, self-driving
+cars, etc.. To take advantage of the computational power of the underlying
+hardware, from GPUs to clusters, you need a low-level language that allows for
+control of memory. However, to make machine intelligence widely accessible, you want
+a high-level and comfortable abstraction over the underlying hardware.
 
 Rust allows us to cross this chasm.
-Rust promises performance like C/C++ but with safe memory-control. For now we
-can use C Rust wrappers for performant libraries. But in the future Rust
-rewritten libraries will have the advantage of zero-cost safe memory control,
-that will make large, parallel learning networks over CPUs and GPUs more
-feasible and more reliable to develop. The development of these future libraries
+Rust promises performance like C/C++ but with safe memory-control. Currently, we
+can use C Rust wrappers for performant libraries, but in the future libraries
+rewritten in Rust will have the advantage of zero-cost safe memory control.
+Those Rust libraries will make developing large, parallel learning networks over CPUs and GPUs more
+feasible and reliable. The development of these future libraries
 is already under way e.g. [Glium][glium].
 
-On the usability side, Rust offers a trait-system, that makes it easy for
-researchers and hobbyists alike to extend and work with Leaf as if Leaf would
-have been written in a higher-level language such as Ruby, Python, Java, etc.
+On the usability side, Rust offers a trait-system that makes it easy for
+researchers and hobbyists to extend and work with Leaf, as though Leaf was
+written in a higher-level language, such as Ruby, Python, Java, etc.
 
 #### _Who can use Leaf?_
 
-We develop Leaf under the MIT open source license, which, paired with the easy
+We develop Leaf under the MIT open source license, which, paired with easy
 access and performance, makes Leaf a first-choice option for researchers and
 developers alike.
 
 #### _Why did you open source Leaf?_
 
-We believe strongly in machine intelligence and think that it will have a major
-impact on future innovations, products and our society. At Autumn, we experienced
-a lack of common and well engineered tools for machine learning and therefore
-started to create a modular toolbox for machine learning in Rust. We hope, that
-with making our work open source, we will speed-up research and development of
+We strongly believe in machine intelligence, and think that it will have a major
+impact on future innovations, products, and our society. At Autumn, we experienced
+a lack of common and well engineered tools for machine learning, and therefore
+started to create a modular toolbox for machine learning in Rust. We hope that by
+making our work open source, we will speed-up research and development of
 production-ready applications and make their work easier as well.
 
 #### _Who is Autumn?_
