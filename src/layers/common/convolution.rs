@@ -5,4 +5,5 @@
 
 #[derive(Debug, Copy, Clone)]
 /// Convolution Layer
+//intended to construct
 pub struct Convolution;
