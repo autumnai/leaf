@@ -1,4 +1,4 @@
-//! Apploes the nonlinear Log-Sigmoid function the its bottom Blob.
+//! Applies the nonlinear Log-Sigmoid function.
 //!
 //! Non-linearity activation function: y = (1 + e^(-x))^(-1)
 //!
@@ -12,7 +12,6 @@
 //! * can be computed faster
 //! * is therefore the most popular activation function in DNNs as of this
 //! writing (2015).
-use shared_memory::*;
 use layer::*;
 
 #[derive(Debug, Copy, Clone)]
@@ -20,7 +19,7 @@ use layer::*;
 pub struct Sigmoid;
 
 impl ILayer for Sigmoid {
-    impl_neuron_layer!();
+    impl_ilayer_activation!();
 
     fn forward_cpu(&self, bottom: &[ReadBlob], top: &mut Vec<&mut WriteBlob>) {
         let bottom_data = bottom[0].cpu_data();
@@ -31,7 +30,7 @@ impl ILayer for Sigmoid {
         }
     }
 
-    fn backward_cpu(&self, top: &[HeapBlob], propagate_down: &[bool], bottom: &mut Vec<HeapBlob>) {
+    fn backward_cpu(&self, top: &[ReadBlob], propagate_down: &[bool], bottom: &mut Vec<&mut WriteBlob>) {
         if propagate_down[0] {
             let top_data = top[0].cpu_data();
             let top_diff = top[0].cpu_diff();

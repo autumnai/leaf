@@ -159,7 +159,7 @@ pub trait ILayer {
     /// Compute the gradients for the bottom blobs
     /// if the corresponding value of propagate_down is true.
     /// Uses the CPU.
-    fn backward_cpu(&self, top: &[HeapBlob], propagate_down: &[bool], bottom: &mut Vec<HeapBlob>);
+    fn backward_cpu(&self, top: &[ReadBlob], propagate_down: &[bool], bottom: &mut Vec<&mut WriteBlob>);
 
     /// Compute the [feedforward][1] layer output using the currently set computation method.
     /// [1]: https://en.wikipedia.org/wiki/Feedforward_neural_network
@@ -178,12 +178,10 @@ pub trait ILayer {
         let mut loss = 0f32;
 
         let btm: Vec<_> = bottom.iter().map(|b| b.read().unwrap()).collect();
-        // let tp: Vec<_> = top.iter().map(|b| b.write().unwrap()).collect();
         let tp_ref = top.iter().cloned().collect::<Vec<_>>();
         let mut tp = &mut tp_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
-        let mut tpo = &mut tp.iter_mut().map(|a| a).collect::<Vec<_>>();
-        self.forward_cpu(&btm, tpo);
-        // self.forward_cpu(bottom, top);
+        let mut top_w = &mut tp.iter_mut().map(|a| a).collect::<Vec<_>>();
+        self.forward_cpu(&btm, top_w);
 
         for (top_id, top_layer) in top.iter().enumerate() {
             // if (!this->loss(top_id)) { continue; } // Caffe
@@ -200,6 +198,25 @@ pub trait ILayer {
         // Unlock();
 
         loss
+    }
+
+    /// Compute the [backpropagation][1] layer output and gradient using the currently set computation method.
+    /// [1]: https://en.wikipedia.org/wiki/Backpropagation
+    ///
+    /// Aquires read locks for the top blobs ([ReadBlob][2])
+    /// and write locks for the bottom blobs ([WriteBlob][3]) to ensure sequential computation,
+    /// and then passes them to computation method specific function ([backward_cpu][4]).
+    ///
+    /// [2]: ./type.ReadBlob.html
+    /// [3]: ./type.WriteBlob.html
+    /// [3]: #method.backward_cpu
+    #[allow(map_clone)]
+    fn backward(&self, top: &[ArcLock<HeapBlob>], propagate_down: &[bool], bottom: &mut Vec<ArcLock<HeapBlob>>) {
+        let tp: Vec<_> = top.iter().map(|b| b.read().unwrap()).collect();
+        let bt_ref = top.iter().cloned().collect::<Vec<_>>();
+        let mut bt = &mut bt_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
+        let mut btm = &mut bt.iter_mut().map(|a| a).collect::<Vec<_>>();
+        self.backward_cpu(&tp, propagate_down, btm);
     }
 
     /// Return whether "anonymous" top blobs are created automatically for the layer.

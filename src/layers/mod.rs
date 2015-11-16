@@ -55,7 +55,8 @@
 /// Implement [ILayer][1] for [activation layers][2].
 /// [1]: ./layer/trait.ILayer.html
 /// [2]: ./layers/activation/index.html
-macro_rules! impl_neuron_layer {
+#[macro_export]
+macro_rules! impl_ilayer_activation {
     () => (
         fn exact_num_top_blobs(&self) -> usize { 1 }
         fn exact_num_bottom_blobs(&self) -> usize { 1 }
