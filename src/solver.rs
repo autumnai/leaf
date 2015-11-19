@@ -215,17 +215,6 @@ impl<S: ISolver> Solver<S>{
     }
 }
 
-// impl<'a, S: ISolver> Default for Solver<'a, S> {
-//     fn default() -> Solver<'a, ISolver> {
-//         Solver {
-//             net: Network::default(),
-//             worker: Box::<S>::new(Momentum::new()),
-//             config: SolverConfig::default(),
-//             iter: 0,
-//         }
-//     }
-// }
-
 /// Implementation of a specific Solver.
 ///
 /// See [Solvers][1]
