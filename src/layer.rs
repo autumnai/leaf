@@ -1,14 +1,16 @@
 //! Provides the generics and interfaces for the specific [Layers][layers].
 //! [layers]: ../layers/index.html
-use math::*;
-use phloem::{Blob, Numeric};
+use co::backend::IBackend;
+use co::libraries::blas::IBlas;
+use co::libraries::numeric_helpers::Float;
+use phloem::Blob;
 use shared_memory::{ArcLock, HeapBlob};
 use layers::*;
 use std::fmt;
 use std::cmp;
 use std::collections::{HashMap, HashSet};
+use std::rc::Rc;
 use std::sync::{Arc, RwLock};
-
 use std::sync::{RwLockReadGuard, RwLockWriteGuard};
 
 /// Secures sequential execution as bottom Blob for a forward and as top Blob for a backward
@@ -71,7 +73,7 @@ pub type WriteBlob<'_> = RwLockWriteGuard<'_, HeapBlob>;
 
 #[derive(Debug)]
 /// The generic Layer
-pub struct Layer {
+pub struct Layer<B: IBackend + IBlas<f32>> {
     /// Identifies the Network
     ///
     /// The name is mainly used for logging purposes.
@@ -86,7 +88,9 @@ pub struct Layer {
     /// [3]: ./trait.ILayer.html#method.backward
     pub worker: Box<ILayer>,
 
-    /// Determies if layer will skip comutations for [backward][1] step.
+    backend: Rc<B>,
+
+    /// Determines if layer will skip comutations for [backward][1] step.
     /// [1]: ./trait.ILayer.html#method.backward
     needs_backward: bool,
 
@@ -122,14 +126,14 @@ pub struct Layer {
     pub blob_names: HashMap<String, ArcLock<HeapBlob>>,
 }
 
-impl Layer {
+impl<B: IBackend + IBlas<f32>> Layer<B> {
     /// Creates a new Layer from a [LayerConfig][1].
     /// [1]: ./struct.LayerConfig.html
     ///
     /// Used during [Network][2] initalization.
     ///
     /// [2]: ../network/struct.Network.html
-    pub fn from_config(config: &LayerConfig) -> Layer {
+    pub fn from_config(backend: Rc<B>, config: &LayerConfig) -> Layer<B> {
         let cl = config.clone();
         let cfg = Box::<LayerConfig>::new(cl);
         Layer {
@@ -150,7 +154,9 @@ impl Layer {
 
             blob_names: HashMap::new(),
 
-            worker: Layer::worker_from_config(&cfg),
+            backend: backend,
+
+            worker: Layer::<B>::worker_from_config(&cfg),
             config: cfg,
         }
     }
@@ -432,13 +438,12 @@ pub trait ILayer {
     fn init(&mut self) {}
 
     /// Compute the [feedforward][1] layer output.
-    /// Uses the CPU.
     /// [1]: https://en.wikipedia.org/wiki/Feedforward_neural_network
-    fn forward_cpu(&self, bottom: &[ReadBlob], top: &mut Vec<&mut WriteBlob>);
+    fn forward_layer(&self, bottom: &[ReadBlob], top: &mut Vec<&mut WriteBlob>);
     /// Compute the gradients for the bottom blobs
     /// if the corresponding value of `propagate_down` is true.
     /// Uses the CPU.
-    fn backward_cpu(&self, top: &[ReadBlob], propagate_down: &[bool], bottom: &mut Vec<&mut WriteBlob>);
+    fn backward_layer(&self, top: &[ReadBlob], propagate_down: &[bool], bottom: &mut Vec<&mut WriteBlob>);
 
     /// Compute the [feedforward][1] layer output using the currently set computation method.
     /// [1]: https://en.wikipedia.org/wiki/Feedforward_neural_network
@@ -460,7 +465,7 @@ pub trait ILayer {
         let tp_ref = top.iter().cloned().collect::<Vec<_>>();
         let mut tp = &mut tp_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
         let mut top_w = &mut tp.iter_mut().map(|a| a).collect::<Vec<_>>();
-        self.forward_cpu(&btm, top_w);
+        self.forward_layer(&btm, top_w);
 
         for (top_id, top_layer) in top.iter().enumerate() {
             // if (!this->loss(top_id)) { continue; } // Caffe
@@ -468,10 +473,11 @@ pub trait ILayer {
 
             let top_blob = top_layer.read().unwrap();
 
-            let data = top_blob.cpu_data();
-            let loss_weights = top_blob.cpu_diff();
+            let data = top_blob.data();
+            let loss_weights = top_blob.diff();
 
-            loss += leaf_cpu_dot(data, loss_weights);
+            // TODO
+            // loss += leaf_cpu_dot(data, loss_weights);
         }
 
         // Unlock();
@@ -495,7 +501,7 @@ pub trait ILayer {
         let bt_ref = bottom.iter().cloned().collect::<Vec<_>>();
         let mut bt = &mut bt_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
         let mut btm = &mut bt.iter_mut().map(|a| a).collect::<Vec<_>>();
-        self.backward_cpu(&tp, propagate_down, btm);
+        self.backward_layer(&tp, propagate_down, btm);
     }
 
     /// Return whether "anonymous" top blobs are created automatically for the layer.
@@ -685,7 +691,7 @@ impl Default for WeightConfig {
 impl WeightConfig {
     /// Checks dimensions of two blobs according to the `share_mode`.
     /// Returns an error if there is a count/shape mismatch.
-    pub fn check_dimensions<T: Numeric>(&self,
+    pub fn check_dimensions<T: Float>(&self,
                                         blob_one: &Blob<T>,
                                         blob_two: &Blob<T>,
                                         param_name: String,

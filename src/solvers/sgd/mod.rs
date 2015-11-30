@@ -25,8 +25,8 @@
 #[macro_export]
 macro_rules! impl_isolver_sgd {
     ($t:ty) => (
-        impl ISolver for $t {
-            fn apply_update(&mut self, config: &SolverConfig, net: &mut Network, iter: usize) {
+        impl<B: IBackend + IBlas<f32>> ISolver<B> for $t {
+            fn apply_update(&mut self, config: &SolverConfig, net: &mut Network<B>, iter: usize) {
                 // CHECK(Caffe::root_solver()); // Caffe
                 let rate = config.get_learning_rate(iter);
 
@@ -42,6 +42,10 @@ macro_rules! impl_isolver_sgd {
                                               &net.weights_lr()[weight_id].unwrap());
                 }
                 net.update_weights();
+            }
+
+            fn backend(&self) -> &B {
+                &self.backend
             }
         }
     )
