@@ -79,10 +79,9 @@
 
 #[macro_use]
 extern crate log;
-extern crate rblas;
 extern crate phloem;
+extern crate collenchyma as co;
 pub mod shared_memory;
-mod math;
 pub mod layer;
 pub mod layers;
 pub mod solver;

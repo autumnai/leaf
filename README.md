@@ -76,10 +76,11 @@ as extensible as possible. More helpful crates you can use with Leaf:
 
 - [**Cuticula**][cuticula]: Preprocessing Framework for Machine Learning
 - [**Phloem**][phloem]: Universal CPU/GPU Data Blob for Machine Learning
+- [**Collenchyma**][collen]: Backend-agnostic parallel computation
 
 [cuticula]: https://github.com/autumnai/cuticula
 [phloem]: https://github.com/autumnai/phloem
-
+[collen]: https://github.com/autumnai/collenchyma
 
 ## Contributing
 
