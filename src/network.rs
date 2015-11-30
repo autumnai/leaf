@@ -32,13 +32,15 @@
 //!
 //! The blobs in a input layer contain externally preprocessed data that has
 //! been brought into a form suitable for consumption by a neural network.
+use co::backend::IBackend;
+use co::libraries::blas::IBlas;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
-use math::*;
 use shared_memory::*;
 use layer::{ILayer, Layer};
 use layer::{LayerConfig, WeightConfig};
 use phloem::Blob;
+use std::rc::Rc;
 
 #[derive(Debug)]
 /// Defines a [Network][1] that contains the [Layers][2] and [Blobs][3] that store
@@ -53,12 +55,12 @@ use phloem::Blob;
 /// A Network is usually used together with a [Solver][6] to optimize the networks' weights.
 ///
 /// [6]: ../solver/struct.Solver.html
-pub struct Network {
+pub struct Network<B: IBackend + IBlas<f32>> {
     /// Identifies the Network
     ///
     /// The name is mainly used for logging purposes.
     pub name: String,
-    layers: Vec<Layer>,
+    layers: Vec<Layer<B>>,
 
     blobs: Vec<ArcLock<HeapBlob>>, // the blobs storing intermediate results between the layer.
     blob_names: Vec<String>,
@@ -84,8 +86,8 @@ pub struct Network {
     weights_weight_decay: Vec<Option<f32>>,
 }
 
-impl Default for Network {
-    fn default() -> Network {
+impl<B: IBackend + IBlas<f32>> Default for Network<B> {
+    fn default() -> Network<B> {
         Network {
             name: "".to_owned(),
             layers: vec![],
@@ -111,7 +113,7 @@ impl Default for Network {
     }
 }
 
-impl Network {
+impl<B: IBackend + IBlas<f32>> Network<B> {
     /// Creates a Network from a [NetworkConfig][1].
     /// [1]: ./struct.NetworkConfig.html
     ///
@@ -122,9 +124,9 @@ impl Network {
     /// let cfg = NetworkConfig::default();
     /// Network::from_config(&cfg);
     /// ```
-    pub fn from_config(param: &NetworkConfig) -> Network {
+    pub fn from_config(backend: Rc<B>, param: &NetworkConfig) -> Network<B> {
         let mut network = Network::default();
-        network.init(param);
+        network.init(backend, param);
         network
     }
 
@@ -135,7 +137,7 @@ impl Network {
     /// to be executed for each blob and layer.
     ///
     /// [1]: ./struct.NetworkConfig.html
-    fn init(&mut self, in_config: &NetworkConfig) {
+    fn init(&mut self, backend: Rc<B>, in_config: &NetworkConfig) {
         let config = in_config.clone();
         let registry = &mut HashMap::<String, ArcLock<HeapBlob>>::new();
 
@@ -144,7 +146,7 @@ impl Network {
         }
 
         for layer_config in &config.layers {
-            self.init_layer(&layer_config, registry);
+            self.init_layer(backend.clone(), &layer_config, registry);
         }
 
         // Go through the net backwards to determine which blobs contribute to the
@@ -188,6 +190,7 @@ impl Network {
     /// [3]: ../layer/struct.Layer.html
     /// [4]: ../layers/index.html
     fn init_layer(&mut self,
+                  backend: Rc<B>,
                   layer_config: &LayerConfig,
                   registry: &mut HashMap<String, ArcLock<HeapBlob>>) {
         // Caffe
@@ -204,7 +207,7 @@ impl Network {
         }
 
         info!("Creating Layer {}", layer_config.name.clone());
-        let mut layer = Layer::from_config(&layer_config);
+        let mut layer = Layer::from_config(backend, &layer_config);
 
         // Figure out this layer's input and output
         // self.layers.last_mut().unwrap().connect(registry);
@@ -232,8 +235,8 @@ impl Network {
         // }
         for (i, _) in self.weights.clone().iter().enumerate() {
             if let Some(j) = self.weight_owners[i] {
-                assert!(self.weights[i].read().unwrap().cpu_data().capacity() ==
-                        self.weights[j].read().unwrap().cpu_data().capacity());
+                assert!(self.weights[i].read().unwrap().capacity() ==
+                        self.weights[j].read().unwrap().capacity());
                 self.weights[i] = self.weights[j].clone(); // sharing whole blob?
             }
         }
@@ -271,7 +274,7 @@ impl Network {
 
             // Set the (explicitly specified) dimensions of the input blob.
             // let input_shape = config.input_shape(top_id).unwrap().clone();
-            blob.write().unwrap().reshape(input_shape.clone());
+            blob.write().unwrap().reshape(&input_shape.clone());
 
             self.input_blobs.push(blob.clone());
             registry.insert(blob_name.to_owned(), blob);
@@ -504,9 +507,10 @@ impl Network {
     /// [2]: ../solver/struct.Solver.html
     pub fn clear_weight_diffs(&mut self) {
         for weight_blob in &mut self.learnable_weights.iter() {
-            for p in weight_blob.write().unwrap().mutable_cpu_diff().iter_mut() {
-                *p = 0f32;
-            }
+            // TODO
+            // for p in weight_blob.write().unwrap().mut_diff().iter_mut() {
+            //     *p = 0f32;
+            // }
         }
     }
 
@@ -520,9 +524,7 @@ impl Network {
     /// [3]: ../solver/enum.LRPolicy.html
     pub fn update_weights(&mut self) {
         for weight_blob in &self.learnable_weights {
-            leaf_cpu_axpy(&-1f32,
-                          weight_blob.read().unwrap().cpu_diff(),
-                          weight_blob.write().unwrap().mutable_cpu_data());
+            weight_blob.write().unwrap().apply_diff()
         }
     }
 

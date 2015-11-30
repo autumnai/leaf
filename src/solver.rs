@@ -1,14 +1,19 @@
 //! Provides the generics and interfaces for the specific [Solvers][solvers].
 //! [solvers]: ../solvers/index.html
+use co::backend::*;
+use co::framework::*;
+use co::frameworks::Native;
+use co::libraries::blas::IBlas;
 use shared_memory::*;
 use network::*;
 use solvers::*;
+use std::rc::Rc;
 
 #[derive(Debug)]
 /// Solver that optimizes a [Network][1].
 /// [1]: ../network/struct.Network.html
-pub struct Solver<S> {
-    net: Network,
+pub struct Solver<S, B: IBackend + IBlas<f32>> {
+    net: Network<B>,
     /// The implementation of the Solver
     pub worker: S,
 
@@ -17,7 +22,7 @@ pub struct Solver<S> {
     iter: usize,
 }
 
-impl<S> Solver<S> {
+impl<S, B: IBackend + IBlas<f32>> Solver<S, B> {
     /// Create Solver from [SolverConfig][1]
     /// [1]: ./struct.SolverConfig.html
     ///
@@ -32,10 +37,16 @@ impl<S> Solver<S> {
     ///             ..SolverConfig::default()};
     /// let solver = Solver::<Box<ISolver>>::from_config(&cfg);
     /// ```
-    pub fn from_config(config: &SolverConfig) -> Solver<Box<ISolver>> {
+    pub fn from_config(config: &SolverConfig) -> Solver<Box<ISolver<Backend<Native>>>, Backend<Native>> {
+        let framework = Native::new();
+        let hardwares = framework.hardwares();
+        let backend_config = BackendConfig::new(framework, hardwares);
+        let backend = Rc::new(Backend::new(backend_config).unwrap());
+
+        let worker = config.solver.with_config(backend.clone(), &config);
         Solver {
-            net: Network::from_config(&config.train_net),
-            worker: config.solver.with_config(&config),
+            worker: worker,
+            net: Network::from_config(backend, &config.train_net),
             iter: 0,
 
             config: config.clone(),
@@ -44,8 +55,8 @@ impl<S> Solver<S> {
 
 }
 
-impl<S: ISolver> Solver<S>{
-    fn init(&mut self, config: SolverConfig) {
+impl<S: ISolver<B>, B: IBackend + IBlas<f32>> Solver<S, B>{
+    fn init(&mut self, backend: Rc<B>, config: SolverConfig) {
         // Caffe
         //   CHECK(Caffe::root_solver() || root_solver_)
         //       << "root_solver_ needs to be set for all non-root solvers";
@@ -57,7 +68,7 @@ impl<S: ISolver> Solver<S>{
         //     Caffe::set_random_seed(param_.random_seed());
         //   }
 
-        Solver::<S>::init_train_net(&mut self.config, &mut self.net);
+        Solver::<S, _>::init_train_net(backend, &mut self.config, &mut self.net);
         // if (Caffe::root_solver()) {
         {
             // self.init_test_nets();
@@ -66,7 +77,7 @@ impl<S: ISolver> Solver<S>{
     }
 
     /// Initialize the training net
-    fn init_train_net(param: &mut SolverConfig, net: &mut Network) {
+    fn init_train_net(backend: Rc<B>, param: &mut SolverConfig, net: &mut Network<B>) {
         // Caffe
         // Set the correct NetState.  We start with the solver defaults (lowest
         // precedence); then, merge in any NetState specified by the net_param itself;
@@ -89,7 +100,7 @@ impl<S: ISolver> Solver<S>{
         // } else {
         //     net_.reset(new Net<Dtype>(net_param, root_solver_->net_.get()));
         // }
-        *net = Network::from_config(&param.train_net);
+        *net = Network::from_config(backend, &param.train_net);
 
         unimplemented!();
     }
@@ -219,7 +230,7 @@ impl<S: ISolver> Solver<S>{
 ///
 /// See [Solvers][1]
 /// [1]: ../solvers/index.html
-pub trait ISolver {
+pub trait ISolver<B> {
     /// Update the weights of the net with part of the gradient.
     ///
     /// The [second phase of backpropagation learning][1].
@@ -234,7 +245,10 @@ pub trait ISolver {
     //
     // TODO: the actual update can probably be pulled out of this function,
     // since that should be the same independent of solver type.
-    fn apply_update(&mut self, param: &SolverConfig, network: &mut Network, iter: usize);
+    fn apply_update(&mut self, param: &SolverConfig, network: &mut Network<B>, iter: usize);
+
+    /// TODO: [DOC]
+    fn backend(&self) -> &B;
 }
 
 #[derive(Debug, Clone)]
@@ -462,10 +476,10 @@ pub enum SolverKind {
 
 impl SolverKind {
     /// Create a Solver of the specified kind with the supplied SolverConfig.
-    pub fn with_config(&self, config: &SolverConfig) -> Box<ISolver> {
+    pub fn with_config<B: IBackend + IBlas<f32> + 'static>(&self, backend: Rc<B>, config: &SolverConfig) -> Box<ISolver<B>> {
         match *self {
             SolverKind::SGD(sgd) => {
-                sgd.with_config(config)
+                sgd.with_config(backend, config)
             }
         }
     }
@@ -481,10 +495,10 @@ pub enum SGDKind {
 
 impl SGDKind {
     /// Create a Solver of the specified kind with the supplied SolverConfig.
-    pub fn with_config(&self, config: &SolverConfig) -> Box<ISolver> {
+    pub fn with_config<B: IBackend + IBlas<f32> + 'static>(&self, backend: Rc<B>, config: &SolverConfig) -> Box<ISolver<B>> {
         match *self {
             SGDKind::Momentum => {
-                Box::new(Momentum::new())
+                Box::new(Momentum::<B>::new(backend))
             }
         }
     }
