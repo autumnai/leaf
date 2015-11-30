@@ -66,9 +66,9 @@
 //! [issue-loss]: https://github.com/autumnai/leaf/issues/18
 //! [issue-activation]: https://github.com/autumnai/leaf/issues/19
 //! [issue-common]: https://github.com/autumnai/leaf/issues/20
-#![feature(plugin)]
+#![cfg_attr(lint, feature(plugin))]
+#![cfg_attr(lint, plugin(clippy))]
 #![feature(augmented_assignments)]
-#![plugin(clippy)]
 #![allow(dead_code)]
 #![allow(unused_variables)]
 #![deny(missing_docs,
@@ -79,10 +79,9 @@
 
 #[macro_use]
 extern crate log;
-extern crate rblas;
 extern crate phloem;
+extern crate collenchyma as co;
 pub mod shared_memory;
-mod math;
 pub mod layer;
 pub mod layers;
 pub mod solver;

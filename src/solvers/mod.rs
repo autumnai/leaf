@@ -31,13 +31,14 @@
 pub use self::sgd::{Momentum};
 pub mod sgd;
 
-
-use math::*;
+use co::backend::IBackend;
+use co::shared_memory::SharedMemory;
+use co::libraries::blas::IBlas;
 use shared_memory::*;
 use solver::*;
 use network::Network;
 
-trait SGDSolver {
+trait SGDSolver<B: IBackend + IBlas<f32>> : ISolver<B> {
     fn compute_update_value(&mut self,
                             config: &SolverConfig,
                             weight_blob: &ArcLock<HeapBlob>,
@@ -57,17 +58,22 @@ trait SGDSolver {
     ///
     /// [3]: https://en.wikipedia.org/wiki/Recurrent_neural_network
     /// [4]: https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm
-    fn clip_gradients(&self, config: &SolverConfig, net: &mut Network) {
+    fn clip_gradients(&self, config: &SolverConfig, net: &mut Network<B>) {
         // skip clipping gradients if SolverConfig.clip_gradients is set to None
         if let Some(clip_threshold) = config.clip_gradients {
             let net_weights = net.learnable_weights();
             let mut sumsq_diff = 0f32;
+            let backend = self.backend();
+            let mut result = SharedMemory::<f32>::new(backend.device(), 1);
             for weight_blob in net_weights {
-                let blob = weight_blob.read().unwrap();
-                let blob_sumsq_diff = leaf_cpu_dot(blob.cpu_diff(), blob.cpu_diff());
-                sumsq_diff += blob_sumsq_diff;
+                let mut blob = weight_blob.write().unwrap();
+                // self.backend().nrm2(blob.mut_diff(), &mut result);
+                // TODO
+                // let blob_sumsq_diff = leaf_cpu_dot(blob.cpu_diff(), blob.cpu_diff());
+                // sumsq_diff += blob_sumsq_diff;
             }
             let l2norm_diff = sumsq_diff.sqrt();
+            unimplemented!(); // needs either simple devision or similar
             if l2norm_diff > clip_threshold {
                 let scale_factor = clip_threshold / l2norm_diff;
                 info!("Gradient clipping: scaling down gradients (L2 norm {} > {})
@@ -78,8 +84,9 @@ trait SGDSolver {
 
                 for weight_blob in net_weights {
                     let mut blob = weight_blob.write().unwrap();
-                    let diff = blob.mutable_cpu_diff();
-                    leaf_cpu_scal(&scale_factor, diff);
+                    let diff = blob.mut_diff();
+                    // TODO
+                    // leaf_cpu_scal(&scale_factor, diff);
                 }
             }
         }
@@ -95,7 +102,9 @@ trait SGDSolver {
         if config.minibatch_size > 1 {
             let scale_factor = 1f32 / config.minibatch_size as f32;
             let mut write_blob = weight_blob.write().unwrap();
-            leaf_cpu_scal(&scale_factor, write_blob.mutable_cpu_diff());
+            let mut shared_scale_factor = SharedMemory::<f32>::new(self.backend().device(), 1);
+            // let _ = self.backend().scale(&mut shared_scale_factor, write_blob.mut_diff());
+            unimplemented!();
         }
     }
 
@@ -110,9 +119,10 @@ trait SGDSolver {
                         let local_decay = global_weight_decay * weight_decay_mult;
                         match regularization_method {
                             RegularizationMethod::L2 => {
-                                leaf_cpu_axpy(&local_decay,
-                                              weight_blob.read().unwrap().cpu_data(),
-                                              weight_blob.write().unwrap().mutable_cpu_diff());
+                                // TODO
+                                // leaf_cpu_axpy(&local_decay,
+                                //               weight_blob.read().unwrap().cpu_data(),
+                                //               weight_blob.write().unwrap().mutable_cpu_diff());
                             }
                         }
                     }

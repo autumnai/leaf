@@ -21,27 +21,29 @@ pub struct Sigmoid;
 impl ILayer for Sigmoid {
     impl_ilayer_activation!();
 
-    fn forward_cpu(&self, bottom: &[ReadBlob], top: &mut Vec<&mut WriteBlob>) {
-        let bottom_data = bottom[0].cpu_data();
-        let top_data = top[0].mutable_cpu_data();
+    fn forward_layer(&self, bottom: &[ReadBlob], top: &mut Vec<&mut WriteBlob>) {
+        let bottom_data = bottom[0].data();
+        let top_data = top[0].mut_data();
 
-        for (i, _) in bottom_data.iter().enumerate() {
-            top_data[i] = Sigmoid::sigmoid(bottom_data[i])
-        }
+        // TODO
+        // for (i, _) in bottom_data.iter().enumerate() {
+        //     top_data[i] = Sigmoid::sigmoid(bottom_data[i])
+        // }
     }
 
-    fn backward_cpu(&self, top: &[ReadBlob], propagate_down: &[bool], bottom: &mut Vec<&mut WriteBlob>) {
+    fn backward_layer(&self, top: &[ReadBlob], propagate_down: &[bool], bottom: &mut Vec<&mut WriteBlob>) {
         if propagate_down[0] {
-            let top_data = top[0].cpu_data();
-            let top_diff = top[0].cpu_diff();
-            let count = bottom[0].len();
-            let bottom_diff = bottom[0].mutable_cpu_diff();
+            let top_data = top[0].data();
+            let top_diff = top[0].diff();
+            let count = bottom[0].capacity();
+            let bottom_diff = bottom[0].mut_diff();
 
-            for i in 0..count {
-                let sigmoid_x = top_data[i];
-                // bottom_diff[i] = top_diff[i] * sigmoid_x * (1f32 - sigmoid_x);
-                bottom_diff[i] = top_diff[i] * Sigmoid::sigmoid_prime_precalc(sigmoid_x)
-            }
+
+            // for i in 0..count {
+                // TODO
+                // let sigmoid_x = top_data[i];
+                // bottom_diff[i] = top_diff[i] * Sigmoid::sigmoid_prime_precalc(sigmoid_x)
+            // }
         }
     }
 }
