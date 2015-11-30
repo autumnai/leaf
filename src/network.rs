@@ -120,9 +120,25 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
     /// ## Examples
     ///
     /// ```
+    /// # extern crate collenchyma;
+    /// # extern crate leaf;
+    ///
     /// # use leaf::network::*;
+    /// # use collenchyma::backend::{Backend, BackendConfig};
+    /// # use collenchyma::frameworks::Native;
+    /// # use collenchyma::framework::IFramework;
+    /// # use std::rc::Rc;
+    ///
+    /// # fn main() {
+    /// // create backend
+    /// let framework = Native::new();
+    /// let hardwares = framework.hardwares();
+    /// let backend_config = BackendConfig::new(framework, hardwares);
+    /// let backend = Rc::new(Backend::new(backend_config).unwrap());
+    /// // create network
     /// let cfg = NetworkConfig::default();
-    /// Network::from_config(&cfg);
+    /// Network::from_config(backend, &cfg);
+    /// # }
     /// ```
     pub fn from_config(backend: Rc<B>, param: &NetworkConfig) -> Network<B> {
         let mut network = Network::default();
@@ -250,7 +266,7 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
     /// Used during initialization of the Network.
     /// [1]: ../layer/struct.Layer.html
     /// [2]: ../layer/struct.Layer.html#method.connect
-    #[allow(ptr_arg)]
+    #[cfg_attr(lint, allow(ptr_arg))]
     fn init_input_blob(&mut self,
                   blob_name: &str,
                   input_shape: &Vec<usize>,

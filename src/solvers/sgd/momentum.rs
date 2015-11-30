@@ -13,8 +13,6 @@
 //! into the same direction you will reach the optimum faster.
 //! It also makes solving more stable.
 use co::backend::*;
-use co::framework::*;
-use co::frameworks::*;
 use co::libraries::blas::IBlas;
 use shared_memory::*;
 use network::Network;

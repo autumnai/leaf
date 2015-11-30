@@ -31,12 +31,21 @@ use std::sync::{RwLockReadGuard, RwLockWriteGuard};
 /// ```
 /// extern crate phloem;
 /// # extern crate leaf;
+/// # extern crate collenchyma as co;
 /// use phloem::Blob;
 /// use std::sync::{RwLock, RwLockReadGuard};
 /// # use leaf::layer::ReadBlob;
+/// # use co::backend::{Backend, BackendConfig};
+/// # use co::frameworks::Native;
+/// # use co::framework::IFramework;
+/// # use std::rc::Rc;
 ///
 /// # fn main() {
-/// let lock = RwLock::new(Box::new(Blob::<f32>::of_shape(vec![3])));
+/// # let framework = Native::new();
+/// # let hardwares = framework.hardwares();
+/// # let backend_config = BackendConfig::new(framework, hardwares);
+/// # let backend = Rc::new(Backend::new(backend_config).unwrap());
+/// let lock = RwLock::new(Box::new(Blob::<f32>::of_shape(Some(backend.device()), &[3, 2, 3])));
 /// let read_blob: ReadBlob = lock.read().unwrap();
 /// # }
 /// ```
@@ -60,12 +69,21 @@ pub type ReadBlob<'_> = RwLockReadGuard<'_, HeapBlob>;
 /// ```
 /// extern crate phloem;
 /// # extern crate leaf;
+/// # extern crate collenchyma as co;
 /// use phloem::Blob;
 /// use std::sync::{RwLock, RwLockWriteGuard};
 /// # use leaf::layer::WriteBlob;
+/// # use co::backend::{Backend, BackendConfig};
+/// # use co::frameworks::Native;
+/// # use co::framework::IFramework;
+/// # use std::rc::Rc;
 ///
 /// # fn main() {
-/// let lock = RwLock::new(Box::new(Blob::<f32>::of_shape(vec![3])));
+/// # let framework = Native::new();
+/// # let hardwares = framework.hardwares();
+/// # let backend_config = BackendConfig::new(framework, hardwares);
+/// # let backend = Rc::new(Backend::new(backend_config).unwrap());
+/// let lock = RwLock::new(Box::new(Blob::<f32>::of_shape(Some(backend.device()), &[4, 2, 1])));
 /// let read_blob: WriteBlob = lock.write().unwrap();
 /// # }
 /// ```
@@ -455,7 +473,7 @@ pub trait ILayer {
     /// [2]: ./type.ReadBlob.html
     /// [3]: ./type.WriteBlob.html
     /// [3]: #method.forward_cpu
-    #[allow(map_clone)]
+    #[cfg_attr(lint, allow(map_clone))]
     fn forward(&self, bottom: &[ArcLock<HeapBlob>], top: &mut Vec<ArcLock<HeapBlob>>) -> f32 {
         // Lock();
         // Reshape(bottom, top); // Reshape the layer to fit top & bottom blob
@@ -495,7 +513,7 @@ pub trait ILayer {
     /// [2]: ./type.ReadBlob.html
     /// [3]: ./type.WriteBlob.html
     /// [3]: #method.backward_cpu
-    #[allow(map_clone)]
+    #[cfg_attr(lint, allow(map_clone))]
     fn backward(&self, top: &[ArcLock<HeapBlob>], propagate_down: &[bool], bottom: &mut Vec<ArcLock<HeapBlob>>) {
         let tp: Vec<_> = top.iter().map(|b| b.read().unwrap()).collect();
         let bt_ref = bottom.iter().cloned().collect::<Vec<_>>();
