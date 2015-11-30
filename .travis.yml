@@ -21,7 +21,6 @@ before_script:
 script:
 - |
   travis-cargo build &&
-  travis-cargo test &&
   travis-cargo bench &&
   travis-cargo doc
 addons:

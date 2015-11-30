@@ -1,7 +1,7 @@
 [package]
 name = "leaf"
 description = "Machine Learning Framework"
-version = "0.1.0"
+version = "0.1.1"
 authors = [
   "Maximilian Goisser <max@autumnai.com>",
   "Michael Hirn <mj@autumnai.com>"
@@ -18,7 +18,6 @@ phloem = "~0.3.0"
 collenchyma = "~0.0.3"
 
 log = "0.3.2"
-clippy = "0.0.23"
 
 clippy = { version = "0.0.23", optional = true }
 
