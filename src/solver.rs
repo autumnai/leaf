@@ -31,11 +31,18 @@ impl<S, B: IBackend + IBlas<f32>> Solver<S, B> {
     /// ## Example
     ///
     /// ```
+    /// # extern crate leaf;
+    /// # extern crate collenchyma;
     /// # use leaf::solver::*;
+    /// # use collenchyma::backend::Backend;
+    /// # use collenchyma::frameworks::Native;
+    ///
+    /// # fn main() {
     /// let cfg = SolverConfig{
     ///             solver: SolverKind::SGD(SGDKind::Momentum),
     ///             ..SolverConfig::default()};
-    /// let solver = Solver::<Box<ISolver>>::from_config(&cfg);
+    /// let solver = Solver::<Box<ISolver<Backend<Native>>>, Backend<Native>>::from_config(&cfg);
+    /// # }
     /// ```
     pub fn from_config(config: &SolverConfig) -> Solver<Box<ISolver<Backend<Native>>>, Backend<Native>> {
         let framework = Native::new();

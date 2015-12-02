@@ -54,7 +54,7 @@ For more information,
 If you're using Cargo, just add Leaf to your Cargo.toml:
 
     [dependencies]
-    leaf = "0.1.0"
+    leaf = "0.1.1"
 
 If you're using [Cargo Edit][cargo-edit], you can
 call:
@@ -75,8 +75,10 @@ We design Leaf and all other crates for machine learning completely modular and
 as extensible as possible. More helpful crates you can use with Leaf:
 
 - [**Cuticula**][cuticula]: Preprocessing Framework for Machine Learning
-- [**Phloem**][phloem]: Universal CPU/GPU Data Blob for Machine Learning
-- [**Collenchyma**][collen]: Backend-agnostic parallel computation
+- [**Phloem**][phloem]: Universal Data Blob for Machine Learning on CUDA, OpenCL
+or common CPU
+- [**Collenchyma**][collen]: Portable, High Performance Computation on CUDA,
+  OpenCL and common CPU
 
 [cuticula]: https://github.com/autumnai/cuticula
 [phloem]: https://github.com/autumnai/phloem
