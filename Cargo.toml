@@ -15,7 +15,7 @@ license = "MIT"
 
 [dependencies]
 phloem = "~0.3.0"
-collenchyma = "~0.0.3"
+collenchyma = "= 0.0.3"
 
 log = "0.3.2"
 
