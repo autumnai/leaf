@@ -54,7 +54,7 @@ For more information,
 If you're using Cargo, just add Leaf to your Cargo.toml:
 
     [dependencies]
-    leaf = "0.1.1"
+    leaf = "0.1.2"
 
 If you're using [Cargo Edit][cargo-edit], you can
 call:
