@@ -75,8 +75,6 @@ We design Leaf and all other crates for machine learning completely modular and
 as extensible as possible. More helpful crates you can use with Leaf:
 
 - [**Cuticula**][cuticula]: Preprocessing Framework for Machine Learning
-- [**Phloem**][phloem]: Universal Data Blob for Machine Learning on CUDA, OpenCL
-or common CPU
 - [**Collenchyma**][collen]: Portable, High Performance Computation on CUDA,
   OpenCL and common CPU
 
@@ -84,20 +82,22 @@ or common CPU
 [phloem]: https://github.com/autumnai/phloem
 [collen]: https://github.com/autumnai/collenchyma
 
-## Contributing
+## Contributing and Contact
 
 Want to contribute? Awesome! We have
 [instructions to help you get started contributing code or documentation][contributing].
 
 Leaf has a near real-time collaboration culture and happens here on Github and
 on the [Leaf Gitter Channels][gitter-leaf].
-You can also reach out to the Maintainers
-{[@MJ][mj], [@hobofan][hobofan]}.
+
+You can also reach out to the Maintainers [@MJ][mj] and [@hobofan][hobofan]
+directly or engage at the [#rust-machine-learning][irc] IRC on irc.mozilla.org.
 
 [contributing]: CONTRIBUTING.md
 [gitter-leaf]: https://gitter.im/autumnai/leaf
 [mj]: https://twitter.com/mjhirn
 [hobofan]: https://twitter.com/hobofan
+[irc]: https://chat.mibbit.com/?server=irc.mozilla.org&channel=%23rust-machine-learning
 
 ## Q&A
 
