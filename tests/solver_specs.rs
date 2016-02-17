@@ -1,8 +1,11 @@
 extern crate leaf;
+extern crate collenchyma as co;
 
 #[cfg(test)]
 mod network_spec {
     use leaf::solver::*;
+    use co::backend::Backend;
+    use co::frameworks::Native;
 
     #[test]
     // fixed: always return base_lr.
@@ -40,6 +43,6 @@ mod network_spec {
     #[test]
     fn instantiate_solver_sgd_momentum() {
         let cfg = SolverConfig{ solver: SolverKind::SGD(SGDKind::Momentum), ..SolverConfig::default()};
-        Solver::<Box<ISolver>>::from_config(&cfg);
+        Solver::<Box<ISolver<Backend<Native>>>, Backend<Native>>::from_config(&cfg);
     }
 }

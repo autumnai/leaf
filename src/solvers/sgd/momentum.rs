@@ -12,23 +12,27 @@
 //! since if you keep adjusting the gradients
 //! into the same direction you will reach the optimum faster.
 //! It also makes solving more stable.
-use math::*;
+use co::backend::*;
+use co::libraries::blas::IBlas;
 use shared_memory::*;
 use network::Network;
 use solver::*;
 use solvers::SGDSolver;
+use std::rc::Rc;
 
 #[derive(Debug, Clone)]
 /// Stochastic Gradient Descent with Momentum.
 ///
 /// See [module description][1] for more information.
 /// [1]: ./index.html
-pub struct Momentum {
+pub struct Momentum<B: IBackend + IBlas<f32>> {
     /// The gradient update from the previous iteration for each blob.
     history: Vec<ArcLock<HeapBlob>>,
+    /// The backend used for computing the gradient.
+    backend: Rc<B>,
 }
 
-impl Momentum {
+impl<B: IBackend + IBlas<f32>> Momentum<B> {
     /// Create a new SGD Momentum solver.
     ///
     /// Should not be called directly.
@@ -36,24 +40,27 @@ impl Momentum {
     ///
     /// [1]: ../../../network/struct.Network.html#method.from_config
     /// [2]: ../../../solver/struct.Solver.html#method.from_config
-    pub fn new() -> Momentum {
-        Momentum { history: Vec::new() }
+    pub fn new(backend: Rc<B>) -> Momentum<B> {
+        Momentum {
+            history: Vec::new(),
+            backend: backend
+        }
     }
 
     /// Initialize the SGD Momentum solver, allocating memory for its history.
-    fn init(&mut self, net: &Network) {
+    fn init(&mut self, net: &Network<B>) {
         self.history = Vec::with_capacity(net.learnable_weights().len());
 
         for weight_blob in net.learnable_weights() {
             let shape = weight_blob.read().unwrap().shape();
             let history_blob = new_shared_heapblob();
-            history_blob.write().unwrap().reshape(shape);
+            history_blob.write().unwrap().reshape(&shape);
             self.history.push(history_blob);
         }
     }
 }
 
-impl SGDSolver for Momentum {
+impl<B: IBackend + IBlas<f32>> SGDSolver<B> for Momentum<B> {
     fn compute_update_value(&mut self,
                             config: &SolverConfig,
                             weight_blob: &ArcLock<HeapBlob>,
@@ -65,12 +72,14 @@ impl SGDSolver for Momentum {
         let local_lr = global_lr * blob_lr;
 
         // Compute the update to history, then copy it to the parameter diff.
-        leaf_cpu_axpby(&local_lr,
-                       weight_blob.read().unwrap().cpu_diff(),
-                       &momentum,
-                       history_blob.write().unwrap().mutable_cpu_data());
-        *weight_blob.write().unwrap().mutable_cpu_diff() = history_blob.read().unwrap().cpu_data().clone();
+        // TODO
+        // leaf_cpu_axpby(&local_lr,
+        //                weight_blob.read().unwrap().cpu_diff(),
+        //                &momentum,
+        //                history_blob.write().unwrap().mutable_cpu_data());
+        // TODO
+        // *weight_blob.write().unwrap().mut_diff() = *history_blob.read().unwrap().data().clone();
     }
 }
 
-impl_isolver_sgd!(Momentum);
+impl_isolver_sgd!(Momentum<B>);

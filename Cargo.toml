@@ -1,6 +1,13 @@
 [package]
 authors = ["Maximilian Goisser <max@autumnai.com>", "Michael Hirn <mj@autumnai.com>"]
 description = "Machine Learning Framework"
+version = "0.1.2"
+authors = [
+  "Maximilian Goisser <max@autumnai.com>",
+  "Michael Hirn <mj@autumnai.com>"
+]
+repository = "https://github.com/autumnai/leaf"
+homepage = "https://github.com/autumnai/leaf"
 documentation = "http://autumnai.github.io/leaf"
 homepage = "https://github.com/autumnai/leaf"
 keywords = ["deep-learning", "neural-networks", "machine-learning", "framework"]
@@ -11,11 +18,14 @@ repository = "https://github.com/autumnai/leaf"
 version = "0.1.0"
 
 [dependencies]
-log = "~0.3.5"
-phloem = "~0.3.1"
-rblas = "~0.0.13"
-clippy = {version = "~0.0.41", optional = true}
+phloem = "~0.3.0"
+collenchyma = "= 0.0.3"
+
+log = "0.3.2"
+
+clippy = { version = "0.0.23", optional = true }
 
 [features]
 default = []
 dev = []
+lint = ["clippy"]

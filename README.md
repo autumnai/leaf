@@ -54,7 +54,7 @@ For more information,
 If you're using Cargo, just add Leaf to your Cargo.toml:
 
     [dependencies]
-    leaf = "0.1.0"
+    leaf = "0.1.2"
 
 If you're using [Cargo Edit][cargo-edit], you can
 call:
@@ -75,26 +75,43 @@ We design Leaf and all other crates for machine learning completely modular and
 as extensible as possible. More helpful crates you can use with Leaf:
 
 - [**Cuticula**][cuticula]: Preprocessing Framework for Machine Learning
-- [**Phloem**][phloem]: Universal CPU/GPU Data Blob for Machine Learning
+- [**Collenchyma**][collen]: Portable, High Performance Computation on CUDA,
+  OpenCL and common CPU
 
 [cuticula]: https://github.com/autumnai/cuticula
 [phloem]: https://github.com/autumnai/phloem
+[collen]: https://github.com/autumnai/collenchyma
 
-
-## Contributing
+## Contributing and Contact
 
 Want to contribute? Awesome! We have
 [instructions to help you get started contributing code or documentation][contributing].
 
 Leaf has a near real-time collaboration culture and happens here on Github and
 on the [Leaf Gitter Channels][gitter-leaf].
-You can also reach out to the Maintainers
-{[@MJ][mj], [@hobofan][hobofan]}.
+
+You can also reach out to the Maintainers [@MJ][mj] and [@hobofan][hobofan]
+directly or engage at the [#rust-machine-learning][irc] IRC on irc.mozilla.org.
 
 [contributing]: CONTRIBUTING.md
 [gitter-leaf]: https://gitter.im/autumnai/leaf
 [mj]: https://twitter.com/mjhirn
 [hobofan]: https://twitter.com/hobofan
+[irc]: https://chat.mibbit.com/?server=irc.mozilla.org&channel=%23rust-machine-learning
+
+## Changelog
+
+You can find the release history in the root file [CHANGELOG.md][changelog].
+
+A changelog is a log or record of all the changes made to a project, such as a
+website or software project, usually including such records as bug fixes, new
+features, etc. - [Wikipedia][changelog-quote]
+
+We are using [Clog][clog], the Rust tool for auto-generating CHANGELOG files.
+
+[changelog]: CHANGELOG.md
+[changelog-quote]: https://en.wikipedia.org/wiki/Changelog
+[Clog]: https://github.com/clog-tool/clog-cli
 
 ## Q&A
 
