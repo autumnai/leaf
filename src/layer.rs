@@ -476,7 +476,7 @@ pub trait ILayer {
     fn forward(&self, bottom: &[ArcLock<HeapBlob>], top: &mut Vec<ArcLock<HeapBlob>>) -> f32 {
         // Lock();
         // Reshape(bottom, top); // Reshape the layer to fit top & bottom blob
-        let mut loss = 0f32;
+        let loss = 0f32;
 
         let btm: Vec<_> = bottom.iter().map(|b| b.read().unwrap()).collect();
         let tp_ref = top.iter().cloned().collect::<Vec<_>>();

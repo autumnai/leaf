@@ -62,11 +62,11 @@ trait SGDSolver<B: IBackend + IBlas<f32>> : ISolver<B> {
         // skip clipping gradients if SolverConfig.clip_gradients is set to None
         if let Some(clip_threshold) = config.clip_gradients {
             let net_weights = net.learnable_weights();
-            let mut sumsq_diff = 0f32;
+            let sumsq_diff = 0f32;
             let backend = self.backend();
-            let mut result = SharedMemory::<f32>::new(backend.device(), 1);
+            let result = SharedMemory::<f32>::new(backend.device(), 1);
             for weight_blob in net_weights {
-                let mut blob = weight_blob.write().unwrap();
+                let blob = weight_blob.write().unwrap();
                 // self.backend().nrm2(blob.mut_diff(), &mut result);
                 // TODO
                 // let blob_sumsq_diff = leaf_cpu_dot(blob.cpu_diff(), blob.cpu_diff());
@@ -74,21 +74,21 @@ trait SGDSolver<B: IBackend + IBlas<f32>> : ISolver<B> {
             }
             let l2norm_diff = sumsq_diff.sqrt();
             unimplemented!(); // needs either simple devision or similar
-            if l2norm_diff > clip_threshold {
-                let scale_factor = clip_threshold / l2norm_diff;
-                info!("Gradient clipping: scaling down gradients (L2 norm {} > {})
-                        by scale factor {}",
-                      l2norm_diff,
-                      clip_threshold,
-                      scale_factor);
-
-                for weight_blob in net_weights {
-                    let mut blob = weight_blob.write().unwrap();
-                    let diff = blob.mut_diff();
-                    // TODO
-                    // leaf_cpu_scal(&scale_factor, diff);
-                }
-            }
+            // if l2norm_diff > clip_threshold {
+            //     let scale_factor = clip_threshold / l2norm_diff;
+            //     info!("Gradient clipping: scaling down gradients (L2 norm {} > {})
+            //             by scale factor {}",
+            //           l2norm_diff,
+            //           clip_threshold,
+            //           scale_factor);
+            //
+            //     for weight_blob in net_weights {
+            //         let mut blob = weight_blob.write().unwrap();
+            //         let diff = blob.mut_diff();
+            //         // TODO
+            //         // leaf_cpu_scal(&scale_factor, diff);
+            //     }
+            // }
         }
     }
 
@@ -101,8 +101,8 @@ trait SGDSolver<B: IBackend + IBlas<f32>> : ISolver<B> {
     fn normalize(&self, config: &SolverConfig, weight_blob: &ArcLock<HeapBlob>) {
         if config.minibatch_size > 1 {
             let scale_factor = 1f32 / config.minibatch_size as f32;
-            let mut write_blob = weight_blob.write().unwrap();
-            let mut shared_scale_factor = SharedMemory::<f32>::new(self.backend().device(), 1);
+            let write_blob = weight_blob.write().unwrap();
+            let shared_scale_factor = SharedMemory::<f32>::new(self.backend().device(), 1);
             // let _ = self.backend().scale(&mut shared_scale_factor, write_blob.mut_diff());
             unimplemented!();
         }

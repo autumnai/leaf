@@ -236,7 +236,7 @@ impl<S: ISolver<B>, B: IBackend + IBlas<f32>> Solver<S, B> {
 ///
 /// See [Solvers][1]
 /// [1]: ../solvers/index.html
-pub trait ISolver<B> {
+pub trait ISolver<B: IBackend + IBlas<f32>> {
     /// Update the weights of the net with part of the gradient.
     ///
     /// The [second phase of backpropagation learning][1].
