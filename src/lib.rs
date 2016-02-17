@@ -77,6 +77,12 @@
         unsafe_code,
         unused_import_braces, unused_qualifications)]
 
+// used when run with  cargo test --no-run --features clippy
+// or cargo build --features clippy
+#![cfg_attr(feature="clippy", feature(plugin))]
+#![cfg_attr(feature="clippy", plugin(clippy))]
+#![cfg_attr(feature="clippy", deny(clippy, clippy_pedantic))]
+
 #[macro_use]
 extern crate log;
 extern crate rblas;

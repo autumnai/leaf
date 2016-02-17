@@ -41,10 +41,9 @@ impl<S> Solver<S> {
             config: config.clone(),
         }
     }
-
 }
 
-impl<S: ISolver> Solver<S>{
+impl<S: ISolver> Solver<S> {
     fn init(&mut self, config: SolverConfig) {
         // Caffe
         //   CHECK(Caffe::root_solver() || root_solver_)
@@ -242,7 +241,6 @@ pub trait ISolver {
     /// Used by [step][2] to optimize the network.
     ///
     /// [2]: ./struct.Solver.html#method.step
-    //
     // TODO: the actual update can probably be pulled out of this function,
     // since that should be the same independent of solver type.
     fn apply_update(&mut self, param: &SolverConfig, network: &mut Network, iter: usize);
@@ -391,9 +389,7 @@ impl SolverConfig {
     /// [3]: ../solvers/index.html
     pub fn get_learning_rate(&self, iter: usize) -> f32 {
         match self.lr_policy() {
-            LRPolicy::Fixed => {
-                self.base_lr()
-            }
+            LRPolicy::Fixed => self.base_lr(),
             LRPolicy::Step => {
                 let current_step = self.step(iter);
                 self.base_lr() * self.gamma().powf(current_step as f32)
@@ -410,9 +406,7 @@ impl SolverConfig {
                 //       pow(this->param_.gamma(), this->current_step_);
                 unimplemented!();
             }
-            LRPolicy::Exp => {
-                self.base_lr() * self.gamma().powf(iter as f32)
-            }
+            LRPolicy::Exp => self.base_lr() * self.gamma().powf(iter as f32),
             LRPolicy::Inv => {
                 //   rate = this->param_.base_lr() *
                 //       pow(Dtype(1) + this->param_.gamma() * this->iter_,
@@ -475,9 +469,7 @@ impl SolverKind {
     /// Create a Solver of the specified kind with the supplied SolverConfig.
     pub fn with_config(&self, config: &SolverConfig) -> Box<ISolver> {
         match *self {
-            SolverKind::SGD(sgd) => {
-                sgd.with_config(config)
-            }
+            SolverKind::SGD(sgd) => sgd.with_config(config),
         }
     }
 }
@@ -494,9 +486,7 @@ impl SGDKind {
     /// Create a Solver of the specified kind with the supplied SolverConfig.
     pub fn with_config(&self, config: &SolverConfig) -> Box<ISolver> {
         match *self {
-            SGDKind::Momentum => {
-                Box::new(Momentum::new())
-            }
+            SGDKind::Momentum => Box::new(Momentum::new()),
         }
     }
 }

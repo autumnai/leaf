@@ -28,7 +28,7 @@
 //! [backprop]: https://en.wikipedia.org/wiki/Backpropagation
 
 #[allow(unused_import_braces)]
-pub use self::sgd::{Momentum};
+pub use self::sgd::Momentum;
 pub mod sgd;
 
 

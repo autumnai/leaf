@@ -64,16 +64,16 @@ macro_rules! impl_ilayer_activation {
 }
 
 #[allow(unused_import_braces)]
-pub use self::activation::{Sigmoid};
+pub use self::activation::Sigmoid;
 
 #[allow(unused_import_braces)]
-pub use self::common::{Convolution};
+pub use self::common::Convolution;
 
 #[allow(unused_import_braces)]
-pub use self::loss::{Softmax};
+pub use self::loss::Softmax;
 
 #[allow(unused_import_braces)]
-pub use self::utility::{Flatten};
+pub use self::utility::Flatten;
 
 pub mod activation;
 pub mod common;
