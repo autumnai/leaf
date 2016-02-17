@@ -174,7 +174,7 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
         let blobs_under_loss = &mut HashSet::<String>::new();
         let blobs_skip_backp = &mut HashSet::<String>::new();
         for layer in &mut self.layers {
-            layer.init_backprop( blobs_under_loss, blobs_skip_backp);
+            layer.init_backprop(blobs_under_loss, blobs_skip_backp);
         }
 
         if config.force_backward {
@@ -251,8 +251,7 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
         // }
         for (i, _) in self.weights.clone().iter().enumerate() {
             if let Some(j) = self.weight_owners[i] {
-                assert!(self.weights[i].read().unwrap().capacity() ==
-                        self.weights[j].read().unwrap().capacity());
+                assert!(self.weights[i].read().unwrap().capacity() == self.weights[j].read().unwrap().capacity());
                 self.weights[i] = self.weights[j].clone(); // sharing whole blob?
             }
         }
@@ -268,15 +267,15 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
     /// [2]: ../layer/struct.Layer.html#method.connect
     #[cfg_attr(lint, allow(ptr_arg))]
     fn init_input_blob(&mut self,
-                  blob_name: &str,
-                  input_shape: &Vec<usize>,
-                  registry: &mut HashMap<String, ArcLock<HeapBlob>>) {
+                       blob_name: &str,
+                       input_shape: &Vec<usize>,
+                       registry: &mut HashMap<String, ArcLock<HeapBlob>>) {
 
         if registry.contains_key(blob_name) {
             // If we are not doing in-place computation but have duplicated blobs, raise an
             // error.
             error!("Top blob {} produced by multiple sources.", blob_name);
-            return
+            return;
         } else {
             // if (Caffe::root_solver()) {
             {

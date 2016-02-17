@@ -61,7 +61,7 @@ impl<S, B: IBackend + IBlas<f32>> Solver<S, B> {
     }
 }
 
-impl<S: ISolver<B>, B: IBackend + IBlas<f32>> Solver<S, B>{
+impl<S: ISolver<B>, B: IBackend + IBlas<f32>> Solver<S, B> {
     fn init(&mut self, backend: Rc<B>, config: SolverConfig) {
         // Caffe
         //   CHECK(Caffe::root_solver() || root_solver_)
@@ -477,11 +477,12 @@ pub enum SolverKind {
 
 impl SolverKind {
     /// Create a Solver of the specified kind with the supplied SolverConfig.
-    pub fn with_config<B: IBackend + IBlas<f32> + 'static>(&self, backend: Rc<B>, config: &SolverConfig) -> Box<ISolver<B>> {
+    pub fn with_config<B: IBackend + IBlas<f32> + 'static>(&self,
+                                                           backend: Rc<B>,
+                                                           config: &SolverConfig)
+                                                           -> Box<ISolver<B>> {
         match *self {
-            SolverKind::SGD(sgd) => {
-                sgd.with_config(backend, config)
-            }
+            SolverKind::SGD(sgd) => sgd.with_config(backend, config),
         }
     }
 }
@@ -496,11 +497,12 @@ pub enum SGDKind {
 
 impl SGDKind {
     /// Create a Solver of the specified kind with the supplied SolverConfig.
-    pub fn with_config<B: IBackend + IBlas<f32> + 'static>(&self, backend: Rc<B>, config: &SolverConfig) -> Box<ISolver<B>> {
+    pub fn with_config<B: IBackend + IBlas<f32> + 'static>(&self,
+                                                           backend: Rc<B>,
+                                                           config: &SolverConfig)
+                                                           -> Box<ISolver<B>> {
         match *self {
-            SGDKind::Momentum => {
-                Box::new(Momentum::<B>::new(backend))
-            }
+            SGDKind::Momentum => Box::new(Momentum::<B>::new(backend)),
         }
     }
 }

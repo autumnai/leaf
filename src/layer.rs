@@ -250,7 +250,9 @@ impl<B: IBackend + IBlas<f32>> Layer<B> {
         }
         info!("{} <- {}", self.name, blob_name);
 
-        self.bottom_blob_names.insert(blob_name.to_owned(), (self.bottom_blobs.len(), available_blobs[&*blob_name].clone()));
+        self.bottom_blob_names.insert(blob_name.to_owned(),
+                                      (self.bottom_blobs.len(),
+                                       available_blobs[&*blob_name].clone()));
         self.bottom_blobs.push(available_blobs[&*blob_name].clone());
         available_blobs.remove(&*blob_name);
 
@@ -272,9 +274,7 @@ impl<B: IBackend + IBlas<f32>> Layer<B> {
     /// Finally, the new blob will be added to the registry, so that the other layers can
     /// connect it as their bottom.
     /// [2]: ../layer/struct.LayerConfig.html
-    fn append_top(&mut self,
-                  top_id: usize,
-                  registry: &mut HashMap<String, ArcLock<HeapBlob>>) {
+    fn append_top(&mut self, top_id: usize, registry: &mut HashMap<String, ArcLock<HeapBlob>>) {
         let layer_config = &self.config;
 
         let blob_name = layer_config.top(top_id).unwrap().clone();
@@ -287,7 +287,7 @@ impl<B: IBackend + IBlas<f32>> Layer<B> {
             // If we are not doing in-place computation but have duplicated blobs, raise an
             // error.
             error!("Top blob {} produced by multiple sources.", blob_name);
-            return
+            return;
         } else {
             // if (Caffe::root_solver()) {
             {
@@ -297,7 +297,7 @@ impl<B: IBackend + IBlas<f32>> Layer<B> {
 
             blob = Arc::new(RwLock::new(Box::new(Blob::new())));
         }
-        self.top_blob_names.insert(blob_name.clone(), (self.top_blobs.len(),blob.clone()));
+        self.top_blob_names.insert(blob_name.clone(), (self.top_blobs.len(), blob.clone()));
         self.top_blobs.push(blob.clone());
         self.blob_names.insert(blob_name.clone(), blob.clone());
         registry.insert(blob_name.clone(), blob.clone());
@@ -328,9 +328,7 @@ impl<B: IBackend + IBlas<f32>> Layer<B> {
     /// to the loss.
     /// If all of the blobs skip backpropagation we set a flag to skip backpropagation
     /// of the whole layer.
-    pub fn init_backprop(&mut self,
-                     blobs_under_loss: &mut HashSet<String>,
-                     blobs_skip_backp: &mut HashSet<String>) {
+    pub fn init_backprop(&mut self, blobs_under_loss: &mut HashSet<String>, blobs_skip_backp: &mut HashSet<String>) {
         let mut layer_contributes_loss = false;
         let mut layer_skip_propagate_down = true;
         for (top_id, top_blob) in self.top_blobs.iter().enumerate() {
@@ -389,10 +387,9 @@ impl<B: IBackend + IBlas<f32>> Layer<B> {
     pub fn init_force_backward(&mut self) {
         self.needs_backward = true;
         for (bottom_id, _) in self.bottom_need_backwards.clone().iter().enumerate() {
-            self.bottom_need_backwards[bottom_id] =
-                *self.bottom_need_backwards
-                     .get(bottom_id)
-                     .unwrap_or(&self.worker.allow_force_backward(bottom_id));
+            self.bottom_need_backwards[bottom_id] = *self.bottom_need_backwards
+                                                         .get(bottom_id)
+                                                         .unwrap_or(&self.worker.allow_force_backward(bottom_id));
         }
         for (weight_id, _) in self.blobs.clone().iter().enumerate() {
             self.set_weight_propagate_down(weight_id, true);
@@ -411,7 +408,9 @@ impl<B: IBackend + IBlas<f32>> Layer<B> {
     /// See [ILayer.backward](./trait.ILayer.html#method.backward)
     pub fn backward(&mut self) {
         if self.needs_backward {
-            self.worker.backward(&self.top_blobs, &self.bottom_need_backwards, &mut self.bottom_blobs)
+            self.worker.backward(&self.top_blobs,
+                                 &self.bottom_need_backwards,
+                                 &mut self.bottom_blobs)
         }
     }
 
@@ -710,12 +709,12 @@ impl WeightConfig {
     /// Checks dimensions of two blobs according to the `share_mode`.
     /// Returns an error if there is a count/shape mismatch.
     pub fn check_dimensions<T: Float>(&self,
-                                        blob_one: &Blob<T>,
-                                        blob_two: &Blob<T>,
-                                        param_name: String,
-                                        owner_name: String,
-                                        layer_name: String)
-                                        -> Result<(), String> {
+                                      blob_one: &Blob<T>,
+                                      blob_two: &Blob<T>,
+                                      param_name: String,
+                                      owner_name: String,
+                                      layer_name: String)
+                                      -> Result<(), String> {
         match self.share_mode {
             // Permissive dimension checking -- only check counts are the same.
             DimCheckMode::Permissive => {
