@@ -40,9 +40,9 @@ impl ILayer for Sigmoid {
 
 
             // for i in 0..count {
-                // TODO
-                // let sigmoid_x = top_data[i];
-                // bottom_diff[i] = top_diff[i] * Sigmoid::sigmoid_prime_precalc(sigmoid_x)
+            // TODO
+            // let sigmoid_x = top_data[i];
+            // bottom_diff[i] = top_diff[i] * Sigmoid::sigmoid_prime_precalc(sigmoid_x)
             // }
         }
     }

@@ -16,10 +16,8 @@ license = "MIT"
 [dependencies]
 phloem = "~0.3.0"
 collenchyma = "= 0.0.3"
-
-log = "0.3.2"
-
-clippy = { version = "0.0.23", optional = true }
+log = "~0.3.2"
+clippy = { version = "0.0.41", optional = true }
 
 [features]
 default = []

@@ -43,7 +43,7 @@ impl<B: IBackend + IBlas<f32>> Momentum<B> {
     pub fn new(backend: Rc<B>) -> Momentum<B> {
         Momentum {
             history: Vec::new(),
-            backend: backend
+            backend: backend,
         }
     }
 

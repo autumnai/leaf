@@ -59,10 +59,9 @@ impl<S, B: IBackend + IBlas<f32>> Solver<S, B> {
             config: config.clone(),
         }
     }
-
 }
 
-impl<S: ISolver<B>, B: IBackend + IBlas<f32>> Solver<S, B>{
+impl<S: ISolver<B>, B: IBackend + IBlas<f32>> Solver<S, B> {
     fn init(&mut self, backend: Rc<B>, config: SolverConfig) {
         // Caffe
         //   CHECK(Caffe::root_solver() || root_solver_)
@@ -237,7 +236,7 @@ impl<S: ISolver<B>, B: IBackend + IBlas<f32>> Solver<S, B>{
 ///
 /// See [Solvers][1]
 /// [1]: ../solvers/index.html
-pub trait ISolver<B> {
+pub trait ISolver<B: IBackend + IBlas<f32>> {
     /// Update the weights of the net with part of the gradient.
     ///
     /// The [second phase of backpropagation learning][1].
@@ -249,7 +248,6 @@ pub trait ISolver<B> {
     /// Used by [step][2] to optimize the network.
     ///
     /// [2]: ./struct.Solver.html#method.step
-    //
     // TODO: the actual update can probably be pulled out of this function,
     // since that should be the same independent of solver type.
     fn apply_update(&mut self, param: &SolverConfig, network: &mut Network<B>, iter: usize);
@@ -401,9 +399,7 @@ impl SolverConfig {
     /// [3]: ../solvers/index.html
     pub fn get_learning_rate(&self, iter: usize) -> f32 {
         match self.lr_policy() {
-            LRPolicy::Fixed => {
-                self.base_lr()
-            }
+            LRPolicy::Fixed => self.base_lr(),
             LRPolicy::Step => {
                 let current_step = self.step(iter);
                 self.base_lr() * self.gamma().powf(current_step as f32)
@@ -420,9 +416,7 @@ impl SolverConfig {
                 //       pow(this->param_.gamma(), this->current_step_);
                 unimplemented!();
             }
-            LRPolicy::Exp => {
-                self.base_lr() * self.gamma().powf(iter as f32)
-            }
+            LRPolicy::Exp => self.base_lr() * self.gamma().powf(iter as f32),
             LRPolicy::Inv => {
                 //   rate = this->param_.base_lr() *
                 //       pow(Dtype(1) + this->param_.gamma() * this->iter_,
@@ -483,11 +477,12 @@ pub enum SolverKind {
 
 impl SolverKind {
     /// Create a Solver of the specified kind with the supplied SolverConfig.
-    pub fn with_config<B: IBackend + IBlas<f32> + 'static>(&self, backend: Rc<B>, config: &SolverConfig) -> Box<ISolver<B>> {
+    pub fn with_config<B: IBackend + IBlas<f32> + 'static>(&self,
+                                                           backend: Rc<B>,
+                                                           config: &SolverConfig)
+                                                           -> Box<ISolver<B>> {
         match *self {
-            SolverKind::SGD(sgd) => {
-                sgd.with_config(backend, config)
-            }
+            SolverKind::SGD(sgd) => sgd.with_config(backend, config),
         }
     }
 }
@@ -502,11 +497,12 @@ pub enum SGDKind {
 
 impl SGDKind {
     /// Create a Solver of the specified kind with the supplied SolverConfig.
-    pub fn with_config<B: IBackend + IBlas<f32> + 'static>(&self, backend: Rc<B>, config: &SolverConfig) -> Box<ISolver<B>> {
+    pub fn with_config<B: IBackend + IBlas<f32> + 'static>(&self,
+                                                           backend: Rc<B>,
+                                                           config: &SolverConfig)
+                                                           -> Box<ISolver<B>> {
         match *self {
-            SGDKind::Momentum => {
-                Box::new(Momentum::<B>::new(backend))
-            }
+            SGDKind::Momentum => Box::new(Momentum::<B>::new(backend)),
         }
     }
 }
