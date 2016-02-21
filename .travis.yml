@@ -35,6 +35,7 @@ addons:
     - fglrx
     - opencl-headers
     - binutils-dev
+    - nvidia-opencl-dev
 
 after_success:
 - travis-cargo doc-upload
