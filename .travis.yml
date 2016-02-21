@@ -1,3 +1,4 @@
+sudo: false
 language: rust
 rust:
 - nightly
@@ -23,7 +24,7 @@ script:
   travis-cargo build &&
   travis-cargo test  &&
   travis-cargo bench &&
-  travis-cargo doc
+  travis-cargo --only stable doc
 addons:
   apt:
     packages:
@@ -31,12 +32,14 @@ addons:
     - libelf-dev
     - libdw-dev
     - libblas-dev
-install:
-  - sudo apt-get update
-  - sudo apt-get install fglrx opencl-headers
+    - fglrx
+    - opencl-headers
+    - binutils-dev
+    - nvidia-opencl-dev
+
 after_success:
 - travis-cargo doc-upload
-- travis-cargo coveralls --no-sudo
+- travis-cargo coveralls --no-sudo --verify
 notifications:
   email:
     on_success: never

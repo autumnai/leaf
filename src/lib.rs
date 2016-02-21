@@ -18,7 +18,7 @@
 //! The Network defines the entire model, by defining the hirarchical structure of layers from
 //! bottom to top. At execution time, the Network passes the data, flowing through the Network,
 //! from one layer to the next. The output of one layer is the input for the layer on top. On a
-//! backward pass, the Network passes the deriviates inverted through the Network.
+//! backward pass, the Network passes the derivatives inverted through the Network.
 //!
 //! Layers, the building block of a Leaf Network, are small units, describing computation over
 //! numerical input data. Generally speaking Layers take input and produce an output, but
@@ -37,8 +37,8 @@
 //! memory management and synchronization.
 //!
 //! The learning and optimization of the Network happens at the [Solver][solver] and is decoupled
-//! from the Network making the setup clean and flexibel. One of the four layer types is a Loss
-//! Layer, which is used for the interaction of Network and Solver. The Network procudes the loss
+//! from the Network making the setup clean and flexible. One of the four layer types is a Loss
+//! Layer, which is used for the interaction of Network and Solver. The Network produces the loss
 //! and gradients, which the Solver uses to optimize the Network through parameter updates. Beside
 //! that, the Solver provides housekeeping and other evaluations of the Network. All operation
 //! on the Solver happen through Collenchyma, therefore can be executed on Cuda, OpenCL or native
@@ -115,6 +115,12 @@
         trivial_casts, trivial_numeric_casts,
         unsafe_code,
         unused_import_braces, unused_qualifications)]
+
+// used when run with  cargo test --no-run --features clippy
+// or cargo build --features clippy
+#![cfg_attr(feature="clippy", feature(plugin))]
+#![cfg_attr(feature="clippy", plugin(clippy))]
+#![cfg_attr(feature="clippy", deny(clippy, clippy_pedantic))]
 
 #[macro_use]
 extern crate log;
