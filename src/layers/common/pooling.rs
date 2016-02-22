@@ -64,11 +64,9 @@ impl<T: Float, B: conn::Pooling<T>> FilterLayer for Pooling<T, B> {
         for dim in &input_shape[0..2].to_vec() {
             output_shape.push(*dim);
         }
-        println!("FILTER SHAPE 1 {:?}", output_shape);
         for spatial_dim in Self::calculate_spatial_output_dims(&input_shape[2..], &filter, &padding, &stride) {
             output_shape.push(spatial_dim);
         }
-        println!("FILTER OUT SHAPE {:?}", output_shape);
 
         output_shape
     }
