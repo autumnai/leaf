@@ -6,25 +6,23 @@ rust:
 - stable
 matrix:
   allow_failures:
-    - rust: beta
-    - rust: stable
     - rust: nightly
-      env: TRAVIS_CARGO_NIGHTLY_FEATURE=lint
+      env: FEATURES=lint
   exclude:
     - rust: beta
-      env: TRAVIS_CARGO_NIGHTLY_FEATURE=lint
+      env: FEATURES=lint
     - rust: stable
-      env: TRAVIS_CARGO_NIGHTLY_FEATURE=lint
+      env: FEATURES=lint
 before_script:
 - |
   pip install 'travis-cargo<0.2' --user &&
   export PATH=$HOME/.local/bin:$PATH
 script:
 - |
-  travis-cargo build &&
-  travis-cargo test  &&
-  travis-cargo bench &&
-  travis-cargo --only stable doc
+  travis-cargo build -- --no-default-features --features $FEATURES &&
+  travis-cargo test -- --no-default-features --features $FEATURES &&
+  travis-cargo bench -- --no-default-features --features $FEATURES &&
+  travis-cargo --only stable doc -- --no-default-features --features $FEATURES
 addons:
   apt:
     packages:
@@ -47,5 +45,5 @@ env:
   global:
     - secure: QcJ9u0BrVpvjYnerd/3dukvM+GLFQNikIoDHhtKjVenuM2ozZtW6+/RyyXVC1YMh/SghwTnu4Kcnv1sdmwuiC5KWdPoppfalXdxafPkl5PGEfTOexe6L5UAJNW6BdA4lbRKM3xnaUg0Guq6x6tD/zdABIkh8nym/gRLGKT40e9Xitkf6wUQqPBHTGZimip59qg5Fty8lAD48pCBEXynJm+ihA2tz6EDhp0/7wvieHyEl/FqNwvUL5+Z9EeTzEJfKNF8PA5DTHkgeXgeCnWKLm8cCdPEziRZlgdQtvIW27oZBkNTQGHyqI9/tVYhaW4AeKstzE5BoJuyRzmerWYRQCNiz8bgyAjc5HnpWLJPmPSFaGBWTRzwYwUk/iOUP4YEZiN3p0Xj1sKgSB0TA2AjKWND7cufwjrW8NdPdZ3hURVOnM8DHYSQMm2HOfbUNnkw+P5M8n+flT2HKWFdnPhJ3n12rDlLYdHeg9PQ3emJ6kE8Y/jrNT+6yZRrSwLQnsV0uU8Ii44MFQHpdUOGuOIxZFGh9rjKsUwhruUpGtbwI4FWPOqiQJvIaBFY1IUjIVlVCZevvIG3fPXvPksIEKwK93hM/ThDi2PLq2qwBpA87RNfKxDG4S0aR2j19IG+ludbpPcP95mYFVnGCb4rpj44iZoCifC8c9tVqC4L85hEGzik=
   matrix:
-    - TRAVIS_CARGO_NIGHTLY_FEATURE=dev
-    - TRAVIS_CARGO_NIGHTLY_FEATURE=lint
+    - FEATURES=travis
+    - FEATURES=lint

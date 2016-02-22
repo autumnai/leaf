@@ -1,12 +1,11 @@
 extern crate leaf;
-extern crate phloem;
 extern crate collenchyma as co;
 
-#[cfg(test)]
+#[cfg(all(test, whatever))]
+// #[cfg(test)]
 mod layer_spec {
 
     use leaf::layer::*;
-    use phloem::Blob;
     use std::rc::Rc;
     use co::backend::{Backend, BackendConfig};
     use co::frameworks::Native;

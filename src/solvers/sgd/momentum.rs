@@ -13,26 +13,29 @@
 //! into the same direction you will reach the optimum faster.
 //! It also makes solving more stable.
 use co::backend::*;
-use co::libraries::blas::IBlas;
-use shared_memory::*;
+use co::tensor::*;
+use co::memory::MemoryType;
+// use shared_memory::*;
 use network::Network;
 use solver::*;
 use solvers::SGDSolver;
 use std::rc::Rc;
+use std::sync::{Arc, RwLock};
+use util::*;
 
 #[derive(Debug, Clone)]
 /// Stochastic Gradient Descent with Momentum.
 ///
 /// See [module description][1] for more information.
 /// [1]: ./index.html
-pub struct Momentum<B: IBackend + IBlas<f32>> {
+pub struct Momentum<SolverB: IBackend + SolverOps<f32>> {
     /// The gradient update from the previous iteration for each blob.
-    history: Vec<ArcLock<HeapBlob>>,
+    history: Vec<ArcLock<SharedTensor<f32>>>,
     /// The backend used for computing the gradient.
-    backend: Rc<B>,
+    backend: Rc<SolverB>,
 }
 
-impl<B: IBackend + IBlas<f32>> Momentum<B> {
+impl<SolverB: IBackend + SolverOps<f32>> Momentum<SolverB> {
     /// Create a new SGD Momentum solver.
     ///
     /// Should not be called directly.
@@ -40,7 +43,7 @@ impl<B: IBackend + IBlas<f32>> Momentum<B> {
     ///
     /// [1]: ../../../network/struct.Network.html#method.from_config
     /// [2]: ../../../solver/struct.Solver.html#method.from_config
-    pub fn new(backend: Rc<B>) -> Momentum<B> {
+    pub fn new(backend: Rc<SolverB>) -> Momentum<SolverB> {
         Momentum {
             history: Vec::new(),
             backend: backend
@@ -48,38 +51,54 @@ impl<B: IBackend + IBlas<f32>> Momentum<B> {
     }
 
     /// Initialize the SGD Momentum solver, allocating memory for its history.
-    fn init(&mut self, net: &Network<B>) {
-        self.history = Vec::with_capacity(net.learnable_weights().len());
+    fn init<B: IBackend + LayerOps<f32>>(&mut self, net: &Network<B>) {
+        self.history = Vec::with_capacity(net.learnable_weight_gradients().len());
 
-        for weight_blob in net.learnable_weights() {
-            let shape = weight_blob.read().unwrap().shape();
-            let history_blob = new_shared_heapblob();
-            history_blob.write().unwrap().reshape(&shape);
-            self.history.push(history_blob);
+        for weight_gradient in net.learnable_weight_gradients() {
+            let shape = weight_gradient.read().unwrap().desc().clone();
+            let history_tensor = Arc::new(RwLock::new(SharedTensor::new(self.backend.device(), &shape).unwrap()));
+            self.history.push(history_tensor);
         }
     }
 }
 
-impl<B: IBackend + IBlas<f32>> SGDSolver<B> for Momentum<B> {
+impl<B: IBackend + SolverOps<f32>, NetB: IBackend + LayerOps<f32>> SGDSolver<B, NetB> for Momentum<B> {
     fn compute_update_value(&mut self,
                             config: &SolverConfig,
-                            weight_blob: &ArcLock<HeapBlob>,
+                            weight_gradient: &ArcLock<SharedTensor<f32>>,
                             history_blob_id: usize,
                             global_lr: &f32,
                             blob_lr: &f32) {
         let history_blob = &self.history[history_blob_id];
-        let momentum = config.momentum;
+        let local_momentum = config.momentum;
         let local_lr = global_lr * blob_lr;
 
+        let mut lr_shared = SharedTensor::<f32>::new(self.backend.device(), &1).unwrap();
+        if let &mut MemoryType::Native(ref mut lr) = lr_shared.get_mut(self.backend.device()).unwrap() {
+            let lr_slice = lr.as_mut_slice::<f32>();
+            lr_slice[0] = local_lr;
+        } else {
+            panic!();
+        }
+
+        let mut momentum_shared = SharedTensor::<f32>::new(self.backend.device(), &1).unwrap();
+        if let &mut MemoryType::Native(ref mut momentum) = momentum_shared.get_mut(self.backend.device()).unwrap() {
+            let momentum_slice = momentum.as_mut_slice::<f32>();
+            momentum_slice[0] = local_momentum;
+        } else {
+            panic!();
+        }
+
         // Compute the update to history, then copy it to the parameter diff.
-        // TODO
-        // leaf_cpu_axpby(&local_lr,
-        //                weight_blob.read().unwrap().cpu_diff(),
-        //                &momentum,
-        //                history_blob.write().unwrap().mutable_cpu_data());
-        // TODO
-        // *weight_blob.write().unwrap().mut_diff() = *history_blob.read().unwrap().data().clone();
+        let _ = Axpby::<f32>::axpby_plain(ISolver::<B, NetB>::backend(self),
+                                               &lr_shared,
+                                               &weight_gradient.read().unwrap(),
+                                               &momentum_shared,
+                                               &mut history_blob.write().unwrap());
+
+        let _ = ISolver::<B, NetB>::backend(self).copy_plain(
+            &history_blob.read().unwrap(), &mut weight_gradient.write().unwrap());
     }
 }
 
-impl_isolver_sgd!(Momentum<B>);
+impl_isolver_sgd!(Momentum<SolverB>);

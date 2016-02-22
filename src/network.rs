@@ -25,22 +25,21 @@
 //! ## Glossary
 //! ### Input Layers / Blobs
 //!
-//! A input layer is the bottom-most layer of a network.</br>
+//! A input layer is the first layer of a network.</br>
 //! During a forward step the data is put into the input layer,
 //! passed through all the intermediate (hidden) layers and generates a
 //! result in the output layer.
 //!
 //! The blobs in a input layer contain externally preprocessed data that has
 //! been brought into a form suitable for consumption by a neural network.
-use co::backend::IBackend;
-use co::libraries::blas::IBlas;
+use std::rc::Rc;
+use co::IBackend;
+use co::tensor::*;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
-use shared_memory::*;
 use layer::{ILayer, Layer};
-use layer::{LayerConfig, WeightConfig};
-use phloem::Blob;
-use std::rc::Rc;
+use layer::LayerConfig;
+use util::{ArcLock, LayerOps, SolverOps};
 
 #[derive(Debug)]
 /// Defines a [Network][1] that contains the [Layers][2] and [Blobs][3] that store
@@ -55,18 +54,24 @@ use std::rc::Rc;
 /// A Network is usually used together with a [Solver][6] to optimize the networks' weights.
 ///
 /// [6]: ../solver/struct.Solver.html
-pub struct Network<B: IBackend + IBlas<f32>> {
+pub struct Network<B: IBackend + LayerOps<f32>> {
     /// Identifies the Network
     ///
     /// The name is mainly used for logging purposes.
     pub name: String,
     layers: Vec<Layer<B>>,
 
-    blobs: Vec<ArcLock<HeapBlob>>, // the blobs storing intermediate results between the layer.
+    blobs_data: Vec<ArcLock<SharedTensor<f32>>>, // the blobs storing intermediate results between the layer.
+    blobs_gradient: Vec<ArcLock<SharedTensor<f32>>>, // the blobs storing intermediate results between the layer.
     blob_names: Vec<String>,
 
-    input_blobs: Vec<ArcLock<HeapBlob>>,
-    output_blobs: Vec<ArcLock<HeapBlob>>,
+    input_blobs_data: Vec<ArcLock<SharedTensor<f32>>>,
+    input_blobs_gradient: Vec<ArcLock<SharedTensor<f32>>>,
+    input_blob_names: Vec<String>,
+    output_blobs_data: Vec<ArcLock<SharedTensor<f32>>>,
+    output_blobs_gradient: Vec<ArcLock<SharedTensor<f32>>>,
+
+    registry: HashMap<String, (ArcLock<SharedTensor<f32>>, ArcLock<SharedTensor<f32>>)>,
 
     weight_owners: Vec<Option<usize>>,
     weight_display_names: Vec<String>,
@@ -78,25 +83,32 @@ pub struct Network<B: IBackend + IBlas<f32>> {
     ///
     /// Parameters are currently in the process of being renamed to weights throughout the codebase.
     /// [Issue #17](https://github.com/autumnai/leaf/issues/17)
-    weights: Vec<ArcLock<HeapBlob>>,
-    learnable_weights: Vec<ArcLock<HeapBlob>>,
+    weights: Vec<ArcLock<SharedTensor<f32>>>,
+    learnable_weights_data: Vec<ArcLock<SharedTensor<f32>>>,
+    learnable_weights_gradient: Vec<ArcLock<SharedTensor<f32>>>,
     learnable_weight_ids: Vec<usize>,
 
     weights_lr: Vec<Option<f32>>,
     weights_weight_decay: Vec<Option<f32>>,
 }
 
-impl<B: IBackend + IBlas<f32>> Default for Network<B> {
+impl<B: IBackend + LayerOps<f32>> Default for Network<B> {
     fn default() -> Network<B> {
         Network {
             name: "".to_owned(),
             layers: vec![],
 
-            blobs: vec![],
+            blobs_data: vec![],
+            blobs_gradient: vec![],
             blob_names: vec![],
 
-            input_blobs: vec![],
-            output_blobs: vec![],
+            input_blobs_data: vec![],
+            input_blobs_gradient: vec![],
+            input_blob_names: vec![],
+            output_blobs_data: vec![],
+            output_blobs_gradient: vec![],
+
+            registry: HashMap::new(),
 
             weight_owners: vec![],
             weight_display_names: vec![],
@@ -104,7 +116,8 @@ impl<B: IBackend + IBlas<f32>> Default for Network<B> {
             weight_names_index: HashMap::<String, usize>::new(),
 
             weights: vec![],
-            learnable_weights: vec![],
+            learnable_weights_data: vec![],
+            learnable_weights_gradient: vec![],
             learnable_weight_ids: vec![],
 
             weights_lr: vec![],
@@ -113,7 +126,7 @@ impl<B: IBackend + IBlas<f32>> Default for Network<B> {
     }
 }
 
-impl<B: IBackend + IBlas<f32>> Network<B> {
+impl<B: IBackend + LayerOps<f32> + 'static> Network<B> {
     /// Creates a Network from a [NetworkConfig][1].
     /// [1]: ./struct.NetworkConfig.html
     ///
@@ -124,21 +137,19 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
     /// # extern crate leaf;
     ///
     /// # use leaf::network::*;
-    /// # use collenchyma::backend::{Backend, BackendConfig};
-    /// # use collenchyma::frameworks::Native;
-    /// # use collenchyma::framework::IFramework;
+    /// # use collenchyma::prelude::*;
     /// # use std::rc::Rc;
     ///
+    /// # #[cfg(feature="cuda")]
     /// # fn main() {
     /// // create backend
-    /// let framework = Native::new();
-    /// let hardwares = framework.hardwares();
-    /// let backend_config = BackendConfig::new(framework, hardwares);
-    /// let backend = Rc::new(Backend::new(backend_config).unwrap());
+    /// let backend = Rc::new(Backend::<Cuda>::default().unwrap());
     /// // create network
     /// let cfg = NetworkConfig::default();
     /// Network::from_config(backend, &cfg);
     /// # }
+    /// # #[cfg(not(feature="cuda"))]
+    /// # fn main() {}
     /// ```
     pub fn from_config(backend: Rc<B>, param: &NetworkConfig) -> Network<B> {
         let mut network = Network::default();
@@ -155,14 +166,15 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
     /// [1]: ./struct.NetworkConfig.html
     fn init(&mut self, backend: Rc<B>, in_config: &NetworkConfig) {
         let config = in_config.clone();
-        let registry = &mut HashMap::<String, ArcLock<HeapBlob>>::new();
+        let mut registry = HashMap::<String, (ArcLock<SharedTensor<f32>>, ArcLock<SharedTensor<f32>>)>::new();
+        let weight_registry = &mut HashMap::<String, (ArcLock<SharedTensor<f32>>, ArcLock<SharedTensor<f32>>, Option<f32>, Option<f32>)>::new();
 
         for (input_name, input_shape) in config.inputs.iter().zip(config.input_shapes.iter()) {
-            self.init_input_blob(&input_name, input_shape, registry);
+            self.init_input_blob(backend.clone(), &input_name, input_shape, &mut registry);
         }
 
         for layer_config in &config.layers {
-            self.init_layer(backend.clone(), &layer_config, registry);
+            self.init_layer(backend.clone(), &layer_config, &mut registry, weight_registry);
         }
 
         // Go through the net backwards to determine which blobs contribute to the
@@ -173,7 +185,7 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
         // computation for the entire layer
         let blobs_under_loss = &mut HashSet::<String>::new();
         let blobs_skip_backp = &mut HashSet::<String>::new();
-        for layer in &mut self.layers {
+        for layer in &mut self.layers.iter_mut().rev() {
             layer.init_backprop( blobs_under_loss, blobs_skip_backp);
         }
 
@@ -186,10 +198,12 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
         // In the end, all remaining blobs are considered output blobs.
         for (blob_name, blob) in registry.iter() {
             info!("This network produces output {}", blob_name);
-            self.output_blobs.push(blob.clone());
+            self.output_blobs_data.push(blob.0.clone());
+            self.output_blobs_gradient.push(blob.1.clone());
         }
 
         self.share_weights();
+        self.registry = registry;
 
         info!("Network initialization done.");
     }
@@ -208,14 +222,8 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
     fn init_layer(&mut self,
                   backend: Rc<B>,
                   layer_config: &LayerConfig,
-                  registry: &mut HashMap<String, ArcLock<HeapBlob>>) {
-        // Caffe
-        // bool share_from_root = !Caffe::root_solver()
-        //     && root_net_->layers_[layer_id]->ShareInParallel();
-        // // Inherit mode from net if unset.
-        // if (!param.layer(layer_id).has_mode()) {
-        //   param.mutable_layer(layer_id)->set_mode(mode_);
-        // }
+                  registry: &mut HashMap<String, (ArcLock<SharedTensor<f32>>, ArcLock<SharedTensor<f32>>)>,
+                  weight_registry: &mut HashMap<String, (ArcLock<SharedTensor<f32>>, ArcLock<SharedTensor<f32>>, Option<f32>, Option<f32>)>) {
 
         // Setup layer.
         if let Err(e) = layer_config.validate() {
@@ -226,12 +234,12 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
         let mut layer = Layer::from_config(backend, &layer_config);
 
         // Figure out this layer's input and output
-        // self.layers.last_mut().unwrap().connect(registry);
-        layer.connect(registry);
-
-        for (weight_id, _) in layer.blobs.iter().enumerate() {
-            let layer_id = self.layers.len();
-            self.append_weight(layer_id, weight_id);
+        layer.connect(registry, weight_registry);
+        for weight_data in &layer.weights_data {
+            self.learnable_weights_data.push(weight_data.clone());
+        }
+        for weight_gradient in &layer.weights_gradient {
+            self.learnable_weights_gradient.push(weight_gradient.clone());
         }
 
         self.layers.push(layer);
@@ -251,8 +259,8 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
         // }
         for (i, _) in self.weights.clone().iter().enumerate() {
             if let Some(j) = self.weight_owners[i] {
-                assert!(self.weights[i].read().unwrap().capacity() ==
-                        self.weights[j].read().unwrap().capacity());
+                assert!(self.weights[i].read().unwrap().desc().size() ==
+                        self.weights[j].read().unwrap().desc().size());
                 self.weights[i] = self.weights[j].clone(); // sharing whole blob?
             }
         }
@@ -268,9 +276,10 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
     /// [2]: ../layer/struct.Layer.html#method.connect
     #[cfg_attr(lint, allow(ptr_arg))]
     fn init_input_blob(&mut self,
+                  backend: Rc<B>,
                   blob_name: &str,
                   input_shape: &Vec<usize>,
-                  registry: &mut HashMap<String, ArcLock<HeapBlob>>) {
+                  registry: &mut HashMap<String, (ArcLock<SharedTensor<f32>>, ArcLock<SharedTensor<f32>>)> ) {
 
         if registry.contains_key(blob_name) {
             // If we are not doing in-place computation but have duplicated blobs, raise an
@@ -278,120 +287,18 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
             error!("Top blob {} produced by multiple sources.", blob_name);
             return
         } else {
-            // if (Caffe::root_solver()) {
-            {
-                info!("Input {} -> {}", self.input_blobs.len(), blob_name);
-            }
+            info!("Input {} -> {}", self.input_blobs_data.len(), blob_name);
 
-            let blob: ArcLock<HeapBlob> = Arc::new(RwLock::new(Box::new(Blob::new())));
-            let blob_id = self.blobs.len();
-            self.blobs.push(blob.clone());
+            let ibackend: Rc<IBackend<F=B::F>> = backend;
+            let blob_data: ArcLock<SharedTensor<f32>> = Arc::new(RwLock::new(SharedTensor::new(ibackend.device(), input_shape).unwrap()));
+            let blob_gradient: ArcLock<SharedTensor<f32>> = Arc::new(RwLock::new(SharedTensor::new(ibackend.device(), input_shape).unwrap()));
+            let blob_id = self.blobs_data.len();
+            self.blobs_data.push(blob_data.clone());
             self.blob_names.push(blob_name.to_owned());
 
-            // Set the (explicitly specified) dimensions of the input blob.
-            // let input_shape = config.input_shape(top_id).unwrap().clone();
-            blob.write().unwrap().reshape(&input_shape.clone());
-
-            self.input_blobs.push(blob.clone());
-            registry.insert(blob_name.to_owned(), blob);
-        }
-    }
-
-    /// Append a weight blob to the network.
-    ///
-    /// During network initalization weight blobs are appended to the correct layers.
-    /// If a layer's [LayerConfig][1] states that the weights are shared,
-    /// this function also makes sure to set a reference to the other weight blob instead of
-    /// allocating a new one.
-    ///
-    /// [1]: ../layer/struct.LayerConfig.html
-    fn append_weight(&mut self, layer_id: usize, weight_id: usize) {
-        let layer_config = self.layers[layer_id].config.clone();
-        let weights_len = self.weights.len();
-        let weight_name = if weights_len > weight_id {
-            layer_config.param(weight_id).unwrap().name.clone()
-        } else {
-            "".to_owned()
-        };
-
-        // use weight_name (or weight_id as a fallback) as display_name
-        if !weight_name.is_empty() {
-            self.weight_display_names.push(weight_name.clone());
-        } else {
-            self.weight_display_names.push(format!("{}", weight_id));
-        }
-
-        // add to tracking vectors
-        let net_weight_id = weights_len;
-        self.weights.push(self.layers[layer_id].blobs[weight_id].clone());
-        self.weight_layer_indices.push((layer_id, weight_id));
-
-        let mut weight_config = &WeightConfig::default();
-        if layer_config.params_len() > weight_id {
-            weight_config = layer_config.param(weight_id).unwrap();
-        }
-        // This layer "owns" this weight blob -- it is either anonymous
-        // (i.e., not given a weight_name) or explicitly given a name that we
-        // haven't already seen.
-        if weight_name.is_empty() || !self.weight_names_index.contains_key(&weight_name) {
-            self.weight_owners.push(None);
-            if !weight_name.is_empty() {
-                self.weight_names_index.insert(weight_name.clone(), net_weight_id);
-            }
-            let learnable_weight_id = self.learnable_weights.len();
-            self.learnable_weights.push(self.weights[net_weight_id].clone());
-            self.learnable_weight_ids.push(learnable_weight_id);
-            self.weights_lr.push(weight_config.lr_mult.clone());
-            self.weights_weight_decay.push(weight_config.decay_mult.clone());
-        } else {
-            // Named weight blob with name we've seen before: share weights
-
-            let owner_net_weight_id = *self.weight_names_index.get(&weight_name).unwrap();
-            self.weight_owners.push(Some(owner_net_weight_id));
-            let (owner_layer_id, owner_weight_id) = self.weight_layer_indices[owner_net_weight_id];
-            info!("Sharing weights '{}' owned by layer '{}', weight index {}",
-                  weight_name.clone(),
-                  self.layers[owner_layer_id].name,
-                  owner_weight_id);
-            let this_blob = self.layers[layer_id].blobs[weight_id].clone();
-            let owner_blob = self.layers[owner_layer_id].blobs[owner_weight_id].clone();
-            // can only share weights if blobs match by shape or capacity
-            if weights_len > weight_id {
-                if let Err(e) = layer_config.param(weight_id)
-                                            .unwrap()
-                                            .check_dimensions(&this_blob.read().unwrap(),
-                                                              &owner_blob.read().unwrap(),
-                                                              weight_name.clone(),
-                                                              self.layers[owner_layer_id].name.clone(),
-                                                              self.layers[layer_id].name.clone()) {
-                    error!("{}", e)
-                }
-            }
-
-            let learnable_weight_id = self.learnable_weight_ids[owner_net_weight_id];
-            self.learnable_weight_ids.push(learnable_weight_id);
-            // can only share parameters if both have same lr_mult
-            if let Some(lr_mult) = weight_config.lr_mult {
-                if let Some(owner_lr_mult) = self.weights_lr[learnable_weight_id] {
-                    if !lr_mult.eq(&owner_lr_mult) {
-                        error!("Shared param '{}' has mismatched lr_mult.",
-                               weight_name.clone());
-                    }
-                } else {
-                    self.weights_lr[learnable_weight_id] = weight_config.lr_mult;
-                }
-            }
-            // can only share weights if both have same decay_mult
-            if let Some(decay_mult) = weight_config.decay_mult {
-                if let Some(owner_decay_mult) = self.weights_weight_decay[learnable_weight_id] {
-                    if !decay_mult.eq(&owner_decay_mult) {
-                        error!("Shared param '{}' has mismatched decay_mult.",
-                               weight_name.clone());
-                    }
-                } else {
-                    self.weights_weight_decay[learnable_weight_id] = weight_config.decay_mult;
-                }
-            }
+            self.input_blobs_data.push(blob_data.clone());
+            self.input_blob_names.push(blob_name.to_owned());
+            registry.insert(blob_name.to_owned(), (blob_data, blob_gradient));
         }
     }
 
@@ -405,7 +312,7 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
     ///
     /// [4]: ../solver/struct.Solver.html
     /// [5]: https://en.wikipedia.org/wiki/Backpropagation#Phase_1:_Propagation
-    pub fn forward_backward(&mut self, bottom: &[ArcLock<HeapBlob>]) -> f32 {
+    pub fn forward_backward(&mut self, bottom: &[ArcLock<SharedTensor<f32>>]) -> f32 {
         let loss = &mut 0f32;
 
         self.forward(bottom, loss);
@@ -424,9 +331,16 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
     ///
     /// This is the go-to if you just want to feed data to your network and get the corresponding
     /// output.
-    pub fn forward(&mut self, input: &[ArcLock<HeapBlob>], loss: &mut f32) -> &Vec<ArcLock<HeapBlob>> {
+    pub fn forward(&mut self, input: &[ArcLock<SharedTensor<f32>>], loss: &mut f32) -> &Vec<ArcLock<SharedTensor<f32>>> {
         for (i, inp) in input.iter().enumerate() {
-            self.input_blobs[i] = inp.clone();
+            self.input_blobs_data[i] = inp.clone();
+            for layer in &mut self.layers {
+                for (blob_index, blob_name) in layer.input_blob_names().to_owned().iter().enumerate() {
+                    if blob_name == &self.input_blob_names[i] {
+                        layer.input_blobs_data[blob_index] = inp.clone();
+                    }
+                }
+            }
         }
 
         self.forward_prefilled(Some(loss))
@@ -442,8 +356,8 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
     /// otherwise [forward][4] is the prefered method to forward through the whole network.
     ///
     /// [4]: #method.forward
-    pub fn forward_prefilled(&mut self, loss: Option<&mut f32>) -> &Vec<ArcLock<HeapBlob>> {
-        let end = self.layers.len() - 1;
+    pub fn forward_prefilled(&mut self, loss: Option<&mut f32>) -> &Vec<ArcLock<SharedTensor<f32>>> {
+        let end = self.layers.len();
         match loss {
             Some(loss_result) => {
                 // not sure if loss_result will really be changed
@@ -454,7 +368,7 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
             }
         }
 
-        &self.output_blobs
+        &self.output_blobs_data
     }
 
     /// Compute [forward step][1] for a part of (or the whole) network and returns the [total loss][2].
@@ -470,13 +384,18 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
     ///
     /// [3]: #method.forward_prefilled
     pub fn forward_from_to(&mut self, start: usize, end: usize) -> f32 {
-        assert!(end < self.layers.len());
+        assert!(end <= self.layers.len());
 
         let mut loss = 0f32;
 
         for i in start..end {
             loss += self.layers[i].forward();
+            if i == (end - 1) {
+                // synchronize after last layer
+                self.layers[i].synchronize();
+            }
         }
+        debug!("LOSS {:?}", loss);
 
         loss
     }
@@ -491,8 +410,22 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
     /// Backpropagating a network is only useful during training and handled by a [Solver][3]
     /// [3]: ../solver/index.html
     pub fn backward(&mut self) {
-        let start = self.layers.len() - 1;
-        self.backward_from_to(start, 0);
+        let start = self.layers.len();
+        debug!("BACKWARD NETWORK START: {:?}", &start);
+        self.backward_input_from_to(start, 0);
+        self.backward_parameters_from_to(start, 0);
+    }
+
+    /// TODO: Docs
+    pub fn backward_input(&mut self) {
+        let start = self.layers.len();
+        self.backward_input_from_to(start, 0);
+    }
+
+    /// TODO: Docs
+    pub fn backward_parameters(&mut self) {
+        let start = self.layers.len();
+        self.backward_parameters_from_to(start, 0);
     }
 
     /// Compute [backpropagation][1] step for a part of (or the whole) network.
@@ -505,11 +438,29 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
     /// If you want to compute a foward step for the whole network you should use [backward][3].
     /// Computing a backward on a part of the network is usually only done for debugging purposes.
     /// [3]: #method.backward
-    pub fn backward_from_to(&mut self, start: usize, end: usize) {
-        assert!(start < self.layers.len());
+    pub fn backward_input_from_to(&mut self, start: usize, end: usize) {
+        // assert!(start < self.layers.len());
+        debug!("BACKWARD NETWORK LAYERS");
+        for i in (end..start).rev() {
+            debug!("BACKWARD NETWORK LAYER {:?}", &self.layers[i].name);
+            self.layers[i].backward_input();
+            if i == end {
+                // synchronize after last layer
+                self.layers[i].synchronize();
+            }
+        }
+    }
 
-        for i in start..end {
-            self.layers[i].backward();
+    /// TODO: Docs
+    pub fn backward_parameters_from_to(&mut self, start: usize, end: usize) {
+        debug!("BACKWARD NETWORK LAYERS");
+        for i in (end..start).rev() {
+            debug!("BACKWARD NETWORK LAYER {:?}", &self.layers[i].name);
+            self.layers[i].backward_parameters();
+            if i == end {
+                // synchronize after last layer
+                self.layers[i].synchronize();
+            }
         }
     }
 
@@ -522,14 +473,16 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
     ///
     /// [2]: ../solver/struct.Solver.html
     pub fn clear_weight_diffs(&mut self) {
-        for weight_blob in &mut self.learnable_weights.iter() {
-            // TODO
-            // for p in weight_blob.write().unwrap().mut_diff().iter_mut() {
-            //     *p = 0f32;
-            // }
+        for weight_gradient in &mut self.learnable_weights_gradient.iter() {
+            let filler = ::weight::FillerType::Constant {
+                value: 0f32
+            };
+            filler.fill(&mut weight_gradient.write().unwrap());
         }
     }
+}
 
+impl<B: IBackend + LayerOps<f32>> Network<B> {
     /// Updates the [weights][1] with the weight update computed by the [Solver][2].
     /// [1]: https://en.wikipedia.org/wiki/Synaptic_weight
     /// [2]: ../solver/struct.Solver.html
@@ -538,15 +491,31 @@ impl<B: IBackend + IBlas<f32>> Network<B> {
     /// The update value is computed in previous steps according to the [learning rate policy][3]
     ///
     /// [3]: ../solver/enum.LRPolicy.html
-    pub fn update_weights(&mut self) {
-        for weight_blob in &self.learnable_weights {
-            weight_blob.write().unwrap().apply_diff()
+    pub fn update_weights<SolverB: IBackend + SolverOps<f32>>(&mut self, backend: &SolverB) {
+        let mut shared_a = ::util::native_scalar(-1f32);
+        let _ = shared_a.add_device(backend.device());
+        shared_a.sync(backend.device()).unwrap();
+        for (weight_gradient, weight_data) in self.learnable_weights_gradient.iter().zip(&mut self.learnable_weights_data) {
+            weight_gradient.write().unwrap().sync(backend.device()).unwrap();
+            weight_data.write().unwrap().sync(backend.device()).unwrap();
+            backend.axpy_plain(&shared_a, &weight_gradient.read().unwrap(), &mut weight_data.write().unwrap()).unwrap();
+            // weight_blob.write().unwrap().apply_diff(backend) // TODO: solver
         }
     }
 
     #[allow(missing_docs)]
-    pub fn learnable_weights(&self) -> &Vec<ArcLock<HeapBlob>> {
-        &self.learnable_weights
+    pub fn learnable_weight_data(&self) -> &Vec<ArcLock<SharedTensor<f32>>> {
+        &self.learnable_weights_data
+    }
+
+    #[allow(missing_docs)]
+    pub fn learnable_weight_gradients(&self) -> &Vec<ArcLock<SharedTensor<f32>>> {
+        &self.learnable_weights_gradient
+    }
+
+    /// get the data associated with the provided tensor name
+    pub fn get_data(&self, name: &str) -> ArcLock<SharedTensor<f32>> {
+        self.registry.get(name).unwrap().0.clone()
     }
 
     #[allow(missing_docs)]
@@ -574,7 +543,7 @@ pub struct NetworkConfig {
     /// Defines the names of the [input blobs][1].
     /// [1]: ./index.html#input-layers--blobs
     ///
-    /// The input blobs are identified by name so they can be referenced as [bottom blobs][2]
+    /// The input blobs are identified by name so they can be referenced as [input blobs][2]
     /// in a [LayerConfig][3].
     ///
     /// [2]: ../layer/index.html
@@ -638,6 +607,11 @@ impl NetworkConfig {
         self.layers.get(layer_id)
     }
 
+    /// Add layer at the end of the network.
+    pub fn add_layer(&mut self, layer: LayerConfig) {
+        self.layers.push(layer);
+    }
+
     #[allow(missing_docs)]
     pub fn input(&self, input_id: usize) -> Option<&String> {
         self.inputs.get(input_id)
@@ -646,6 +620,12 @@ impl NetworkConfig {
     #[allow(missing_docs)]
     pub fn input_shape(&self, input_id: usize) -> Option<&Vec<usize>> {
         self.input_shapes.get(input_id)
+    }
+
+    /// Add a input to the network.
+    pub fn add_input(&mut self, input_name: &str, shape: &[usize]) {
+        self.inputs.push(input_name.to_owned());
+        self.input_shapes.push(shape.to_owned());
     }
 }
 

@@ -22,8 +22,7 @@ such as feeding in data, logging, or returning results. You can use the layers
 that ship with Leaf (e.g. Convolutional, ReLU, RNN, SVM,
 etc.) or thanks to Rust, easily extend Leaf with your own layers.
 
-Leaf strives for leading-edge performance
-([benchmarks are next][benchmarks-issue]), while providing a clear and
+Leaf strives for [leading-edge performance][benchmarks], while providing a clear and
 expressive architecture that creates - as we hope - an innovative and active
 community around machine intelligence and fuels future research.
 
@@ -42,7 +41,7 @@ For more information,
 [rust]: https://www.rust-lang.org/
 [autumn]: http://autumnai.com
 [tensorflow]: https://github.com/tensorflow/tensorflow
-[benchmarks-issue]: https://github.com/autumnai/leaf/issues/26
+[benchmarks]: #benchmarks
 [documentation]: http://autumnai.github.io/leaf
 
 > Disclaimer: Leaf is currently in a very early and heavy stage of development.
@@ -68,6 +67,21 @@ Leaf right from the command line.
 
 [cargo-edit]: https://github.com/killercup/cargo-edit
 [leaf-examples]: https://github.com/autumnai/leaf-examples
+
+## Benchmarks
+
+| (in ms)          | Leaf    | Torch    | Neon    | Caffe    | Tensorflow |
+| ---------------- |---------|----------|---------|----------|------------|
+| **Alexnet**
+| *FORWARD*        |    30.8 |     33.0 |    30.9 |     42.0 |       46.1 |
+| *BACKWARD*       |    70.6 |     66.1 |    67.2 |     85.3 |      156.0 |
+| *TOTAL*          |   101.4 |     99.1 |    98.1 |    127.3 |      202.1 |
+| **Overfeat**                                
+| *FORWARD*        |   104.6 |    113.5 |         |    142.3 |            |
+| *BACKWARD*       |   216.7 |    213.7 |         |    287.9 |            |
+| *TOTAL*          |   321.3 |    327.2 |         |    430.2 |            |
+|                  |         |          |         |          |            | |
+
 
 ## Leaf Ecosystem and Extensions
 

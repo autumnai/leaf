@@ -1,8 +1,9 @@
 extern crate leaf;
 extern crate collenchyma as co;
 
-#[cfg(test)]
-mod network_spec {
+#[cfg(all(test, whatever))]
+// #[cfg(test)]
+mod solver_specs {
     use leaf::solver::*;
     use co::backend::Backend;
     use co::frameworks::Native;

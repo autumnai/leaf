@@ -10,5 +10,7 @@
 //!
 //! [1]: ../../layer/index.html
 pub use self::flatten::Flatten;
+pub use self::reshape::{Reshape, ReshapeConfig};
 
 pub mod flatten;
+pub mod reshape;
