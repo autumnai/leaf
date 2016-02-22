@@ -11,7 +11,7 @@ homepage = "https://github.com/autumnai/leaf"
 documentation = "http://autumnai.github.io/leaf"
 readme = "README.md"
 keywords = ["deep-learning", "neural-networks", "machine-learning", "framework"]
-license = "MIT"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 collenchyma = { version = "0.0.8", default-features = false }
