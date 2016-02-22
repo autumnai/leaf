@@ -12,7 +12,6 @@
 //! or 5D NCDHW (3 spatial dimensions) format.
 use std::rc::Rc;
 use co::{IBackend, SharedTensor};
-use co::plugin::Float;
 use conn;
 use layer::*;
 use util::{ArcLock, cast_vec_usize_to_i32};
@@ -20,7 +19,7 @@ use super::FilterLayer;
 
 #[derive(Debug, Clone)]
 /// [Pooling](./index.html) Layer
-pub struct Pooling<T: Float, B: conn::Pooling<T>> {
+pub struct Pooling<T, B: conn::Pooling<T>> {
     mode: PoolingMode,
 
     filter_shape: Vec<usize>,
@@ -30,7 +29,7 @@ pub struct Pooling<T: Float, B: conn::Pooling<T>> {
     pooling_configs: Vec<Rc<B::CPOOL>>,
 }
 
-impl<T: Float, B: conn::Pooling<T>> Pooling<T, B> {
+impl<T, B: conn::Pooling<T>> Pooling<T, B> {
     /// Create a Pooling layer from a PoolingConfig.
     pub fn from_config(config: &PoolingConfig) -> Pooling<T, B> {
         Pooling {
@@ -45,7 +44,7 @@ impl<T: Float, B: conn::Pooling<T>> Pooling<T, B> {
     }
 }
 
-impl<T: Float, B: conn::Pooling<T>> FilterLayer for Pooling<T, B> {
+impl<T, B: conn::Pooling<T>> FilterLayer for Pooling<T, B> {
     /// Calculates the number of spatial dimensions for the pooling operation.
     fn num_spatial_dims(&self, input_shape: &[usize]) -> usize {
         match input_shape.len() {

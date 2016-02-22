@@ -5,7 +5,6 @@ use co::framework::IFramework;
 use co::frameworks::Native;
 use co::memory::MemoryType;
 use co::tensor::SharedTensor;
-use co::plugin::numeric_helpers::*;
 use coblas::plugin::*;
 use conn;
 
@@ -55,7 +54,7 @@ pub fn cast_vec_usize_to_i32(input: Vec<usize>) -> Vec<i32> {
 }
 
 /// Extends IBlas with Axpby
-pub trait Axpby<F: Float> : Axpy<F> + Scal<F> {
+pub trait Axpby<F> : Axpy<F> + Scal<F> {
     /// Performs the operation y := a*x + b*y .
     ///
     /// Consists of a scal(b, y) followed by a axpby(a,x,y).
@@ -69,18 +68,18 @@ pub trait Axpby<F: Float> : Axpy<F> + Scal<F> {
 impl<T: Axpy<f32> + Scal<f32>> Axpby<f32> for T {}
 
 /// Encapsulates all traits required by Solvers.
-pub trait SolverOps<F: Float> : Axpby<F> + Dot<F> + Copy<F> {}
+pub trait SolverOps<F> : Axpby<F> + Dot<F> + Copy<F> {}
 
 impl<T: Axpby<f32> + Dot<f32> + Copy<f32>> SolverOps<f32> for T {}
 
 /// Encapsulates all traits used in Layers.
-pub trait LayerOps<F: Float> : conn::Convolution<F> + conn::Pooling<F> + conn::Relu<F> + conn::Sigmoid<F> + conn::Softmax<F> + conn::LogSoftmax<F>
+pub trait LayerOps<F> : conn::Convolution<F> + conn::Pooling<F> + conn::Relu<F> + conn::Sigmoid<F> + conn::Softmax<F> + conn::LogSoftmax<F>
                              + Gemm<F> {}
 
 impl<T: conn::Convolution<f32> + conn::Pooling<f32> + conn::Relu<f32> + conn::Sigmoid<f32> + conn::Softmax<f32> + conn::LogSoftmax<f32>
       + Gemm<f32>> LayerOps<f32> for T {}
 
-// pub trait LayerOps<F: Float> : conn::Relu<F> + conn::Sigmoid<F> + conn::Softmax<F> + conn::LogSoftmax<F>
+// pub trait LayerOps<F> : conn::Relu<F> + conn::Sigmoid<F> + conn::Softmax<F> + conn::LogSoftmax<F>
 //                              + Gemm<F> {}
 //
 // impl<T: conn::Relu<f32> + conn::Sigmoid<f32> + conn::Softmax<f32> + conn::LogSoftmax<f32>
