@@ -2,8 +2,6 @@
 use rand;
 use rand::distributions::{IndependentSample, Range};
 use co::{ITensorDesc, SharedTensor};
-use co::plugin::numeric_helpers::Float;
-// use shared_memory::*;
 use util::native_backend;
 
 #[derive(Debug, Clone)]
@@ -52,7 +50,7 @@ impl Default for WeightConfig {
 impl WeightConfig {
     /// Checks dimensions of two blobs according to the `share_mode`.
     /// Returns an error if there is a count/shape mismatch.
-    pub fn check_dimensions<T: Float>(&self,
+    pub fn check_dimensions<T>(&self,
                                         tensor_one: &SharedTensor<T>,
                                         tensor_two: &SharedTensor<T>,
                                         param_name: String,
