@@ -25,26 +25,26 @@
 #[macro_export]
 macro_rules! impl_isolver_sgd {
     ($t:ty) => (
-        impl<B: IBackend + IBlas<f32>> ISolver<B> for $t {
-            fn apply_update(&mut self, config: &SolverConfig, net: &mut Network<B>, iter: usize) {
+        impl<SolverB: IBackend + SolverOps<f32>, NetB: IBackend + LayerOps<f32>> ISolver<SolverB, NetB> for $t {
+            fn apply_update(&mut self, config: &SolverConfig, net: &mut Network<NetB>, iter: usize) {
                 // CHECK(Caffe::root_solver()); // Caffe
                 let rate = config.get_learning_rate(iter);
 
-                self.clip_gradients(config, net);
-                for (weight_id, weight_blob) in net.learnable_weights().iter().enumerate() {
-                    self.normalize(config, weight_blob);
-                    self.regularize(config, weight_blob, net.weights_weight_decay()[weight_id]);
+                SGDSolver::<SolverB, NetB>::clip_gradients(self, config, net);
+                for (weight_id, weight_gradient) in net.learnable_weight_gradients().iter().enumerate() {
+                    SGDSolver::<SolverB, NetB>::normalize(self, config, weight_gradient);
+                    SGDSolver::<SolverB, NetB>::regularize(self, config, weight_gradient, net.weights_weight_decay()[weight_id]);
 
-                    self.compute_update_value(config,
-                                              weight_blob,
+                    SGDSolver::<SolverB, NetB>::compute_update_value(self, config,
+                                              weight_gradient,
                                               weight_id,
                                               &rate,
                                               &net.weights_lr()[weight_id].unwrap());
                 }
-                net.update_weights();
+                net.update_weights(ISolver::<SolverB, NetB>::backend(self));
             }
 
-            fn backend(&self) -> &B {
+            fn backend(&self) -> &SolverB {
                 &self.backend
             }
         }

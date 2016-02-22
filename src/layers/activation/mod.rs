@@ -1,7 +1,7 @@
 //! Provides nonlinear activation methods.
 //!
-//! Activation Layers take a bottom Blob, provide the activation operation and
-//! produce a top Blob.
+//! Activation Layers take a input tensor, provide the activation operation and
+//! produce a output tensor.
 //! Thanks to the nonlinearity of the activation methods, we can 'learn' and
 //! detect nonlinearities
 //! in our (complex) datasets.
@@ -10,11 +10,23 @@
 //! classification a
 //! step function might be very useful. For more complex tasks continious
 //! activation functions such
-//! as Sigmoid, TanH, Softmax or ReLU should be used. In most cases ReLU might
-//! prove the best
-//! results.
+//! as [Sigmoid][mod_sigmoid], TanH, [ReLU][mod_relu] should be used. In most cases ReLU might
+//! provide the best results.
 //!
 //! The activation function is also sometimes called transfer function.
+//!
+//! [mod_sigmoid]: ./sigmoid/index.html
+//! [mod_relu]: ./relu/index.html
+#[macro_export]
+macro_rules! impl_ilayer_activation {
+    () => (
+        fn exact_num_output_blobs(&self) -> Option<usize> { Some(1) }
+        fn exact_num_input_blobs(&self) -> Option<usize> { Some(1) }
+    )
+}
+
+pub use self::relu::ReLU;
 pub use self::sigmoid::Sigmoid;
 
+pub mod relu;
 pub mod sigmoid;

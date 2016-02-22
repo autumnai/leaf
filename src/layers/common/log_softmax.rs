@@ -1,17 +1,5 @@
-//! Applies the nonlinear Log-Sigmoid function.
+//! Computes the logarithmic softmax of its input.
 //!
-//! Non-linearity activation function: y = (1 + e^(-x))^(-1)
-//!
-//! A classic choice in neural networks.
-//! But you might consider using ReLu as an alternative.
-//!
-//! ReLu, compared to Sigmoid
-//!
-//! * reduces the likelyhood of vanishing gradients
-//! * increases the likelyhood of a more beneficial sparse representation
-//! * can be computed faster
-//! * is therefore the most popular activation function in DNNs as of this
-//! writing (2015).
 use co::{IBackend, SharedTensor};
 use conn;
 use layer::*;
@@ -19,12 +7,10 @@ use util::ArcLock;
 
 #[derive(Debug, Clone)]
 #[allow(missing_copy_implementations)]
-/// Sigmoid Activation Layer
-pub struct Sigmoid;
+/// LogSoftmax Layer
+pub struct LogSoftmax;
 
-impl<B: IBackend + conn::Sigmoid<f32>> ILayer<B> for Sigmoid {
-    impl_ilayer_activation!();
-
+impl<B: IBackend + conn::LogSoftmax<f32>> ILayer<B> for LogSoftmax {
     fn reshape(&mut self,
                backend: ::std::rc::Rc<B>,
                input_data: &mut Vec<ArcLock<SharedTensor<f32>>>,
@@ -33,23 +19,24 @@ impl<B: IBackend + conn::Sigmoid<f32>> ILayer<B> for Sigmoid {
                weights_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_data: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>) {
-        let inp = input_data[0].read().unwrap();
-        output_data[0].write().unwrap().resize(inp.desc()).unwrap();
-        output_gradient[0].write().unwrap().resize(inp.desc()).unwrap();
+        let input_desc = input_data[0].read().unwrap().desc().clone();
+        input_gradient[0].write().unwrap().resize(&input_desc).unwrap();
+        output_data[0].write().unwrap().resize(&input_desc).unwrap();
+        output_gradient[0].write().unwrap().resize(&input_desc).unwrap();
     }
 }
 
-impl<B: IBackend + conn::Sigmoid<f32>> ComputeOutput<f32, B> for Sigmoid {
+impl<B: IBackend + conn::LogSoftmax<f32>> ComputeOutput<f32, B> for LogSoftmax {
     fn compute_output(&self,
                       backend: &B,
                       _weights: &[&SharedTensor<f32>],
                       input_data: &[&SharedTensor<f32>],
                       output_data: &mut [&mut SharedTensor<f32>]) {
-        backend.sigmoid_plain(input_data[0], output_data[0]).unwrap();
+        backend.log_softmax_plain(input_data[0], output_data[0]).unwrap();
     }
 }
 
-impl<B: IBackend + conn::Sigmoid<f32>> ComputeInputGradient<f32, B> for Sigmoid {
+impl<B: IBackend + conn::LogSoftmax<f32>> ComputeInputGradient<f32, B> for LogSoftmax {
     fn compute_input_gradient(&self,
                               backend: &B,
                               weights_data: &[&SharedTensor<f32>],
@@ -57,8 +44,14 @@ impl<B: IBackend + conn::Sigmoid<f32>> ComputeInputGradient<f32, B> for Sigmoid 
                               output_gradients: &[&SharedTensor<f32>],
                               input_data: &[&SharedTensor<f32>],
                               input_gradients: &mut [&mut SharedTensor<f32>]) {
-        backend.sigmoid_grad_plain(output_data[0], output_gradients[0], input_data[0], input_gradients[0]).unwrap();
+        backend.log_softmax_grad_plain(output_data[0], output_gradients[0], input_gradients[0]).unwrap();
     }
 }
 
-impl<B: IBackend + conn::Sigmoid<f32>> ComputeParametersGradient<f32, B> for Sigmoid {}
+impl<B: IBackend + conn::LogSoftmax<f32>> ComputeParametersGradient<f32, B> for LogSoftmax { }
+
+impl ::std::default::Default for LogSoftmax {
+    fn default() -> LogSoftmax {
+        LogSoftmax
+    }
+}

@@ -23,7 +23,7 @@
 //! Layers, the building block of a Leaf Network, are small units, describing computation over
 //! numerical input data. Generally speaking Layers take input and produce an output, but
 //! essentially a Layer can describe any functionality e.g. logging as long as it obeys to the
-//! general behaviour specifications of a Layer. Any Layer can be grouped in one of four
+//! general behaviour specifications of a Layer. A Layer can be grouped in one of four
 //! Layer types which are closer defined at the [Layers page][layers]. Every
 //! layer serves a special purpose and can occur zero, one or many times inside a Network.
 //!
@@ -105,9 +105,10 @@
 //! [issue-loss]: https://github.com/autumnai/leaf/issues/18
 //! [issue-activation]: https://github.com/autumnai/leaf/issues/19
 //! [issue-common]: https://github.com/autumnai/leaf/issues/20
-#![cfg_attr(lint, feature(plugin))]
-#![cfg_attr(lint, plugin(clippy))]
-#![feature(augmented_assignments)]
+#![cfg_attr(feature="lint", feature(plugin))]
+#![cfg_attr(feature="lint", plugin(clippy))]
+#![cfg_attr(feature="lint", allow(type_complexity))]
+
 #![allow(dead_code)]
 #![allow(unused_variables)]
 #![deny(missing_docs,
@@ -123,12 +124,20 @@
 #![cfg_attr(feature="clippy", deny(clippy, clippy_pedantic))]
 
 #[macro_use]
+extern crate timeit;
+#[macro_use]
 extern crate log;
-extern crate phloem;
+extern crate rand;
 extern crate collenchyma as co;
-pub mod shared_memory;
+extern crate collenchyma_blas as coblas;
+extern crate collenchyma_nn as conn;
 pub mod layer;
 pub mod layers;
+#[cfg(feature="cuda")]
 pub mod solver;
+#[cfg(feature="cuda")]
 pub mod solvers;
 pub mod network;
+pub mod weight;
+
+pub mod util;

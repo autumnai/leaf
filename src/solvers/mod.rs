@@ -31,17 +31,16 @@
 pub use self::sgd::{Momentum};
 pub mod sgd;
 
-use co::backend::IBackend;
-use co::shared_memory::SharedMemory;
-use co::libraries::blas::IBlas;
-use shared_memory::*;
+use co::{IBackend, MemoryType, SharedTensor};
+use conn::NN;
 use solver::*;
 use network::Network;
+use util::{ArcLock, native_backend, LayerOps, SolverOps};
 
-trait SGDSolver<B: IBackend + IBlas<f32>> : ISolver<B> {
+trait SGDSolver<SolverB: IBackend + SolverOps<f32>, NetB: IBackend + LayerOps<f32>> : ISolver<SolverB, NetB> {
     fn compute_update_value(&mut self,
                             config: &SolverConfig,
-                            weight_blob: &ArcLock<HeapBlob>,
+                            weight_blob: &ArcLock<SharedTensor<f32>>,
                             history_blob_id: usize,
                             global_lr: &f32,
                             blob_lr: &f32);
@@ -58,22 +57,31 @@ trait SGDSolver<B: IBackend + IBlas<f32>> : ISolver<B> {
     ///
     /// [3]: https://en.wikipedia.org/wiki/Recurrent_neural_network
     /// [4]: https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm
-    fn clip_gradients(&self, config: &SolverConfig, net: &mut Network<B>) {
+    #[allow(unused_must_use)]
+    fn clip_gradients<B: IBackend + LayerOps<f32>>(&self, config: &SolverConfig, net: &mut Network<B>) {
         // skip clipping gradients if SolverConfig.clip_gradients is set to None
         if let Some(clip_threshold) = config.clip_gradients {
-            let net_weights = net.learnable_weights();
+            let native = native_backend();
+
+            let net_gradients = net.learnable_weight_gradients();
             let mut sumsq_diff = 0f32;
             let backend = self.backend();
-            let mut result = SharedMemory::<f32>::new(backend.device(), 1);
-            for weight_blob in net_weights {
-                let mut blob = weight_blob.write().unwrap();
-                // self.backend().nrm2(blob.mut_diff(), &mut result);
-                // TODO
-                // let blob_sumsq_diff = leaf_cpu_dot(blob.cpu_diff(), blob.cpu_diff());
-                // sumsq_diff += blob_sumsq_diff;
+            for net_gradient in net_gradients {
+                let gradient = net_gradient.read().unwrap();
+                let mut result = SharedTensor::<f32>::new(backend.device(), &1).unwrap();
+                // gradient.sumsq_diff(self.backend(), &mut result);
+                self.backend().dot_plain(&gradient, &gradient, &mut result);
+
+                let mut result = SharedTensor::<f32>::new(backend.device(), &1).unwrap();
+                match result.add_device(native.device()) { _ => result.sync(native.device()).unwrap() }
+                if let &MemoryType::Native(ref sumsq_result) = result.get(native.device()).unwrap() {
+                    let sumsq_diff_slice = sumsq_result.as_slice::<f32>();
+                    sumsq_diff += sumsq_diff_slice[0];
+                } else {
+                    panic!();
+                }
             }
             let l2norm_diff = sumsq_diff.sqrt();
-            unimplemented!(); // needs either simple devision or similar
             if l2norm_diff > clip_threshold {
                 let scale_factor = clip_threshold / l2norm_diff;
                 info!("Gradient clipping: scaling down gradients (L2 norm {} > {})
@@ -82,11 +90,17 @@ trait SGDSolver<B: IBackend + IBlas<f32>> : ISolver<B> {
                       clip_threshold,
                       scale_factor);
 
-                for weight_blob in net_weights {
-                    let mut blob = weight_blob.write().unwrap();
-                    let diff = blob.mut_diff();
-                    // TODO
-                    // leaf_cpu_scal(&scale_factor, diff);
+                let mut scale_shared = SharedTensor::<f32>::new(native.device(), &1).unwrap();
+                if let &mut MemoryType::Native(ref mut scale) = scale_shared.get_mut(native.device()).unwrap() {
+                    let scale_slice = scale.as_mut_slice::<f32>();
+                    scale_slice[0] = scale_factor;
+                } else {
+                    panic!();
+                }
+
+                for weight_gradient in net_gradients {
+                    let mut gradient = weight_gradient.write().unwrap();
+                    backend.scal(&mut scale_shared, &mut gradient);
                 }
             }
         }
@@ -98,20 +112,26 @@ trait SGDSolver<B: IBackend + IBlas<f32>> : ISolver<B> {
     /// To counteract that we are accumulating the gradients over multiple samples,
     /// we need to scale the gradients down to the equivalent of a single sample.</br>
     /// E.g. with a `minibatch_size` of 4 we need to scale the gradient by 0.25 (= 1/4).
-    fn normalize(&self, config: &SolverConfig, weight_blob: &ArcLock<HeapBlob>) {
+    fn normalize(&self, config: &SolverConfig, weight_blob: &ArcLock<SharedTensor<f32>>) {
         if config.minibatch_size > 1 {
             let scale_factor = 1f32 / config.minibatch_size as f32;
-            let mut write_blob = weight_blob.write().unwrap();
-            let mut shared_scale_factor = SharedMemory::<f32>::new(self.backend().device(), 1);
-            // let _ = self.backend().scale(&mut shared_scale_factor, write_blob.mut_diff());
-            unimplemented!();
+            let mut gradient = weight_blob.write().unwrap();
+            let native = native_backend();
+            let mut scale_factor_shared = SharedTensor::<f32>::new(native.device(), &1).unwrap();
+            if let &mut MemoryType::Native(ref mut scale) = scale_factor_shared.get_mut(native.device()).unwrap() {
+                let scale_slice = scale.as_mut_slice::<f32>();
+                scale_slice[0] = scale_factor;
+            } else {
+                panic!();
+            }
+            self.backend().scal_plain(&scale_factor_shared, &mut gradient).unwrap();
         }
     }
 
     /// [Regularize][1] the gradient according to the configured [RegularizationMethod][2].
     /// [1]: https://cs231n.github.io/neural-networks-2/#reg
     /// [2]: ../solver/enum.RegularizationMethod.html
-    fn regularize(&self, config: &SolverConfig, weight_blob: &ArcLock<HeapBlob>, blob_weight_decay: Option<f32>) {
+    fn regularize(&self, config: &SolverConfig, weight_gradient: &ArcLock<SharedTensor<f32>>, blob_weight_decay: Option<f32>) {
         if let Some(global_weight_decay) = config.weight_decay {
             if let Some(regularization_method) = config.regularization_method {
                 match blob_weight_decay {
@@ -119,15 +139,24 @@ trait SGDSolver<B: IBackend + IBlas<f32>> : ISolver<B> {
                         let local_decay = global_weight_decay * weight_decay_mult;
                         match regularization_method {
                             RegularizationMethod::L2 => {
-                                // TODO
-                                // leaf_cpu_axpy(&local_decay,
-                                //               weight_blob.read().unwrap().cpu_data(),
-                                //               weight_blob.write().unwrap().mutable_cpu_diff());
+                                let native = native_backend();
+                                let mut decay_shared = SharedTensor::<f32>::new(native.device(), &1).unwrap();
+                                if let &mut MemoryType::Native(ref mut decay) = decay_shared.get_mut(native.device()).unwrap() {
+                                    let decay_slice = decay.as_mut_slice::<f32>();
+                                    decay_slice[0] = local_decay;
+                                } else {
+                                    panic!();
+                                }
+                                let gradient = &mut weight_gradient.write().unwrap();
+                                // gradient.regularize_l2(self.backend(), &decay_shared);
+                                // backend.axpy_plain(&decay_shared, &self.data, &mut self.diff).unwrap();
+                                // TODO: solver
+                                unimplemented!();
                             }
                         }
                     }
                     None => {
-                        error!("Weight decay multiplier for blob missing.");
+                        error!("Weight decay multiplier for gradient missing.");
                     }
                 }
             }
