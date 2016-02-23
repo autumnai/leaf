@@ -7,9 +7,18 @@ use util::{ArcLock, native_backend};
 #[derive(Debug, Clone)]
 #[allow(missing_copy_implementations)]
 /// NegativeLogLikelihood Loss Layer
-pub struct NegativeLogLikelihood;
+pub struct NegativeLogLikelihood {
+    num_classes: usize,
+}
 
 impl NegativeLogLikelihood {
+    /// Create a NegativeLogLikelihood layer from a NegativeLogLikelihoodConfig.
+    pub fn from_config(config: &NegativeLogLikelihoodConfig) -> NegativeLogLikelihood {
+        NegativeLogLikelihood {
+            num_classes: config.num_classes,
+        }
+    }
+
     fn calculate_outer_num(softmax_axis: usize, input_shape: &[usize]) -> usize {
         input_shape.iter().take(softmax_axis + 1).fold(1, |prod, i| prod * i)
     }
@@ -23,14 +32,6 @@ impl NegativeLogLikelihood {
             1 => 1,
             2 => input_shape[0],
             _ => panic!("NegativeLogLikelihood layer only supports 1D/2D inputs")
-        }
-    }
-
-    fn num_classes(input_shape: &[usize]) -> usize {
-        match input_shape.len() {
-            1 => input_shape[0],
-            2 => input_shape[1],
-            _ => panic!("NegativeLogLikelihood layer only supports 1D/2D inputs"),
         }
     }
 }
@@ -97,7 +98,7 @@ impl<B: IBackend> ComputeInputGradient<f32, B> for NegativeLogLikelihood {
                               input_gradients: &mut [&mut SharedTensor<f32>]) {
         let labels = input_data[1];
         let batch_size = Self::batch_size(input_data[0].desc());
-        let num_classes = Self::num_classes(input_data[0].desc());
+        let num_classes = self.num_classes;
 
         let native = native_backend();
         let native_labels = labels.get(native.device()).unwrap().as_native().unwrap().as_slice::<f32>();
@@ -114,8 +115,10 @@ impl<B: IBackend> ComputeInputGradient<f32, B> for NegativeLogLikelihood {
 
 impl<B: IBackend> ComputeParametersGradient<f32, B> for NegativeLogLikelihood { }
 
-impl ::std::default::Default for NegativeLogLikelihood {
-    fn default() -> NegativeLogLikelihood {
-        NegativeLogLikelihood
-    }
+#[derive(Debug, Clone)]
+#[allow(missing_copy_implementations)]
+/// Specifies configuration parameters for a NegativeLogLikelihood Layer.
+pub struct NegativeLogLikelihoodConfig {
+    /// How many different classes can be classified.
+    pub num_classes: usize,
 }

@@ -64,7 +64,7 @@ pub use self::common::{
 
 #[allow(unused_import_braces)]
 pub use self::loss::{
-    NegativeLogLikelihood,
+    NegativeLogLikelihood, NegativeLogLikelihoodConfig,
 };
 
 #[allow(unused_import_braces)]

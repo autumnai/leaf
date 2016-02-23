@@ -18,6 +18,6 @@ macro_rules! impl_ilayer_loss {
     )
 }
 
-pub use self::negative_log_likelihood::NegativeLogLikelihood;
+pub use self::negative_log_likelihood::{NegativeLogLikelihood, NegativeLogLikelihoodConfig};
 
 pub mod negative_log_likelihood;
