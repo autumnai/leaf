@@ -133,7 +133,7 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
             LayerType::Softmax => Box::new(Softmax::default()),
             LayerType::ReLU => Box::new(ReLU),
             LayerType::Sigmoid => Box::new(Sigmoid),
-            LayerType::NegativeLogLikelihood => Box::new(NegativeLogLikelihood::default()),
+            LayerType::NegativeLogLikelihood(layer_config) => Box::new(NegativeLogLikelihood::from_config(&layer_config)),
             LayerType::Reshape(layer_config) => Box::new(Reshape::from_config(&layer_config)),
         }
     }
@@ -953,7 +953,7 @@ pub enum LayerType {
     Sigmoid,
     // Loss layers
     /// NegativeLogLikelihood Layer
-    NegativeLogLikelihood,
+    NegativeLogLikelihood(NegativeLogLikelihoodConfig),
     // Utility layers
     /// Reshape Layer
     Reshape(ReshapeConfig),

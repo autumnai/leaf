@@ -337,7 +337,14 @@ impl<B: IBackend + LayerOps<f32> + 'static> Network<B> {
             for layer in &mut self.layers {
                 for (blob_index, blob_name) in layer.input_blob_names().to_owned().iter().enumerate() {
                     if blob_name == &self.input_blob_names[i] {
+                        let reshaped_shape = layer.input_blobs_data[blob_index].read().unwrap().desc().clone();
                         layer.input_blobs_data[blob_index] = inp.clone();
+                        // reshape input tensor to the reshaped shape
+                        let old_shape = layer.input_blobs_data[blob_index].read().unwrap().desc().clone();
+                        if old_shape.size() != reshaped_shape.size() {
+                            panic!("The provided input does not have the expected shape");
+                        }
+                        layer.input_blobs_data[blob_index].write().unwrap().reshape(&reshaped_shape).unwrap();
                     }
                 }
             }

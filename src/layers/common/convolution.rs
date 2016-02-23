@@ -3,10 +3,11 @@
 //! Does this convolution with a set of learnable filters, each producing one
 //! feature map in the output tensor.
 use std::rc::Rc;
-use co::{IBackend, DeviceType, SharedTensor};
+use co::prelude::*;
 use conn;
 use layer::*;
 use util::{ArcLock, native_backend, cast_vec_usize_to_i32};
+use weight::FillerType;
 use super::FilterLayer;
 
 #[derive(Debug, Clone)]
@@ -126,7 +127,13 @@ impl<B: IBackend + conn::Convolution<f32>> ILayer<B> for Convolution<B> {
             let config = backend.new_convolution_config(&inp, &output_data, &mut filter,
                                                         conn::ConvForwardAlgo::Auto, conn::ConvBackwardFilterAlgo::Auto, conn::ConvBackwardDataAlgo::Auto,
                                                         &stride, &padding).unwrap();
+            // resize and fill weights
             weights_data[0].write().unwrap().resize(filter.desc()).unwrap();
+            let filler = FillerType::Glorot {
+                input_size: inp.desc().size(),
+                output_size: output_shape.size(),
+            };
+            filler.fill(&mut weights_data[0].write().unwrap());
             weights_gradient[0].write().unwrap().resize(filter.desc()).unwrap();
             self.convolution_configs = Some(Rc::new(config));
         }
