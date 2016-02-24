@@ -189,4 +189,4 @@ We created an extensive [Documentation Guide][1] for you, which outlines an easy
 and efficient communication Framework for providing developers and users with
 helpful Documentation about the Deep Learning Framework.
 
-[1] https://medium.com/@autumn_eng/increasing-open-source-engagement-with-structural-communication-guidelines-for-code-documentation-e72533de8e45
+[1]: https://medium.com/@autumn_eng/increasing-open-source-engagement-with-structural-communication-guidelines-for-code-documentation-e72533de8e45
