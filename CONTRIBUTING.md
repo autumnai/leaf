@@ -12,8 +12,7 @@ overview of how you can contribute to Leaf.
   * [Documentation Guidelines](#documentation-guidelines)
 
 
-If you have questions hop on the [Leaf Chat](https://gitter.im/autumnai/leaf)
-, or reach out to {@[MJ](https://twitter.com/mjhirn), @[Max](https://twitter.com/hobofan)}.
+If you have questions hop on the [Leaf Chat](https://gitter.im/autumnai/leaf), to the #rust-machine-learning IRC on irc.mozilla.org or reach out to {@[MJ](https://twitter.com/mjhirn), @[Max](https://twitter.com/hobofan)}.
 
 ## Pull Requests
 
@@ -117,8 +116,30 @@ open an issue in the repository.
 
 We have very precise rules over how git commit messages should be formatted.
 This leads to more readable messages that are easy to follow when looking
-through the project history. But also, we may use the git commit messages to
-auto-generate the Leaf change log.
+through the project history. The commit guidelines help us to auto-generate the CHANGELOG. More information about it, can be found in the [`Guide to CHANGELOG in Rust` post][2].
+
+#### Commit Message Examples
+
+Following some valid commit message examples. A syntax explanation can be found in the following section, Commit Message Format. 
+
+Example for a mature commit message.
+```
+docs/readme: add contact section to README.md
+
+A lot of people have asked about contact details, so I decided it would be a good idea to include our contact details in the README.md
+
+REFERENCE: #4, #63
+CLOSE: #52
+```
+
+Another example on how you would make the commit on the command line.
+```
+git commit -m 'feat/solver: add Adagrad as SGD-based solver
+
+Some more context and explanation about the commit, PR.
+
+CLOSE: #42'
+```
 
 #### Commit Message Format
 
@@ -149,8 +170,7 @@ Must be one of the following:
 
 <**scope**>:
 
-The scope could be anything that specifies the place of the commit change.
-For example: `feature1`, `tests`, `lib`, etc...
+The scope could be anything that specifies the place of the commit change, e.g. `solver`, `[filename]`, `tests`, `lib`, ... we are not very restrictive on the scope. The scope should just be lowercase and if possible contain of a single word, this makes the CHANGELOG generation easier.
 
 <**subject**>:
 
@@ -190,3 +210,4 @@ and efficient communication Framework for providing developers and users with
 helpful Documentation about the Deep Learning Framework.
 
 [1]: https://medium.com/@autumn_eng/increasing-open-source-engagement-with-structural-communication-guidelines-for-code-documentation-e72533de8e45
+[2]: https://medium.com/@autumn_eng/guide-to-changelog-md-in-rust-6eb349808fa4
