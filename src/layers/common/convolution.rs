@@ -97,6 +97,10 @@ impl<B: conn::Convolution<f32>> FilterLayer for Convolution<B> {
 
 impl<B: IBackend + conn::Convolution<f32>> ILayer<B> for Convolution<B> {
     impl_ilayer_common!();
+    
+    fn auto_weight_blobs(&self) -> bool {
+        true
+    }
 
     fn reshape(&mut self,
                backend: ::std::rc::Rc<B>,

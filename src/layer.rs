@@ -185,13 +185,7 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
         }
 
         self.worker.init(self.backend.clone());
-        self.worker.reshape(self.backend.clone(),
-                            &mut self.input_blobs_data,
-                            &mut self.input_blobs_gradient,
-                            &mut self.weights_data,
-                            &mut self.weights_gradient,
-                            &mut self.output_blobs_data,
-                            &mut self.output_blobs_gradient);
+        self.reshape();
         for t in &self.output_blobs_data {
             println!("{} output shape: {:?}", self.name, t.read().unwrap().desc());
         }
@@ -296,96 +290,121 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
     }
 
     fn append_weight(&mut self, layer_config: &LayerConfig, registry: &mut HashMap<String, (ArcLock<SharedTensor<f32>>, ArcLock<SharedTensor<f32>>, Option<f32>, Option<f32>)>, layer_id: usize, weight_id: usize) {
-        info!("Appending weight to layer {}", &layer_config.name);
-        let weights_len = self.weights_data.len();
-        let weight_name = if weights_len > weight_id {
-            layer_config.param(weight_id).unwrap().name.clone()
-        } else {
-            "".to_owned()
-        };
+        if self.worker.auto_weight_blobs() {
+            info!("Appending weight to layer {}", &layer_config.name);
+            let weights_len = self.weights_data.len();
+            let weight_name = if weights_len > weight_id {
+                layer_config.param(weight_id).unwrap().name.clone()
+            } else {
+                "".to_owned()
+            };
 
-        // use weight_name (or weight_id as a fallback) as display_name
-        let display_name = if !weight_name.is_empty() {
-            weight_name.clone()
-        } else {
-            format!("{}", weight_id)
-        };
-        self.weights_display_names.push(display_name.clone());
-        // create name for registry
-        let registry_name = format!("SHARED_WEIGHT_{}", display_name);
+            // use weight_name (or weight_id as a fallback) as display_name
+            let display_name = if !weight_name.is_empty() {
+                weight_name.clone()
+            } else {
+                format!("{}", weight_id)
+            };
+            self.weights_display_names.push(display_name.clone());
+            // create name for registry
+            let registry_name = format!("SHARED_WEIGHT_{}", display_name);
 
-        // add to tracking vectors
-        let net_weight_id = weights_len;
-        let output_data = self.output_blobs_data[weight_id].read().unwrap();
-        let weight_data = Arc::new(RwLock::new(SharedTensor::<f32>::new(output_data.latest_device(), output_data.desc()).unwrap()));
-        let weight_gradient = Arc::new(RwLock::new(SharedTensor::<f32>::new(output_data.latest_device(), output_data.desc()).unwrap()));
-        self.weights_data.push(weight_data.clone());
-        self.weights_gradient.push(weight_gradient.clone());
+            // add to tracking vectors
+            let net_weight_id = weights_len;
+            let output_data = self.output_blobs_data[weight_id].read().unwrap();
+            let weight_data = Arc::new(RwLock::new(SharedTensor::<f32>::new(output_data.latest_device(), output_data.desc()).unwrap()));
+            let weight_gradient = Arc::new(RwLock::new(SharedTensor::<f32>::new(output_data.latest_device(), output_data.desc()).unwrap()));
+            self.weights_data.push(weight_data.clone());
+            self.weights_gradient.push(weight_gradient.clone());
 
-        let mut weight_config = &WeightConfig::default();
-        if layer_config.params_len() > weight_id {
-            weight_config = layer_config.param(weight_id).unwrap();
+            let mut weight_config = &WeightConfig::default();
+            if layer_config.params_len() > weight_id {
+                weight_config = layer_config.param(weight_id).unwrap();
+            }
+            // This layer "owns" this weight blob -- it is either anonymous
+            // (i.e., not given a weight_name) or explicitly given a name that we
+            // haven't already seen.
+            if weight_name.is_empty() || !registry.contains_key(&registry_name) {
+                // self.weight_owners.push(None);
+                if !weight_name.is_empty() {
+                    registry.insert(weight_name.clone(),
+                        (weight_data.clone(), weight_gradient.clone(), weight_config.lr_mult, weight_config.decay_mult));
+                }
+                let learnable_weight_id = self.learnable_weights.len();
+                self.learnable_weights.push(weight_data.clone());
+                // self.learnable_weight_ids.push(learnable_weight_id);
+                self.weights_lr.push(weight_config.lr_mult);
+                self.weights_weight_decay.push(weight_config.decay_mult);
+            } else {
+                // Named weight blob with name we've seen before: share weights
+
+                let (shared_weight_data, shared_weight_gradient, shared_lr, shared_decay_mult) = registry.get(&registry_name).unwrap().clone();
+                info!("Sharing weight blob '{}'", weight_name.clone());
+
+                // TODO: move shape checking into reshape?
+                // can only share weights if blobs match by shape or capacity
+                // if weights_len > weight_id {
+                //     if let Err(e) = layer_config.param(weight_id)
+                //                                 .unwrap()
+                //                                 .check_dimensions(&this_blob.read().unwrap(),
+                //                                                   &owner_blob.read().unwrap(),
+                //                                                   weight_name.clone(),
+                //                                                   self.layers[owner_layer_id].name.clone(),
+                //                                                   self.layers[layer_id].name.clone()) {
+                //         error!("{}", e)
+                //     }
+                // }
+
+                // can only share parameters if both have same lr_mult
+                if let Some(lr_mult) = weight_config.lr_mult {
+                    if let Some(owner_lr_mult) = shared_lr {
+                        if !lr_mult.eq(&owner_lr_mult) {
+                            error!("Shared param '{}' has mismatched lr_mult.",
+                                   weight_name.clone());
+                        }
+                    } else {
+                        // this is the first shared instance that has a lr_mult value so we take that
+                        registry.remove(&registry_name).unwrap();
+                        registry.insert(registry_name.clone(), (shared_weight_data.clone(), shared_weight_gradient.clone(), weight_config.lr_mult, shared_decay_mult));
+                    }
+                }
+                // can only share weights if both have same decay_mult
+                if let Some(decay_mult) = weight_config.decay_mult {
+                    if let Some(owner_decay_mult) = shared_decay_mult {
+                        if !decay_mult.eq(&owner_decay_mult) {
+                            error!("Shared param '{}' has mismatched decay_mult.",
+                                   weight_name.clone());
+                        }
+                    } else {
+                        // this is the first shared instance that has a decay_mult value so we take that
+                        registry.remove(&registry_name).unwrap();
+                        registry.insert(registry_name, (shared_weight_data.clone(), shared_weight_gradient.clone(), shared_lr, weight_config.decay_mult));
+                    }
+                }
+            }
         }
-        // This layer "owns" this weight blob -- it is either anonymous
-        // (i.e., not given a weight_name) or explicitly given a name that we
-        // haven't already seen.
-        if weight_name.is_empty() || !registry.contains_key(&registry_name) {
-            // self.weight_owners.push(None);
-            if !weight_name.is_empty() {
-                registry.insert(weight_name.clone(),
-                    (weight_data.clone(), weight_gradient.clone(), weight_config.lr_mult, weight_config.decay_mult));
-            }
-            let learnable_weight_id = self.learnable_weights.len();
-            self.learnable_weights.push(weight_data.clone());
-            // self.learnable_weight_ids.push(learnable_weight_id);
-            self.weights_lr.push(weight_config.lr_mult);
-            self.weights_weight_decay.push(weight_config.decay_mult);
-        } else {
-            // Named weight blob with name we've seen before: share weights
+    }
 
-            let (shared_weight_data, shared_weight_gradient, shared_lr, shared_decay_mult) = registry.get(&registry_name).unwrap().clone();
-            info!("Sharing weight blob '{}'", weight_name.clone());
-
-            // TODO: move shape checking into reshape?
-            // can only share weights if blobs match by shape or capacity
-            // if weights_len > weight_id {
-            //     if let Err(e) = layer_config.param(weight_id)
-            //                                 .unwrap()
-            //                                 .check_dimensions(&this_blob.read().unwrap(),
-            //                                                   &owner_blob.read().unwrap(),
-            //                                                   weight_name.clone(),
-            //                                                   self.layers[owner_layer_id].name.clone(),
-            //                                                   self.layers[layer_id].name.clone()) {
-            //         error!("{}", e)
-            //     }
-            // }
-
-            // can only share parameters if both have same lr_mult
-            if let Some(lr_mult) = weight_config.lr_mult {
-                if let Some(owner_lr_mult) = shared_lr {
-                    if !lr_mult.eq(&owner_lr_mult) {
-                        error!("Shared param '{}' has mismatched lr_mult.",
-                               weight_name.clone());
-                    }
-                } else {
-                    // this is the first shared instance that has a lr_mult value so we take that
-                    registry.remove(&registry_name).unwrap();
-                    registry.insert(registry_name.clone(), (shared_weight_data.clone(), shared_weight_gradient.clone(), weight_config.lr_mult, shared_decay_mult));
-                }
-            }
-            // can only share weights if both have same decay_mult
-            if let Some(decay_mult) = weight_config.decay_mult {
-                if let Some(owner_decay_mult) = shared_decay_mult {
-                    if !decay_mult.eq(&owner_decay_mult) {
-                        error!("Shared param '{}' has mismatched decay_mult.",
-                               weight_name.clone());
-                    }
-                } else {
-                    // this is the first shared instance that has a decay_mult value so we take that
-                    registry.remove(&registry_name).unwrap();
-                    registry.insert(registry_name, (shared_weight_data.clone(), shared_weight_gradient.clone(), shared_lr, weight_config.decay_mult));
-                }
-            }
+    fn reshape(&mut self) {
+        match self.is_using_in_place() {
+            false => {
+                self.worker.reshape(self.backend.clone(),
+                                    &mut self.input_blobs_data,
+                                    &mut self.input_blobs_gradient,
+                                    &mut self.weights_data,
+                                    &mut self.weights_gradient,
+                                    &mut self.output_blobs_data,
+                                    &mut self.output_blobs_gradient);
+            },
+            true => {
+                self.worker.reshape(self.backend.clone(),
+                                    &mut vec![],
+                                    &mut vec![],
+                                    &mut self.weights_data,
+                                    &mut self.weights_gradient,
+                                    &mut self.output_blobs_data,
+                                    &mut self.output_blobs_gradient);
+            },
         }
     }
 
@@ -478,16 +497,25 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
                          &mut self.output_blobs_data, &mut self.output_blobs_gradient);
         let forward_time = timeit_loops!(1, {
             // aquire all the locks
-            let btm: Vec<_> = self.input_blobs_data.iter().map(|b| b.read().unwrap()).collect();
             let wgts: Vec<_> = self.weights_data.iter().map(|w| w.read().unwrap()).collect();
+            let weights_data: Vec<&SharedTensor<f32>> = wgts.iter().enumerate().map(|(_, val)| &**val).collect();
+
             let out_ref = self.output_blobs_data.iter().cloned().collect::<Vec<_>>();
             let mut out = &mut out_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
             let mut output_w = &mut out.iter_mut().map(|a| a).collect::<Vec<_>>();
-            // extract SharedTensors from Blobs
-            let weights_data: Vec<&SharedTensor<f32>> = wgts.iter().enumerate().map(|(_, val)| &**val).collect();
-            let input_data: Vec<&SharedTensor<f32>> = btm.iter().enumerate().map(|(_, val)| &**val).collect();
             let mut output_data: Vec<&mut SharedTensor<f32>> = output_w.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
-            self.worker.forward(&self.backend, &input_data, &weights_data, &mut output_data);
+
+            match self.is_using_in_place() {
+                false => {
+                    let inp: Vec<_> = self.input_blobs_data.iter().map(|b| b.read().unwrap()).collect();
+                    let input_data: Vec<&SharedTensor<f32>> = inp.iter().enumerate().map(|(_, val)| &**val).collect();
+                    self.worker.forward(&self.backend, &input_data, &weights_data, &mut output_data);
+                },
+                true => {
+                    let input_data = vec![];
+                    self.worker.forward(&self.backend, &input_data, &weights_data, &mut output_data);
+                }
+            };
         });
         debug!("{:<15} - Forward time: {:.5} ms", &self.name, forward_time / 0.001);
         Self::calculate_loss(&self.backend, &self.worker, &mut self.weights_data, &mut self.output_blobs_data)
@@ -498,34 +526,8 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
     /// See [ILayer.backward](./trait.ILayer.html#method.backward)
     pub fn backward(&mut self) {
         if self.needs_backward {
-            debug!("LAYER: {:?}", &self.name);
-            self.worker.sync(&self.backend,
-                             &mut self.input_blobs_data, &mut self.input_blobs_gradient,
-                             &mut self.weights_data, &mut self.weights_gradient,
-                             &mut self.output_blobs_data, &mut self.output_blobs_gradient);
-            let output_data: Vec<_> = self.output_blobs_data.iter().map(|b| b.read().unwrap()).collect();
-            let output_blobs_data: Vec<&SharedTensor<f32>> = output_data.iter().enumerate().map(|(_, val)| &**val).collect();
-            let output_gradient: Vec<_> = self.output_blobs_gradient.iter().map(|b| b.read().unwrap()).collect();
-            let output_blobs_gradient: Vec<&SharedTensor<f32>> = output_gradient.iter().enumerate().map(|(_, val)| &**val).collect();
-            let wgts_data: Vec<_> = self.weights_data.iter().map(|b| b.read().unwrap()).collect();
-            let weights_data: Vec<&SharedTensor<f32>> = wgts_data.iter().enumerate().map(|(_, val)| &**val).collect();
-            let input_data: Vec<_> = self.input_blobs_data.iter().map(|b| b.read().unwrap()).collect();
-            let input_blobs_data: Vec<&SharedTensor<f32>> = input_data.iter().enumerate().map(|(_, val)| &**val).collect();
-            let inp_gradient_ref = self.input_blobs_gradient.iter().cloned().collect::<Vec<_>>();
-            let mut inp_gradient = &mut inp_gradient_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
-            let mut input_gradient = &mut inp_gradient.iter_mut().map(|a| a).collect::<Vec<_>>();
-            let mut input_blobs_gradient: Vec<&mut SharedTensor<f32>> = input_gradient.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
-            let wgt_gradient_ref = self.weights_gradient.iter().cloned().collect::<Vec<_>>();
-            let mut wgt_gradient = &mut wgt_gradient_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
-            let mut weights_gradient = &mut wgt_gradient.iter_mut().map(|a| a).collect::<Vec<_>>();
-            let mut weights_blobs_gradient: Vec<&mut SharedTensor<f32>> = weights_gradient.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
-            self.worker.backward(&self.backend,
-                                 &output_blobs_data,
-                                 &output_blobs_gradient,
-                                 &weights_data,
-                                 &mut weights_blobs_gradient,
-                                 &input_blobs_data,
-                                 &mut input_blobs_gradient)
+            self.backward_input();
+            self.backward_parameters();
         }
     }
 
@@ -537,10 +539,6 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
                          &mut self.input_blobs_data, &mut self.input_blobs_gradient,
                          &mut self.weights_data, &mut self.weights_gradient,
                          &mut self.output_blobs_data, &mut self.output_blobs_gradient);
-        let output_data: Vec<_> = self.output_blobs_data.iter().map(|b| b.read().unwrap()).collect();
-        let output_blobs_data: Vec<&SharedTensor<f32>> = output_data.iter().enumerate().map(|(_, val)| &**val).collect();
-        let output_gradient: Vec<_> = self.output_blobs_gradient.iter().map(|b| b.read().unwrap()).collect();
-        let output_blobs_gradient: Vec<&SharedTensor<f32>> = output_gradient.iter().enumerate().map(|(_, val)| &**val).collect();
         let wgts_data: Vec<_> = self.weights_data.iter().map(|b| b.read().unwrap()).collect();
         let weights_data: Vec<&SharedTensor<f32>> = wgts_data.iter().enumerate().map(|(_, val)| &**val).collect();
         let input_data: Vec<_> = self.input_blobs_data.iter().map(|b| b.read().unwrap()).collect();
@@ -549,12 +547,31 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
         let mut btm_gradient = &mut btm_gradient_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
         let mut input_gradient = &mut btm_gradient.iter_mut().map(|a| a).collect::<Vec<_>>();
         let mut input_blobs_gradient: Vec<&mut SharedTensor<f32>> = input_gradient.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
-        self.worker.compute_input_gradient(&self.backend,
-                             &weights_data,
-                             &output_blobs_data,
-                             &output_blobs_gradient,
-                             &input_blobs_data,
-                             &mut input_blobs_gradient)
+
+        match self.is_using_in_place() {
+            false => {
+                let output_data: Vec<_> = self.output_blobs_data.iter().map(|b| b.read().unwrap()).collect();
+                let output_blobs_data: Vec<&SharedTensor<f32>> = output_data.iter().enumerate().map(|(_, val)| &**val).collect();
+                let output_gradient: Vec<_> = self.output_blobs_gradient.iter().map(|b| b.read().unwrap()).collect();
+                let output_blobs_gradient: Vec<&SharedTensor<f32>> = output_gradient.iter().enumerate().map(|(_, val)| &**val).collect();
+                self.worker.compute_input_gradient(&self.backend,
+                                     &weights_data,
+                                     &output_blobs_data,
+                                     &output_blobs_gradient,
+                                     &input_blobs_data,
+                                     &mut input_blobs_gradient)
+            },
+            true => {
+                let output_blobs_data = vec![];
+                let output_blobs_gradient = vec![];
+                self.worker.compute_input_gradient(&self.backend,
+                                     &weights_data,
+                                     &output_blobs_data,
+                                     &output_blobs_gradient,
+                                     &input_blobs_data,
+                                     &mut input_blobs_gradient)
+            }
+        };
     }
 
     /// Calculate the gradient w.r.t. parameters.
@@ -622,6 +639,14 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
         }
         self.weight_propagate_down[weight_id] = value;
 
+    }
+
+    /// Returns `true` when the layer is using in-place computation.
+    ///
+    /// For a layer to use in-place computation it needs to support it via `compute_in_place`
+    /// and the names of the first input and output tensor have to match.
+    pub fn is_using_in_place(&self) -> bool {
+        self.worker.compute_in_place() && self.input_blob_names[0] == self.output_blob_names[0]
     }
 
     /// Returns the names of all the input blobs.
@@ -835,6 +860,13 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
     fn exact_num_output_blobs(&self) -> Option<usize> {
         None
     }
+    /// Return whether weight blobs are created automatically for the layer.
+    ///
+    /// If this method returns true, Network::init will create a weight blob
+    /// for every output blob.
+    fn auto_weight_blobs(&self) -> bool {
+        false
+    }
     /// Returns the exact number of input blobs required by the layer,
     /// or `None` if no exact number is required.
     ///
@@ -857,6 +889,16 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
     /// If `false` is returned the default backend will be used, otherwise a new native backend
     /// will be created and provided as argument to `sync`.
     fn sync_native(&self) -> bool {
+        false
+    }
+    /// Return wether the computations of a layer should be done in-place (the output will be written where the input was read from).
+    ///
+    /// Doing computations in place reduces the memory required for layers.
+    ///
+    /// If `false` is returned the layer behaves as normal, otherwise
+    /// if a layer is provided a identiacla "input" and "output", it will only be supplied an
+    /// "output_data" when doing a `compute_output`.
+    fn compute_in_place(&self) -> bool {
         false
     }
 

@@ -13,10 +13,14 @@
 //! as [Sigmoid][mod_sigmoid], TanH, [ReLU][mod_relu] should be used. In most cases ReLU might
 //! provide the best results.
 //!
+//! If you supply the same blob as input and output to a layer via the [LayerConfig][struct_layerconfig],
+//! computations will be done in-place, requiring less memory.
+//!
 //! The activation function is also sometimes called transfer function.
 //!
 //! [mod_sigmoid]: ./sigmoid/index.html
 //! [mod_relu]: ./relu/index.html
+//! [struct_layerconfig]: ../../layer/struct.LayerConfig.html
 #[macro_export]
 macro_rules! impl_ilayer_activation {
     () => (
