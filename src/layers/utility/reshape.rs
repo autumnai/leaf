@@ -53,7 +53,8 @@ impl<B: IBackend> ComputeOutput<f32, B> for Reshape {
                       backend: &B,
                       _weights: &[&SharedTensor<f32>],
                       input_data: &[&SharedTensor<f32>],
-                      output_data: &mut [&mut SharedTensor<f32>]) {}
+                      output_data: &mut [&mut SharedTensor<f32>]) {
+    }
 }
 
 impl<B: IBackend> ComputeInputGradient<f32, B> for Reshape {

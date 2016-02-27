@@ -69,6 +69,10 @@ impl Linear {
 impl<B: IBackend + LayerOps<f32>> ILayer<B> for Linear {
     impl_ilayer_common!();
 
+    fn auto_weight_blobs(&self) -> bool {
+        true
+    }
+
     fn init(&mut self, backend: Rc<B>) {
         let device = <B as IBackend>::device(&backend);
         let _ = self.one.add_device(device);
