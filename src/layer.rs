@@ -318,6 +318,7 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
             // add to tracking vectors
             let net_weight_id = weights_len;
             let output_data = self.output_blobs_data[weight_id].read().unwrap();
+            debug!("Layer {} - creating weight and gradient of size {:?}", &layer_config.name, output_data.desc());
             let weight_data = Arc::new(RwLock::new(SharedTensor::<f32>::new(output_data.latest_device(), output_data.desc()).unwrap()));
             let weight_gradient = Arc::new(RwLock::new(SharedTensor::<f32>::new(output_data.latest_device(), output_data.desc()).unwrap()));
             self.weights_data.push(weight_data.clone());
@@ -1099,6 +1100,24 @@ pub enum LayerType {
     // Utility layers
     /// Reshape Layer
     Reshape(ReshapeConfig),
+}
+
+impl LayerType {
+    /// Returns wether the LayerType supports in-place operations.
+    pub fn supports_in_place(&self) -> bool {
+        match *self {
+            LayerType::Convolution(_) => false,
+            LayerType::Linear(_) => false,
+            LayerType::LogSoftmax => false,
+            LayerType::Pooling(_) => false,
+            LayerType::Sequential(_) => false,
+            LayerType::Softmax => false,
+            LayerType::ReLU => true,
+            LayerType::Sigmoid => true,
+            LayerType::NegativeLogLikelihood(_) => false,
+            LayerType::Reshape(_) => false, // TODO: add in-place support
+        }
+    }
 }
 
 impl LayerConfig {

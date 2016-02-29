@@ -60,7 +60,7 @@ impl<B: IBackend + LayerOps<f32> + 'static> Sequential<B> {
         let mut registry = HashMap::<String, (ArcLock<SharedTensor<f32>>, ArcLock<SharedTensor<f32>>)>::new();
         let weight_registry = &mut HashMap::<String, (ArcLock<SharedTensor<f32>>, ArcLock<SharedTensor<f32>>, Option<f32>, Option<f32>)>::new();
 
-        for (input_name, input_shape) in config.inputs {
+        for (input_name, input_shape) in config.inputs.clone() {
             self.init_input_blob(backend.clone(), &input_name, &input_shape, &mut registry);
         }
 
@@ -79,9 +79,13 @@ impl<B: IBackend + LayerOps<f32> + 'static> Sequential<B> {
                        config.layers[i].outputs.get(0) == config.layers[i + 1].inputs.get(0) {
                         continue;
                     }
-                    // TODO: make use of in-place
-                    config.layers[i].add_output(&format!("SEQUENTIAL_{}", i));
-                    config.layers[i + 1].add_input(&format!("SEQUENTIAL_{}", i));
+                    if let Some(in_place) = config.find_in_place_output(i) {
+                        config.layers[i].add_output(&in_place);
+                        config.layers[i + 1].add_input(&in_place);
+                    } else {
+                        config.layers[i].add_output(&format!("SEQUENTIAL_{}", i));
+                        config.layers[i + 1].add_input(&format!("SEQUENTIAL_{}", i));
+                    }
                 },
                 // last layer
                 true => {
@@ -320,6 +324,24 @@ pub struct SequentialConfig {
 }
 
 impl SequentialConfig {
+    /// Tries to find the output of a previous layer that is usable as in-place output for the n-th layer.
+    pub fn find_in_place_output(&self, n: usize) -> Option<String> {
+        if let Some(layer) = self.layers.get(n) {
+            if layer.layer_type.supports_in_place() {
+                // look through all previous layers until we find the first one that is not doing in-place.
+                for prev_layer in self.layers.iter().take(n).collect::<Vec<_>>().iter().rev() {
+                    if !prev_layer.layer_type.supports_in_place() {
+                        if let Some(output_name) = prev_layer.outputs.get(0) {
+                            return Some(output_name.to_owned())
+                        }
+                    }
+                }
+            }
+        }
+
+        None
+    }
+
     /// Add layer at the end of the sequential container.
     pub fn add_layer(&mut self, layer: LayerConfig) {
         self.layers.push(layer);
