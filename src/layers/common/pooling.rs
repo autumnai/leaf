@@ -157,6 +157,12 @@ pub struct PoolingConfig {
     pub padding: Vec<usize>,
 }
 
+impl Into<LayerType> for PoolingConfig {
+    fn into(self) -> LayerType {
+        LayerType::Pooling(self)
+    }
+}
+
 #[derive(Debug, Copy, Clone)]
 /// The different modes of pooling that can be calculated.
 pub enum PoolingMode {

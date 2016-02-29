@@ -53,11 +53,9 @@ mod layer_spec {
         fn can_create_simple_network_sequential_layer() {
             let mut model = SequentialConfig::default();
             model.add_input("data", &vec![1, 784]);
-            let linear1_cfg = LinearConfig { output_size: 1568 };
-            model.add_layer(LayerConfig::new("linear1", LayerType::Linear(linear1_cfg)));
+            model.add_layer(LayerConfig::new("linear1", LinearConfig { output_size: 1568 }));
             model.add_layer(LayerConfig::new("sigmoid", LayerType::Sigmoid));
-            let linear2_cfg = LinearConfig { output_size: 10 };
-            model.add_layer(LayerConfig::new("linear2", LayerType::Linear(linear2_cfg)));
+            model.add_layer(LayerConfig::new("linear2", LinearConfig { output_size: 10 }));
 
             let network = Layer::from_config(cuda_backend(), &LayerConfig::new("model", LayerType::Sequential(model)));
         }

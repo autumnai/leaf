@@ -1103,10 +1103,10 @@ pub enum LayerType {
 
 impl LayerConfig {
     /// Creates a new LayerConfig
-    pub fn new(name: &str, layer_type: LayerType) -> LayerConfig {
+    pub fn new<L: Into<LayerType>>(name: &str, layer_type: L) -> LayerConfig {
         LayerConfig {
             name: name.to_owned(),
-            layer_type: layer_type,
+            layer_type: layer_type.into(),
 
             outputs: Vec::new(),
             inputs: Vec::new(),

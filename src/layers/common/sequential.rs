@@ -331,6 +331,12 @@ impl SequentialConfig {
     }
 }
 
+impl Into<LayerType> for SequentialConfig {
+    fn into(self) -> LayerType {
+        LayerType::Sequential(self)
+    }
+}
+
 impl ::std::default::Default for SequentialConfig {
     fn default() -> SequentialConfig {
         SequentialConfig {

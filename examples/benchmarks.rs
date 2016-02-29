@@ -117,34 +117,34 @@ fn bench_alexnet() {
     cfg.add_input("data", &vec![128, 3, 224, 224]);
 
     let conv1_layer_cfg = ConvolutionConfig { num_output: 64, filter_shape: vec![11], padding: vec![2], stride: vec![4], axis: None };
-    cfg.add_layer(LayerConfig::new("conv1", LayerType::Convolution(conv1_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv1", conv1_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv1/relu", LayerType::ReLU));
     let pool1_layer_cfg = PoolingConfig { mode: PoolingMode::Max, filter_shape: vec![3], stride: vec![2], padding: vec![0] };
-    cfg.add_layer(LayerConfig::new("pool1", LayerType::Pooling(pool1_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("pool1", pool1_layer_cfg));
 
     let conv2_layer_cfg = ConvolutionConfig { num_output: 192, filter_shape: vec![5], padding: vec![2], stride: vec![1], axis: None };
-    cfg.add_layer(LayerConfig::new("conv2", LayerType::Convolution(conv2_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv2", conv2_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv2/relu", LayerType::ReLU));
     let pool2_layer_cfg = PoolingConfig { mode: PoolingMode::Max, filter_shape: vec![3], stride: vec![2], padding: vec![0] };
-    cfg.add_layer(LayerConfig::new("pool2", LayerType::Pooling(pool2_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("pool2", pool2_layer_cfg));
 
     let conv3_layer_cfg = ConvolutionConfig { num_output: 384, filter_shape: vec![3], padding: vec![1], stride: vec![1], axis: None };
-    cfg.add_layer(LayerConfig::new("conv3", LayerType::Convolution(conv3_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv3", conv3_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv3/relu", LayerType::ReLU));
 
     let conv4_layer_cfg = ConvolutionConfig { num_output: 256, filter_shape: vec![3], padding: vec![1], stride: vec![1], axis: None };
-    cfg.add_layer(LayerConfig::new("conv4", LayerType::Convolution(conv4_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv4", conv4_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv4/relu", LayerType::ReLU));
 
     let conv5_layer_cfg = ConvolutionConfig { num_output: 256, filter_shape: vec![3], padding: vec![1], stride: vec![1], axis: None };
-    cfg.add_layer(LayerConfig::new("conv5", LayerType::Convolution(conv5_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv5", conv5_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv5/relu", LayerType::ReLU));
     let pool3_layer_cfg = PoolingConfig { mode: PoolingMode::Max, filter_shape: vec![3], stride: vec![2], padding: vec![0] };
-    cfg.add_layer(LayerConfig::new("pool3", LayerType::Pooling(pool3_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("pool3", pool3_layer_cfg));
 
-    cfg.add_layer(LayerConfig::new("fc1", LayerType::Linear(LinearConfig { output_size: 4096 })));
-    cfg.add_layer(LayerConfig::new("fc2", LayerType::Linear(LinearConfig { output_size: 4096 })));
-    cfg.add_layer(LayerConfig::new("fc3", LayerType::Linear(LinearConfig { output_size: 1000 })));
+    cfg.add_layer(LayerConfig::new("fc1", LinearConfig { output_size: 4096 }));
+    cfg.add_layer(LayerConfig::new("fc2", LinearConfig { output_size: 4096 }));
+    cfg.add_layer(LayerConfig::new("fc3", LinearConfig { output_size: 1000 }));
 
     let backend = cuda_backend();
     // let native_backend = native_backend();
@@ -199,34 +199,34 @@ fn bench_overfeat() {
     cfg.add_input("data", &vec![128, 3, 231, 231]);
 
     let conv1_layer_cfg = ConvolutionConfig { num_output: 96, filter_shape: vec![11], padding: vec![0], stride: vec![4], axis: None };
-    cfg.add_layer(LayerConfig::new("conv1", LayerType::Convolution(conv1_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv1", conv1_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv1/relu", LayerType::ReLU));
     let pool1_layer_cfg = PoolingConfig { mode: PoolingMode::Max, filter_shape: vec![2], stride: vec![2], padding: vec![0] };
-    cfg.add_layer(LayerConfig::new("pool1", LayerType::Pooling(pool1_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("pool1", pool1_layer_cfg));
 
     let conv2_layer_cfg = ConvolutionConfig { num_output: 256, filter_shape: vec![5], padding: vec![0], stride: vec![1], axis: None };
-    cfg.add_layer(LayerConfig::new("conv2", LayerType::Convolution(conv2_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv2", conv2_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv2/relu", LayerType::ReLU));
     let pool2_layer_cfg = PoolingConfig { mode: PoolingMode::Max, filter_shape: vec![2], stride: vec![2], padding: vec![0] };
-    cfg.add_layer(LayerConfig::new("pool2", LayerType::Pooling(pool2_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("pool2", pool2_layer_cfg));
 
     let conv3_layer_cfg = ConvolutionConfig { num_output: 512, filter_shape: vec![3], padding: vec![1], stride: vec![1], axis: None };
-    cfg.add_layer(LayerConfig::new("conv3", LayerType::Convolution(conv3_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv3", conv3_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv3/relu", LayerType::ReLU));
 
     let conv4_layer_cfg = ConvolutionConfig { num_output: 1024, filter_shape: vec![3], padding: vec![1], stride: vec![1], axis: None };
-    cfg.add_layer(LayerConfig::new("conv4", LayerType::Convolution(conv4_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv4", conv4_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv4/relu", LayerType::ReLU));
 
     let conv5_layer_cfg = ConvolutionConfig { num_output: 1024, filter_shape: vec![3], padding: vec![1], stride: vec![1], axis: None };
-    cfg.add_layer(LayerConfig::new("conv5", LayerType::Convolution(conv5_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv5", conv5_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv5/relu", LayerType::ReLU));
     let pool5_layer_cfg = PoolingConfig { mode: PoolingMode::Max, filter_shape: vec![2], stride: vec![2], padding: vec![0] };
-    cfg.add_layer(LayerConfig::new("pool5", LayerType::Pooling(pool5_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("pool5", pool5_layer_cfg));
 
-    cfg.add_layer(LayerConfig::new("fc1", LayerType::Linear(LinearConfig { output_size: 3072 })));
-    cfg.add_layer(LayerConfig::new("fc2", LayerType::Linear(LinearConfig { output_size: 4096 })));
-    cfg.add_layer(LayerConfig::new("fc3", LayerType::Linear(LinearConfig { output_size: 1000 })));
+    cfg.add_layer(LayerConfig::new("fc1", LinearConfig { output_size: 3072 }));
+    cfg.add_layer(LayerConfig::new("fc2", LinearConfig { output_size: 4096 }));
+    cfg.add_layer(LayerConfig::new("fc3", LinearConfig { output_size: 1000 }));
 
     let backend = cuda_backend();
     // let native_backend = native_backend();
@@ -281,50 +281,50 @@ fn bench_vgg_a() {
     cfg.add_input("data", &vec![64, 3, 224, 224]);
 
     let conv1_layer_cfg = ConvolutionConfig { num_output: 64, filter_shape: vec![3], padding: vec![1], stride: vec![1], axis: None };
-    cfg.add_layer(LayerConfig::new("conv1", LayerType::Convolution(conv1_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv1", conv1_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv1/relu", LayerType::ReLU));
     let pool1_layer_cfg = PoolingConfig { mode: PoolingMode::Max, filter_shape: vec![2], stride: vec![2], padding: vec![0] };
-    cfg.add_layer(LayerConfig::new("pool1", LayerType::Pooling(pool1_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("pool1", pool1_layer_cfg));
 
     let conv2_layer_cfg = ConvolutionConfig { num_output: 128, filter_shape: vec![3], padding: vec![1], stride: vec![1], axis: None };
-    cfg.add_layer(LayerConfig::new("conv2", LayerType::Convolution(conv2_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv2", conv2_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv2/relu", LayerType::ReLU));
     let pool2_layer_cfg = PoolingConfig { mode: PoolingMode::Max, filter_shape: vec![2], stride: vec![2], padding: vec![0] };
-    cfg.add_layer(LayerConfig::new("pool2", LayerType::Pooling(pool2_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("pool2", pool2_layer_cfg));
 
     let conv3_layer_cfg = ConvolutionConfig { num_output: 256, filter_shape: vec![3], padding: vec![1], stride: vec![1], axis: None };
-    cfg.add_layer(LayerConfig::new("conv3", LayerType::Convolution(conv3_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv3", conv3_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv3/relu", LayerType::ReLU));
 
     let conv4_layer_cfg = ConvolutionConfig { num_output: 256, filter_shape: vec![3], padding: vec![1], stride: vec![1], axis: None };
-    cfg.add_layer(LayerConfig::new("conv4", LayerType::Convolution(conv4_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv4", conv4_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv4/relu", LayerType::ReLU));
     let pool3_layer_cfg = PoolingConfig { mode: PoolingMode::Max, filter_shape: vec![2], stride: vec![2], padding: vec![0] };
-    cfg.add_layer(LayerConfig::new("pool3", LayerType::Pooling(pool3_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("pool3", pool3_layer_cfg));
 
     let conv5_layer_cfg = ConvolutionConfig { num_output: 512, filter_shape: vec![3], padding: vec![1], stride: vec![1], axis: None };
-    cfg.add_layer(LayerConfig::new("conv5", LayerType::Convolution(conv5_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv5", conv5_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv5/relu", LayerType::ReLU));
 
     let conv6_layer_cfg = ConvolutionConfig { num_output: 512, filter_shape: vec![3], padding: vec![1], stride: vec![1], axis: None };
-    cfg.add_layer(LayerConfig::new("conv6", LayerType::Convolution(conv6_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv6", conv6_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv6/relu", LayerType::ReLU));
     let pool4_layer_cfg = PoolingConfig { mode: PoolingMode::Max, filter_shape: vec![2], stride: vec![2], padding: vec![0] };
-    cfg.add_layer(LayerConfig::new("pool4", LayerType::Pooling(pool4_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("pool4", pool4_layer_cfg));
 
     let conv7_layer_cfg = ConvolutionConfig { num_output: 512, filter_shape: vec![3], padding: vec![1], stride: vec![1], axis: None };
-    cfg.add_layer(LayerConfig::new("conv7", LayerType::Convolution(conv7_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv7", conv7_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv7/relu", LayerType::ReLU));
 
     let conv8_layer_cfg = ConvolutionConfig { num_output: 512, filter_shape: vec![3], padding: vec![1], stride: vec![1], axis: None };
-    cfg.add_layer(LayerConfig::new("conv8", LayerType::Convolution(conv8_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("conv8", conv8_layer_cfg));
     cfg.add_layer(LayerConfig::new("conv8/relu", LayerType::ReLU));
     let pool5_layer_cfg = PoolingConfig { mode: PoolingMode::Max, filter_shape: vec![2], stride: vec![2], padding: vec![0] };
-    cfg.add_layer(LayerConfig::new("pool5", LayerType::Pooling(pool5_layer_cfg)));
+    cfg.add_layer(LayerConfig::new("pool5", pool5_layer_cfg));
     let fc1_layer_cfg = LinearConfig { output_size: 4096 };
-    cfg.add_layer(LayerConfig::new("fc1", LayerType::Linear(LinearConfig { output_size: 4096 })));
-    cfg.add_layer(LayerConfig::new("fc2", LayerType::Linear(LinearConfig { output_size: 4096 })));
-    cfg.add_layer(LayerConfig::new("fc3", LayerType::Linear(LinearConfig { output_size: 1000 })));
+    cfg.add_layer(LayerConfig::new("fc1", LinearConfig { output_size: 4096 }));
+    cfg.add_layer(LayerConfig::new("fc2", LinearConfig { output_size: 4096 }));
+    cfg.add_layer(LayerConfig::new("fc3", LinearConfig { output_size: 1000 }));
 
     let backend = cuda_backend();
     // let native_backend = native_backend();

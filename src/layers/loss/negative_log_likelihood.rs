@@ -122,3 +122,9 @@ pub struct NegativeLogLikelihoodConfig {
     /// How many different classes can be classified.
     pub num_classes: usize,
 }
+
+impl Into<LayerType> for NegativeLogLikelihoodConfig {
+    fn into(self) -> LayerType {
+        LayerType::NegativeLogLikelihood(self)
+    }
+}

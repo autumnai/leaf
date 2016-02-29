@@ -219,6 +219,12 @@ impl ConvolutionConfig {
     }
 }
 
+impl Into<LayerType> for ConvolutionConfig {
+    fn into(self) -> LayerType {
+        LayerType::Convolution(self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use co::*;
