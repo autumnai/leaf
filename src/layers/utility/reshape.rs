@@ -88,3 +88,9 @@ impl ReshapeConfig {
         }
     }
 }
+
+impl Into<LayerType> for ReshapeConfig {
+    fn into(self) -> LayerType {
+        LayerType::Reshape(self)
+    }
+}

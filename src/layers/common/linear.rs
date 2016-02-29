@@ -183,3 +183,9 @@ pub struct LinearConfig {
     /// The number of output values
     pub output_size: usize,
 }
+
+impl Into<LayerType> for LinearConfig {
+    fn into(self) -> LayerType {
+        LayerType::Linear(self)
+    }
+}
