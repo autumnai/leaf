@@ -77,10 +77,6 @@
 //! ## Examples
 //!
 //! ```
-//! # extern crate leaf;
-//! # use leaf::network::{NetworkConfig};
-//! # fn main() {
-//! # }
 //! ```
 //!
 //! ## Development
@@ -133,11 +129,10 @@ extern crate collenchyma_blas as coblas;
 extern crate collenchyma_nn as conn;
 pub mod layer;
 pub mod layers;
-#[cfg(feature="cuda")]
-pub mod solver;
-#[cfg(feature="cuda")]
-pub mod solvers;
-pub mod network;
+// #[cfg(feature="cuda")]
+// pub mod solver;
+// #[cfg(feature="cuda")]
+// pub mod solvers;
 pub mod weight;
 
 pub mod util;

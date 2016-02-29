@@ -59,6 +59,7 @@ pub use self::common::{
     Linear, LinearConfig,
     LogSoftmax,
     Pooling, PoolingConfig, PoolingMode,
+    Sequential, SequentialConfig,
     Softmax,
 };
 

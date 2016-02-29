@@ -1,6 +1,6 @@
 //! Provides the generics and interfaces for the specific [Layers][layers].
 //! [layers]: ../layers/index.html
-use co::{IBackend, SharedTensor};
+use co::{IBackend, ITensorDesc, SharedTensor};
 use layers::*;
 use weight::WeightConfig;
 use util::{ArcLock, native_backend, LayerOps};
@@ -59,7 +59,8 @@ pub struct Layer<B: IBackend + LayerOps<f32>> {
     pub input_blobs_data: Vec<ArcLock<SharedTensor<f32>>>,
     /// References to all the input blobs of the layer.
     pub input_blobs_gradient: Vec<ArcLock<SharedTensor<f32>>>,
-    input_blob_names: Vec<String>,
+    /// Names for all the input blobs of the layer.
+    pub input_blob_names: Vec<String>,
     input_need_backwards: Vec<bool>,
 
     /// References to all the output blobs of the layer.
@@ -88,7 +89,7 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
     pub fn from_config(backend: Rc<B>, config: &LayerConfig) -> Layer<B> {
         let cl = config.clone();
         let cfg = Box::<LayerConfig>::new(cl);
-        Layer {
+        let mut layer = Layer {
             name: cfg.name.clone(),
 
             needs_backward: true,
@@ -113,23 +114,28 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
 
             blob_names: HashMap::new(),
 
-            backend: backend,
+            backend: backend.clone(),
 
-            worker: Layer::<B>::worker_from_config(&cfg),
+            worker: Layer::<B>::worker_from_config(backend, &cfg),
             config: cfg,
-        }
+        };
+        layer.expose_inputs();
+        layer.expose_outputs();
+
+        layer
     }
 
     /// Helper for [from_config] to match a [LayerType][2] to its [implementation][3].
     /// [1]: #method.from_config
     /// [2]: ./enum.LayerType.html
     /// [3]: ../layers/index.html
-    fn worker_from_config(config: &LayerConfig) -> Box<ILayer<B>> {
+    fn worker_from_config(backend: Rc<B>, config: &LayerConfig) -> Box<ILayer<B>> {
         match config.layer_type.clone() {
             LayerType::Convolution(layer_config) => Box::new(Convolution::from_config(&layer_config)),
             LayerType::Linear(layer_config) => Box::new(Linear::from_config(&layer_config)),
             LayerType::LogSoftmax => Box::new(LogSoftmax::default()),
             LayerType::Pooling(layer_config) => Box::new(Pooling::from_config(&layer_config)),
+            LayerType::Sequential(layer_config) => Box::new(Sequential::from_config(backend, &layer_config)),
             LayerType::Softmax => Box::new(Softmax::default()),
             LayerType::ReLU => Box::new(ReLU),
             LayerType::Sigmoid => Box::new(Sigmoid),
@@ -187,7 +193,7 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
         self.worker.init(self.backend.clone());
         self.reshape();
         for t in &self.output_blobs_data {
-            println!("{} output shape: {:?}", self.name, t.read().unwrap().desc());
+            debug!("Layer {} - output shape: {:?}", self.name, t.read().unwrap().desc());
         }
     }
 
@@ -209,11 +215,11 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
                    self.name,
                    input_id);
         }
-        info!("{:<15} -> {:>15}", blob_name, self.name);
+        info!("Input {:<15} -> Layer {:>15}", blob_name, self.name);
 
         self.input_blob_names.push(blob_name.to_owned());
-        self.input_blobs_data.push(available_blobs[&*blob_name].0.clone());
-        self.input_blobs_gradient.push(available_blobs[&*blob_name].1.clone());
+        self.input_blobs_data.push(available_blobs.get(&*blob_name).expect(&format!("Unknown blob name {}", blob_name)).0.clone());
+        self.input_blobs_gradient.push(available_blobs.get(&*blob_name).expect(&format!("Unknown blob name {}", blob_name)).1.clone());
         // available_blobs.remove(&*blob_name);
 
         let mut propagate_down = true;
@@ -254,8 +260,8 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
             return
         } else {
             {
-                info!("{:<15} -> {:>15}", self.name, blob_name);
-                info!("Input {} -> {}", output_id, blob_name);
+                info!("Layer {:<15} -> Output {:>15}", self.name, blob_name);
+                info!("Output {} = {}", output_id, blob_name);
             }
 
             let backend: Rc<IBackend<F=B::F>> = self.backend.clone();
@@ -291,7 +297,7 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
 
     fn append_weight(&mut self, layer_config: &LayerConfig, registry: &mut HashMap<String, (ArcLock<SharedTensor<f32>>, ArcLock<SharedTensor<f32>>, Option<f32>, Option<f32>)>, layer_id: usize, weight_id: usize) {
         if self.worker.auto_weight_blobs() {
-            info!("Appending weight to layer {}", &layer_config.name);
+            info!("Layer {} - appending weight", &layer_config.name);
             let weights_len = self.weights_data.len();
             let weight_name = if weights_len > weight_id {
                 layer_config.param(weight_id).unwrap().name.clone()
@@ -340,20 +346,6 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
 
                 let (shared_weight_data, shared_weight_gradient, shared_lr, shared_decay_mult) = registry.get(&registry_name).unwrap().clone();
                 info!("Sharing weight blob '{}'", weight_name.clone());
-
-                // TODO: move shape checking into reshape?
-                // can only share weights if blobs match by shape or capacity
-                // if weights_len > weight_id {
-                //     if let Err(e) = layer_config.param(weight_id)
-                //                                 .unwrap()
-                //                                 .check_dimensions(&this_blob.read().unwrap(),
-                //                                                   &owner_blob.read().unwrap(),
-                //                                                   weight_name.clone(),
-                //                                                   self.layers[owner_layer_id].name.clone(),
-                //                                                   self.layers[layer_id].name.clone()) {
-                //         error!("{}", e)
-                //     }
-                // }
 
                 // can only share parameters if both have same lr_mult
                 if let Some(lr_mult) = weight_config.lr_mult {
@@ -486,92 +478,101 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
         }
     }
 
+    /// Expose the internal inputs of a container layer.
+    fn expose_inputs(&mut self) {
+        if let Some(inputs) = self.worker.inputs_data() {
+            self.input_blobs_data = inputs;
+        }
+        if let Some(gradients) = self.worker.inputs_gradients() {
+            self.input_blobs_gradient = gradients;
+        }
+    }
+
+    /// Expose the internal outputs of a container layer.
+    fn expose_outputs(&mut self) {
+        if let Some(outputs) = self.worker.outputs_data() {
+            self.output_blobs_data = outputs;
+        }
+        if let Some(gradients) = self.worker.outputs_gradients() {
+            self.output_blobs_gradient = gradients;
+        }
+    }
+
     /// Uses the underlying layer implementation to compute a forward step.
     ///
     /// See [ILayer.forward](./trait.ILayer.html#method.forward)
-    pub fn forward(&mut self) -> f32 {
+    pub fn forward(&mut self, inputs: &[ArcLock<SharedTensor<f32>>]) -> Vec<ArcLock<SharedTensor<f32>>> {
         debug!("LAYER: {:?}", &self.name);
+        for (input_i, input) in inputs.iter().enumerate() {
+            let reshaped_shape = self.input_blobs_data[input_i].read().unwrap().desc().clone();
+            self.input_blobs_data[input_i] = input.clone();
+            // reshape input tensor to the reshaped shape
+            let old_shape = self.input_blobs_data[input_i].read().unwrap().desc().clone();
+            if old_shape.size() != reshaped_shape.size() {
+                panic!("The provided input does not have the expected shape");
+            }
+            self.input_blobs_data[input_i].write().unwrap().reshape(&reshaped_shape).unwrap();
+        }
+
         self.worker.sync(&self.backend,
                          &mut self.input_blobs_data, &mut self.input_blobs_gradient,
                          &mut self.weights_data, &mut self.weights_gradient,
                          &mut self.output_blobs_data, &mut self.output_blobs_gradient);
+
         let forward_time = timeit_loops!(1, {
-            // aquire all the locks
-            let wgts: Vec<_> = self.weights_data.iter().map(|w| w.read().unwrap()).collect();
-            let weights_data: Vec<&SharedTensor<f32>> = wgts.iter().enumerate().map(|(_, val)| &**val).collect();
-
-            let out_ref = self.output_blobs_data.iter().cloned().collect::<Vec<_>>();
-            let mut out = &mut out_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
-            let mut output_w = &mut out.iter_mut().map(|a| a).collect::<Vec<_>>();
-            let mut output_data: Vec<&mut SharedTensor<f32>> = output_w.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
-
-            match self.is_using_in_place() {
-                false => {
-                    let inp: Vec<_> = self.input_blobs_data.iter().map(|b| b.read().unwrap()).collect();
-                    let input_data: Vec<&SharedTensor<f32>> = inp.iter().enumerate().map(|(_, val)| &**val).collect();
-                    self.worker.forward(&self.backend, &input_data, &weights_data, &mut output_data);
-                },
-                true => {
-                    let input_data = vec![];
-                    self.worker.forward(&self.backend, &input_data, &weights_data, &mut output_data);
-                }
-            };
+            if self.is_using_in_place() {
+                self.worker.forward(&self.backend, &vec![], &self.weights_data, &mut self.output_blobs_data);
+            } else {
+                self.worker.forward(&self.backend, &self.input_blobs_data, &self.weights_data, &mut self.output_blobs_data);
+            }
         });
         debug!("{:<15} - Forward time: {:.5} ms", &self.name, forward_time / 0.001);
-        Self::calculate_loss(&self.backend, &self.worker, &mut self.weights_data, &mut self.output_blobs_data)
+        self.output_blobs_data.clone()
     }
 
     /// Uses the underlying layer implementation to compute a backward step.
     ///
     /// See [ILayer.backward](./trait.ILayer.html#method.backward)
-    pub fn backward(&mut self) {
+    pub fn backward(&mut self, output_gradients: &[ArcLock<SharedTensor<f32>>]) -> Vec<ArcLock<SharedTensor<f32>>> {
         if self.needs_backward {
-            self.backward_input();
+            let input_gradients = self.backward_input(output_gradients);
             self.backward_parameters();
+            input_gradients
+        } else {
+            vec![]
         }
     }
 
     /// Calculate the gradient w.r.t. input.
     ///
     /// This method is mostly used when doing backpropagation.
-    pub fn backward_input(&mut self) {
+    pub fn backward_input(&mut self, output_gradients: &[ArcLock<SharedTensor<f32>>]) -> Vec<ArcLock<SharedTensor<f32>>> {
+        for (output_i, output) in output_gradients.iter().enumerate() {
+            self.output_blobs_gradient[output_i] = output.clone();
+        }
+
         self.worker.sync(&self.backend,
                          &mut self.input_blobs_data, &mut self.input_blobs_gradient,
                          &mut self.weights_data, &mut self.weights_gradient,
                          &mut self.output_blobs_data, &mut self.output_blobs_gradient);
-        let wgts_data: Vec<_> = self.weights_data.iter().map(|b| b.read().unwrap()).collect();
-        let weights_data: Vec<&SharedTensor<f32>> = wgts_data.iter().enumerate().map(|(_, val)| &**val).collect();
-        let input_data: Vec<_> = self.input_blobs_data.iter().map(|b| b.read().unwrap()).collect();
-        let input_blobs_data: Vec<&SharedTensor<f32>> = input_data.iter().enumerate().map(|(_, val)| &**val).collect();
-        let btm_gradient_ref = self.input_blobs_gradient.iter().cloned().collect::<Vec<_>>();
-        let mut btm_gradient = &mut btm_gradient_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
-        let mut input_gradient = &mut btm_gradient.iter_mut().map(|a| a).collect::<Vec<_>>();
-        let mut input_blobs_gradient: Vec<&mut SharedTensor<f32>> = input_gradient.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
 
-        match self.is_using_in_place() {
-            false => {
-                let output_data: Vec<_> = self.output_blobs_data.iter().map(|b| b.read().unwrap()).collect();
-                let output_blobs_data: Vec<&SharedTensor<f32>> = output_data.iter().enumerate().map(|(_, val)| &**val).collect();
-                let output_gradient: Vec<_> = self.output_blobs_gradient.iter().map(|b| b.read().unwrap()).collect();
-                let output_blobs_gradient: Vec<&SharedTensor<f32>> = output_gradient.iter().enumerate().map(|(_, val)| &**val).collect();
-                self.worker.compute_input_gradient(&self.backend,
-                                     &weights_data,
-                                     &output_blobs_data,
-                                     &output_blobs_gradient,
-                                     &input_blobs_data,
-                                     &mut input_blobs_gradient)
-            },
-            true => {
-                let output_blobs_data = vec![];
-                let output_blobs_gradient = vec![];
-                self.worker.compute_input_gradient(&self.backend,
-                                     &weights_data,
-                                     &output_blobs_data,
-                                     &output_blobs_gradient,
-                                     &input_blobs_data,
-                                     &mut input_blobs_gradient)
-            }
-        };
+        if self.is_using_in_place() {
+            self.worker.backward_input(&self.backend,
+                                 &self.weights_data,
+                                 &vec![],
+                                 &vec![],
+                                 &self.input_blobs_data,
+                                 &mut self.input_blobs_gradient)
+        } else {
+            self.worker.backward_input(&self.backend,
+                                 &self.weights_data,
+                                 &self.output_blobs_data,
+                                 &self.output_blobs_gradient,
+                                 &self.input_blobs_data,
+                                 &mut self.input_blobs_gradient)
+        }
+
+        self.input_blobs_gradient.clone()
     }
 
     /// Calculate the gradient w.r.t. parameters.
@@ -584,48 +585,54 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
                          &mut self.input_blobs_data, &mut self.input_blobs_gradient,
                          &mut self.weights_data, &mut self.weights_gradient,
                          &mut self.output_blobs_data, &mut self.output_blobs_gradient);
-        let output_data: Vec<_> = self.output_blobs_data.iter().map(|b| b.read().unwrap()).collect();
-        let output_blobs_data: Vec<&SharedTensor<f32>> = output_data.iter().enumerate().map(|(_, val)| &**val).collect();
-        let output_gradient: Vec<_> = self.output_blobs_gradient.iter().map(|b| b.read().unwrap()).collect();
-        let output_blobs_gradient: Vec<&SharedTensor<f32>> = output_gradient.iter().enumerate().map(|(_, val)| &**val).collect();
-        let wgts_data: Vec<_> = self.weights_data.iter().map(|b| b.read().unwrap()).collect();
-        let weights_data: Vec<&SharedTensor<f32>> = wgts_data.iter().enumerate().map(|(_, val)| &**val).collect();
-        let input_data: Vec<_> = self.input_blobs_data.iter().map(|b| b.read().unwrap()).collect();
-        let input_blobs_data: Vec<&SharedTensor<f32>> = input_data.iter().enumerate().map(|(_, val)| &**val).collect();
-        let wgt_gradient_ref = self.weights_gradient.iter().cloned().collect::<Vec<_>>();
-        let mut wgt_gradient = &mut wgt_gradient_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
-        let mut weights_gradient = &mut wgt_gradient.iter_mut().map(|a| a).collect::<Vec<_>>();
-        let mut weights_blobs_gradient: Vec<&mut SharedTensor<f32>> = weights_gradient.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
-        self.worker.compute_parameters_gradient(&self.backend,
-                             &output_blobs_data,
-                             &output_blobs_gradient,
-                             &input_blobs_data,
-                             &mut weights_blobs_gradient)
-    }
 
-    fn calculate_loss(backend: &B, worker: &Box<ILayer<B>>, weights: &mut Vec<ArcLock<SharedTensor<f32>>>, outputs: &mut Vec<ArcLock<SharedTensor<f32>>>) -> f32 {
-        // get weight of the loss of each weight-output-pair
-        let loss_weights = outputs.iter().enumerate().map(|(output_id, _)| worker.loss_weight(output_id)).collect::<Vec<_>>();
-        // filter out all weights that are not contributing to the total loss
-        let mut contributing_weights = weights.iter().enumerate().filter_map(|(i, val)| {
-            match loss_weights[i].is_none() {
-                true => None,
-                false => Some(val.clone())
-            }
-        }).collect::<Vec<_>>();
-        let mut contributing_outputs = outputs.iter().enumerate().filter_map(|(i, val)| {
-            match loss_weights[i].is_none() {
-                true => None,
-                false => Some(val.clone())
-            }
-        }).collect::<Vec<_>>();
-        let filtered_native_weights = loss_weights.iter().filter_map(|&val| val).collect::<Vec<_>>();
-        worker.calculate_loss(backend, &filtered_native_weights, &mut contributing_weights, &mut contributing_outputs)
+        self.worker.backward_parameters(&self.backend,
+                             &self.output_blobs_data,
+                             &self.output_blobs_gradient,
+                             &self.input_blobs_data,
+                             &mut self.weights_gradient)
     }
 
     /// Synchronize the layers backend.
     pub fn synchronize(&self) {
         self.backend.synchronize().unwrap();
+    }
+
+    /// Updates the [weights][1] with the weight update computed by the [Solver][2].
+    /// [1]: https://en.wikipedia.org/wiki/Synaptic_weight
+    /// [2]: ../solver/struct.Solver.html
+    ///
+    /// Updating the weights is the last step of computing a [Solver][2] minibatch.
+    /// The update value is computed in previous steps according to the [learning rate policy][3]
+    ///
+    /// [3]: ../solver/enum.LRPolicy.html
+    pub fn update_weights<SolverB: IBackend + ::util::SolverOps<f32>>(&mut self, backend: &SolverB) {
+        let mut shared_a = ::util::native_scalar(-1f32);
+        let _ = shared_a.add_device(backend.device());
+        shared_a.sync(backend.device()).unwrap();
+        for (weight_gradient, weight_data) in self.learnable_weights_gradients().iter().zip(&mut self.learnable_weights_data()) {
+            weight_gradient.write().unwrap().sync(backend.device()).unwrap();
+            weight_data.write().unwrap().sync(backend.device()).unwrap();
+            backend.axpy_plain(&shared_a, &weight_gradient.read().unwrap(), &mut weight_data.write().unwrap()).unwrap();
+            // weight_blob.write().unwrap().apply_diff(backend) // TODO: solver
+        }
+    }
+
+    /// Clears the [weights][1] gradients and zero-inits them.
+    /// [1]: https://en.wikipedia.org/wiki/Synaptic_weight
+    ///
+    /// The gradients for the weights accumulate over the backpropagation steps of
+    /// a [Solver][2] minibatch and are cleared between each minibatch
+    /// to start over with a clean slate.
+    ///
+    /// [2]: ../solver/struct.Solver.html
+    pub fn clear_weights_gradients(&mut self) {
+        for weight_gradient in &mut self.learnable_weights_gradients().iter() {
+            let filler = ::weight::FillerType::Constant {
+                value: 0f32
+            };
+            filler.fill(&mut weight_gradient.write().unwrap());
+        }
     }
 
     /// Sets whether the layer should compute gradients w.r.t. a
@@ -646,7 +653,10 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
     /// For a layer to use in-place computation it needs to support it via `compute_in_place`
     /// and the names of the first input and output tensor have to match.
     pub fn is_using_in_place(&self) -> bool {
-        self.worker.compute_in_place() && self.input_blob_names[0] == self.output_blob_names[0]
+        self.worker.compute_in_place() &&
+        self.input_blob_names.get(0).is_some() &&
+        self.output_blob_names.get(0).is_some() &&
+        self.input_blob_names[0] == self.output_blob_names[0]
     }
 
     /// Returns the names of all the input blobs.
@@ -659,6 +669,24 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
     /// [1]: http://caffe.berkeleyvision.org/tutorial/loss.html
     pub fn loss(&self, weight_id: usize) -> Option<&f32> {
         self.loss.get(weight_id)
+    }
+
+    /// Returns all the learnable weights in the layer.
+    ///
+    /// If the layer is a container layer it will return all the weights of the
+    /// layers inside it.
+    pub fn learnable_weights_data(&self) -> Vec<ArcLock<SharedTensor<f32>>> {
+        if let Some(weights) = self.worker.learnable_weights() { weights }
+        else { self.weights_data.clone() }
+    }
+
+    /// Returns the gradients for all the learnable weights in the layer.
+    ///
+    /// If the layer is a container layer it will return all the gradients of the
+    /// layers inside it.
+    pub fn learnable_weights_gradients(&self) -> Vec<ArcLock<SharedTensor<f32>>> {
+        if let Some(gradients) = self.worker.learnable_weights_gradients() { gradients }
+        else { self.weights_gradient.clone() }
     }
 }
 
@@ -703,67 +731,81 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
     #[cfg_attr(lint, allow(map_clone))]
     fn forward(&self,
                backend: &B,
-               input_data: &[&SharedTensor<f32>],
-               weights_data: &[&SharedTensor<f32>],
-               output_data: &mut [&mut SharedTensor<f32>]
-           ) {
-        self.compute_output(backend, weights_data, input_data, output_data);
+               input_data: &[ArcLock<SharedTensor<f32>>],
+               weights_data: &[ArcLock<SharedTensor<f32>>],
+               output_data: &mut [ArcLock<SharedTensor<f32>>]) {
+        // aquire all the locks
+        let inp: Vec<_> = input_data.iter().map(|b| b.read().unwrap()).collect();
+        let input_data_: Vec<&SharedTensor<f32>> = inp.iter().enumerate().map(|(_, val)| &**val).collect();
+
+        let wgts: Vec<_> = weights_data.iter().map(|w| w.read().unwrap()).collect();
+        let weights_data_: Vec<&SharedTensor<f32>> = wgts.iter().enumerate().map(|(_, val)| &**val).collect();
+
+        let out_ref = output_data.iter().cloned().collect::<Vec<_>>();
+        let mut out = &mut out_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
+        let mut output_w = &mut out.iter_mut().map(|a| a).collect::<Vec<_>>();
+        let mut output_data_: Vec<&mut SharedTensor<f32>> = output_w.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
+
+        self.compute_output(backend, &weights_data_, &input_data_, &mut output_data_);
     }
 
-    // TODO: remove
-    /// Calculate the loss for the output blobs in the layer.
-    ///
-    /// If `loss_weight(i)` returns `NAN` for a blob, no loss will be calculated for that blob.
-    ///
-    /// `calculate_loss` is called at the end of the forward computation step.
-    fn calculate_loss(&self, backend: &B, loss_weights: &[f32], weights: &mut Vec<ArcLock<SharedTensor<f32>>>, outputs: &mut Vec<ArcLock<SharedTensor<f32>>>) -> f32 {
-        let mut loss = 0f32;
-
-        let out_ref = outputs.iter().cloned().collect::<Vec<_>>();
-        let out = &mut out_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
-        let wgts_ref = weights.iter().cloned().collect::<Vec<_>>();
-        let wgts = &mut wgts_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
-
-        for (_, (output_blob, _)) in out.iter_mut().zip(loss_weights).enumerate() {
-            let native_backend = native_backend();
-            // setup loss weight
-            // let mut weight = SharedTensor::<f32>::new(native_backend.device(), &vec![1]).unwrap();
-            // match weight.add_device(native_backend.device()) { _ => weight.sync(native_backend.device()).unwrap() }
-            //
-            // ::util::write_to_memory(weight.get_mut(native_backend.device()).unwrap(), &[1]);
-            // match output_blob.add_device(native_backend.device()) { _ => output_blob.sync(native_backend.device()).unwrap() }
-            // let mut shared_loss = SharedTensor::<f32>::new(native_backend.device(), &vec![1]).unwrap();
-            // // calculate weighted loss
-            // native_backend.dot_plain(output_blob, &weight, &mut shared_loss).unwrap();
-
-            let native_output = output_blob.get(native_backend.device()).unwrap().as_native().unwrap();
-            // let native_loss = shared_loss.get(native_backend.device()).unwrap().as_native().unwrap();
-            loss += native_output.as_slice::<f32>()[0];
-            // TODO: factor in loss_weights
-        }
-
-        loss
-    }
-
-    /// Compute the [backpropagation][1] layer output and gradient using the provided backend.
+    /// Compute the [backpropagation][1] input gradient using the provided backend.
     /// [1]: https://en.wikipedia.org/wiki/Backpropagation
     ///
     /// Aquires write locks for the input blobs to ensure sequential computation,
-    /// and then do a [compute_input_gradient][3] and [compute_parameters_gradient][4].
+    /// and then do a [compute_input_gradient][3].
     ///
     /// [3]: ./trait.ComputeInputGradient.html#method.compute_input_gradient
+    #[cfg_attr(lint, allow(map_clone))]
+    fn backward_input(&self,
+                backend: &B,
+                weights_data: &[ArcLock<SharedTensor<f32>>],
+                output_data: &[ArcLock<SharedTensor<f32>>],
+                output_gradients: &[ArcLock<SharedTensor<f32>>],
+                input_data: &[ArcLock<SharedTensor<f32>>],
+                input_gradients: &mut [ArcLock<SharedTensor<f32>>]) {
+        let wgts_data: Vec<_> = weights_data.iter().map(|b| b.read().unwrap()).collect();
+        let weights_data_: Vec<&SharedTensor<f32>> = wgts_data.iter().enumerate().map(|(_, val)| &**val).collect();
+        let out_data: Vec<_> = output_data.iter().map(|b| b.read().unwrap()).collect();
+        let output_data_: Vec<&SharedTensor<f32>> = out_data.iter().enumerate().map(|(_, val)| &**val).collect();
+        let out_gradient: Vec<_> = output_gradients.iter().map(|b| b.read().unwrap()).collect();
+        let output_gradients_: Vec<&SharedTensor<f32>> = out_gradient.iter().enumerate().map(|(_, val)| &**val).collect();
+        let inp_data: Vec<_> = input_data.iter().map(|b| b.read().unwrap()).collect();
+        let input_data_: Vec<&SharedTensor<f32>> = inp_data.iter().enumerate().map(|(_, val)| &**val).collect();
+        let btm_gradient_ref = input_gradients.iter().cloned().collect::<Vec<_>>();
+        let mut btm_gradient = &mut btm_gradient_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
+        let mut input_gradient = &mut btm_gradient.iter_mut().map(|a| a).collect::<Vec<_>>();
+        let mut input_gradients_: Vec<&mut SharedTensor<f32>> = input_gradient.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
+
+        self.compute_input_gradient(backend, &weights_data_, &output_data_, &output_gradients_, &input_data_, &mut input_gradients_);
+    }
+
+    /// Compute the [backpropagation][1] parameters gradient using the provided backend.
+    /// [1]: https://en.wikipedia.org/wiki/Backpropagation
+    ///
+    /// Aquires write locks for the input blobs to ensure sequential computation,
+    /// and then do a [compute_parameters_gradient][4].
+    ///
     /// [4]: ./trait.ComputeParametersGradient.html#method.compute_parameters_gradient
     #[cfg_attr(lint, allow(map_clone))]
-    fn backward(&self,
+    fn backward_parameters(&self,
                 backend: &B,
-                output_data: &[&SharedTensor<f32>],
-                output_gradients: &[&SharedTensor<f32>],
-                weights_data: &[&SharedTensor<f32>],
-                weights_gradients: &mut [&mut SharedTensor<f32>],
-                input_data: &[&SharedTensor<f32>],
-                input_gradients: &mut [&mut SharedTensor<f32>]) {
-        self.compute_input_gradient(backend, weights_data, output_data, output_gradients, input_data, input_gradients);
-        self.compute_parameters_gradient(backend, output_data, output_gradients, input_data, weights_gradients);
+                output_data: &[ArcLock<SharedTensor<f32>>],
+                output_gradients: &[ArcLock<SharedTensor<f32>>],
+                input_data: &[ArcLock<SharedTensor<f32>>],
+                weights_gradients: &mut [ArcLock<SharedTensor<f32>>]) {
+        let out_data: Vec<_> = output_data.iter().map(|b| b.read().unwrap()).collect();
+        let output_data_: Vec<&SharedTensor<f32>> = out_data.iter().enumerate().map(|(_, val)| &**val).collect();
+        let out_gradients: Vec<_> = output_gradients.iter().map(|b| b.read().unwrap()).collect();
+        let output_gradients_: Vec<&SharedTensor<f32>> = out_gradients.iter().enumerate().map(|(_, val)| &**val).collect();
+        let inp_data: Vec<_> = input_data.iter().map(|b| b.read().unwrap()).collect();
+        let input_data_: Vec<&SharedTensor<f32>> = inp_data.iter().enumerate().map(|(_, val)| &**val).collect();
+        let wgt_gradient_ref = weights_gradients.iter().cloned().collect::<Vec<_>>();
+        let mut wgt_gradient = &mut wgt_gradient_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
+        let mut weights_gradient = &mut wgt_gradient.iter_mut().map(|a| a).collect::<Vec<_>>();
+        let mut weights_gradients_: Vec<&mut SharedTensor<f32>> = weights_gradient.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
+
+        self.compute_parameters_gradient(backend, &output_data_, &output_gradients_, &input_data_, &mut weights_gradients_);
     }
 
     /// Synchronize the blobs before doing a forward or backward operation.
@@ -902,12 +944,68 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
         false
     }
 
+    /// Return wether the layer is a container.
+    ///
+    /// This turns of certain behaviour for containers which would lead to problems:
+    /// - RwLocks will not be aquired for forward/backward since it would lead to deadlocks.
+    fn is_container(&self) -> bool {
+        false
+    }
+
     /// Return the associated loss weight for a given output blob index.
     ///
     /// If loss_weight(i) == `None`, no loss will be calculated for the output blob.
     ///
     /// This is usually overridden by loss layers.
     fn loss_weight(&self, output_id: usize) -> Option<f32> {
+        None
+    }
+
+    /// Return the input tensors of the layer.
+    ///
+    /// This should only be overridden by container layers,
+    /// where the tensors are not easily exposable.
+    fn inputs_data(&self) -> Option<Vec<ArcLock<SharedTensor<f32>>>> {
+        None
+    }
+
+    /// Return the gradients of the input tensors of the layer.
+    ///
+    /// This should only be overridden by container layers,
+    /// where the tensors are not easily exposable.
+    fn inputs_gradients(&self) -> Option<Vec<ArcLock<SharedTensor<f32>>>> {
+        None
+    }
+
+    /// Return the output tensors of the layer.
+    ///
+    /// This should only be overridden by container layers,
+    /// where the tensors are not easily exposable.
+    fn outputs_data(&self) -> Option<Vec<ArcLock<SharedTensor<f32>>>> {
+        None
+    }
+
+    /// Return the gradients of the output tensors of the layer.
+    ///
+    /// This should only be overridden by container layers,
+    /// where the tensors are not easily exposable.
+    fn outputs_gradients(&self) -> Option<Vec<ArcLock<SharedTensor<f32>>>> {
+        None
+    }
+
+    /// Return the learnable weights inside the layer.
+    ///
+    /// This should only be overridden by container layers,
+    /// where the weights are not easily exposable.
+    fn learnable_weights(&self) -> Option<Vec<ArcLock<SharedTensor<f32>>>> {
+        None
+    }
+
+    /// Return the gradients for the learnable weights inside the layer.
+    ///
+    /// This should only be overridden by container layers,
+    /// where the weights are not easily exposable.
+    fn learnable_weights_gradients(&self) -> Option<Vec<ArcLock<SharedTensor<f32>>>> {
         None
     }
 }
@@ -986,6 +1084,8 @@ pub enum LayerType {
     LogSoftmax,
     /// Pooling Layer
     Pooling(PoolingConfig),
+    /// Sequential Layer
+    Sequential(SequentialConfig),
     /// Softmax Layer
     Softmax,
     // Activation layers
