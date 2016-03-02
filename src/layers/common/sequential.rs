@@ -249,6 +249,9 @@ impl<B: IBackend + LayerOps<f32> + 'static> ILayer<B> for Sequential<B> {
         for layer in &self.layers {
             layer.borrow_mut().forward(&[]);
         }
+        if let Some(last_layer) = self.layers.last() {
+            last_layer.borrow_mut().synchronize();
+        }
     }
 
     fn backward_input(&self,
@@ -266,6 +269,9 @@ impl<B: IBackend + LayerOps<f32> + 'static> ILayer<B> for Sequential<B> {
         for layer in self.layers.iter().rev() {
             layer.borrow_mut().backward_input(&[]);
         }
+        if let Some(first_layer) = self.layers.iter().rev().last() {
+            first_layer.borrow_mut().synchronize();
+        }
     }
 
     fn backward_parameters(&self,
@@ -274,8 +280,11 @@ impl<B: IBackend + LayerOps<f32> + 'static> ILayer<B> for Sequential<B> {
                 output_gradients: &[ArcLock<SharedTensor<f32>>],
                 input_data: &[ArcLock<SharedTensor<f32>>],
                 weights_gradients: &mut [ArcLock<SharedTensor<f32>>]) {
-        for layer in &self.layers {
+        for layer in self.layers.iter().rev() {
             layer.borrow_mut().backward_parameters();
+        }
+        if let Some(first_layer) = self.layers.iter().rev().last() {
+            first_layer.borrow_mut().synchronize();
         }
     }
 }
