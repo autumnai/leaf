@@ -16,7 +16,7 @@ license = "MIT OR Apache-2.0"
 [dependencies]
 collenchyma = { version = "0.0.8", default-features = false }
 collenchyma-blas = { version = "0.2.0", default-features = false }
-collenchyma-nn = { version = "0.3.1", default-features = false }
+collenchyma-nn = { version = "0.3.2", default-features = false }
 
 log = "0.3.2"
 rand = "0.3.0"

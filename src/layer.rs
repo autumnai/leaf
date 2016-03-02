@@ -192,6 +192,7 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
 
         self.worker.init(self.backend.clone());
         self.reshape();
+        self.worker.resize_shared_workspace(self.backend.clone(), None);
         for t in &self.output_blobs_data {
             debug!("Layer {} - output shape: {:?}", self.name, t.read().unwrap().desc());
         }
@@ -718,6 +719,20 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
                weights_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_data: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>) {}
+
+    /// Adjust size of shared workspace.
+    ///
+    /// Is used by layers that need a workspace.
+    /// The layer should either:
+    ///
+    /// - leave the workspace as is if it bigger than required by this layer
+    /// - resize the workspace to the required size if smaller
+    /// - create the workspace if the `workspace` is `None`
+    ///
+    /// The reference to the workspace should be saved in the layer.
+    fn resize_shared_workspace(&mut self, backend: Rc<B>, workspace: Option<ArcLock<SharedTensor<u8>>>) -> Option<ArcLock<SharedTensor<u8>>> {
+        workspace
+    }
 
     /// Compute the [feedforward][1] layer output using the provided Backend.
     /// [1]: https://en.wikipedia.org/wiki/Feedforward_neural_network

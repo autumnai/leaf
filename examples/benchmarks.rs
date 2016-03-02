@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate timeit;
+extern crate env_logger;
 extern crate collenchyma as co;
 extern crate leaf;
 
@@ -12,6 +13,8 @@ use std::rc::Rc;
 use std::env;
 
 fn main() {
+    env_logger::init().unwrap();
+
     let nets: Vec<String> = vec!("alexnet".to_string(), "overfeat".to_string(), "vgg".to_string());
     if let Some(net) = env::args().nth(1) {
         if nets.contains(&net) {
