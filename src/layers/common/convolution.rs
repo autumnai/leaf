@@ -3,10 +3,12 @@
 //! Does this convolution with a set of learnable filters, each producing one
 //! feature map in the output tensor.
 use std::rc::Rc;
+use std::sync::{Arc, RwLock};
 use co::prelude::*;
 use conn;
+use conn::ConvolutionConfig as connConvolutionConfig;
 use layer::*;
-use util::{ArcLock, native_backend, cast_vec_usize_to_i32};
+use util::{ArcLock, cast_vec_usize_to_i32};
 use weight::FillerType;
 use super::FilterLayer;
 
@@ -19,7 +21,8 @@ pub struct Convolution<B: conn::Convolution<f32>> {
     stride: Vec<usize>,
     padding: Vec<usize>,
 
-    convolution_configs: Option<Rc<B::CC>>,
+    workspace: Option<ArcLock<SharedTensor<u8>>>,
+    convolution_config: Option<Rc<B::CC>>,
 }
 
 impl<B: conn::Convolution<f32>> Convolution<B> {
@@ -34,7 +37,8 @@ impl<B: conn::Convolution<f32>> Convolution<B> {
 
             axis: config.axis(),
 
-            convolution_configs: None,
+            workspace: None,
+            convolution_config: None,
         }
     }
 
@@ -103,7 +107,7 @@ impl<B: IBackend + conn::Convolution<f32>> ILayer<B> for Convolution<B> {
     }
 
     fn reshape(&mut self,
-               backend: ::std::rc::Rc<B>,
+               backend: Rc<B>,
                input_data: &mut Vec<ArcLock<SharedTensor<f32>>>,
                input_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>,
                weights_data: &mut Vec<ArcLock<SharedTensor<f32>>>,
@@ -125,12 +129,10 @@ impl<B: IBackend + conn::Convolution<f32>> ILayer<B> for Convolution<B> {
             let stride = cast_vec_usize_to_i32(self.stride_dims(num_spatial_dims));
             let padding = cast_vec_usize_to_i32(self.padding_dims(num_spatial_dims));
 
-            // add copy on native as workaround for bug in new_convolution_config
-            let native = native_backend();
-            let _ = filter.add_device(native.device());
             let config = backend.new_convolution_config(&inp, &output_data, &mut filter,
                                                         conn::ConvForwardAlgo::Auto, conn::ConvBackwardFilterAlgo::Auto, conn::ConvBackwardDataAlgo::Auto,
                                                         &stride, &padding).unwrap();
+
             // resize and fill weights
             weights_data[0].write().unwrap().resize(filter.desc()).unwrap();
             let filler = FillerType::Glorot {
@@ -139,8 +141,26 @@ impl<B: IBackend + conn::Convolution<f32>> ILayer<B> for Convolution<B> {
             };
             filler.fill(&mut weights_data[0].write().unwrap());
             weights_gradient[0].write().unwrap().resize(filter.desc()).unwrap();
-            self.convolution_configs = Some(Rc::new(config));
+            self.convolution_config = Some(Rc::new(config));
         }
+    }
+
+    fn resize_shared_workspace(&mut self, backend: Rc<B>, workspace: Option<ArcLock<SharedTensor<u8>>>) -> Option<ArcLock<SharedTensor<u8>>> {
+        let required_size = self.convolution_config.as_ref().unwrap().workspace_size();
+        let new_workspace = if workspace.is_none() {
+            Arc::new(RwLock::new(SharedTensor::<u8>::new(IBackend::device(&*backend), &(required_size)).unwrap()))
+        } else {
+            let old_workspace = workspace.as_ref().unwrap().clone();
+            let old_workspace_size = old_workspace.read().unwrap().capacity();
+            if old_workspace_size < required_size {
+                Arc::new(RwLock::new(SharedTensor::<u8>::new(IBackend::device(&*backend), &(required_size)).unwrap()))
+            } else {
+                workspace.unwrap()
+            }
+        };
+
+        self.workspace = Some(new_workspace.clone());
+        Some(new_workspace)
     }
 }
 
@@ -151,8 +171,9 @@ impl<B: IBackend + conn::Convolution<f32>> ComputeOutput<f32, B> for Convolution
                       input_data: &[&SharedTensor<f32>],
                       output_data: &mut [&mut SharedTensor<f32>]) {
         let filter_data = weights[0];
-        let conv_config = self.convolution_configs.as_ref().unwrap();
-        backend.convolution_plain(filter_data, input_data[0], output_data[0], conv_config).unwrap();
+        let conv_config = self.convolution_config.as_ref().unwrap();
+        let mut workspace = self.workspace.as_ref().unwrap().write().unwrap();
+        backend.convolution_plain(filter_data, input_data[0], output_data[0], &mut workspace, conv_config).unwrap();
     }
 }
 
@@ -165,9 +186,10 @@ impl<B: IBackend + conn::Convolution<f32>> ComputeInputGradient<f32, B> for Conv
                               input_data: &[&SharedTensor<f32>],
                               input_gradients: &mut [&mut SharedTensor<f32>]) {
         let filter_data = weights_data[0];
-        let conv_config = self.convolution_configs.as_ref().unwrap();
+        let conv_config = self.convolution_config.as_ref().unwrap();
+        let mut workspace = self.workspace.as_ref().unwrap().write().unwrap();
         // compute gradient w.r.t. input
-        backend.convolution_grad_data_plain(filter_data, output_gradients[0], input_gradients[0], conv_config).unwrap();
+        backend.convolution_grad_data_plain(filter_data, output_gradients[0], input_gradients[0], &mut workspace, conv_config).unwrap();
     }
 }
 
@@ -180,9 +202,10 @@ impl<B: IBackend + conn::Convolution<f32>> ComputeParametersGradient<f32, B> for
                                    parameters_gradients: &mut [&mut SharedTensor<f32>]) {
         // TODO: compute gradient w.r.t to bias
         let filter_gradient = &mut parameters_gradients[0];
-        let conv_config = self.convolution_configs.as_ref().unwrap();
+        let conv_config = self.convolution_config.as_ref().unwrap();
+        let mut workspace = self.workspace.as_ref().unwrap().write().unwrap();
         // compute gradient w.r.t. filter
-        backend.convolution_grad_filter_plain(input_data[0], output_gradients[0], filter_gradient, conv_config).unwrap();
+        backend.convolution_grad_filter_plain(input_data[0], output_gradients[0], filter_gradient, &mut workspace, conv_config).unwrap();
     }
 }
 

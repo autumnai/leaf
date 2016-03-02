@@ -94,8 +94,10 @@ impl<B: IBackend + LayerOps<f32> + 'static> Sequential<B> {
             }
         }
 
+        let mut shared_workspace = None;
         for layer_config in &config.layers {
             self.init_layer(backend.clone(), &layer_config, &mut registry, weight_registry);
+            shared_workspace = self.resize_shared_workspace(backend.clone(), shared_workspace);
         }
 
         // Go through the net backwards to determine which blobs contribute to the
@@ -221,6 +223,17 @@ impl<B: IBackend + LayerOps<f32> + 'static> ILayer<B> for Sequential<B> {
     fn learnable_weights_gradients(&self) -> Option<Vec<ArcLock<SharedTensor<f32>>>> {
         let gradients = self.layers.iter().flat_map(|layer| layer.borrow().learnable_weights_gradients()).collect();
         Some(gradients)
+    }
+
+    fn resize_shared_workspace(&mut self, backend: Rc<B>, workspace: Option<ArcLock<SharedTensor<u8>>>) -> Option<ArcLock<SharedTensor<u8>>> {
+        debug!("Resizing shared workspace {:?}", workspace.is_some());
+        let mut shared_workspace = workspace;
+
+        for layer in &self.layers {
+            shared_workspace = layer.borrow_mut().worker.resize_shared_workspace(backend.clone(), shared_workspace);
+        }
+
+        shared_workspace
     }
 
     fn forward(&self,

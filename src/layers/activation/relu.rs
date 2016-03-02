@@ -34,9 +34,13 @@ impl<B: IBackend + Relu<f32> + ReluPointwise<f32>> ILayer<B> for ReLU {
         if let Some(inp) = input_data.get(0) {
             let read_inp = inp.read().unwrap();
             let input_desc = read_inp.desc();
+            debug!("ONE");
             input_gradient[0].write().unwrap().resize(input_desc).unwrap();
+            debug!("TWO");
             output_data[0].write().unwrap().resize(input_desc).unwrap();
+            debug!("THREE");
             output_gradient[0].write().unwrap().resize(input_desc).unwrap();
+            debug!("FOUR");
         }
     }
 }
