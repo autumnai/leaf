@@ -7,7 +7,7 @@
 //! - `x`: input value
 //! - `b`: bias (not implemented yet)
 //!
-//! ## Input
+//! ## Input Data
 //!
 //! The input can either have one or two dimensions:
 //!
