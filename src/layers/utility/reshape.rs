@@ -1,6 +1,10 @@
-//! Utility layer to give the input another shape.
+//! Utility layer to give a tensor another shape.
 //!
-//! Reshaping a input tensor is required so that it becomes
+//! This layer should be used as in-place operation,
+//! so the tensor that should be reshaped should be specified
+//! as both input and output.
+//!
+//! Reshaping a tensor is required so that it becomes
 //! usable for Layers that interpret meaning into the shape of
 //! the tensor.
 //!
@@ -31,6 +35,10 @@ impl Reshape {
 }
 
 impl<B: IBackend> ILayer<B> for Reshape {
+    fn compute_in_place(&self) -> bool {
+        true
+    }
+
     fn auto_output_blobs(&self) -> bool {
         false
     }
@@ -43,8 +51,8 @@ impl<B: IBackend> ILayer<B> for Reshape {
                weights_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_data: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>) {
-        input_data[0].write().unwrap().reshape(&self.shape).unwrap();
-        input_gradient[0].write().unwrap().reshape(&self.shape).unwrap();
+        output_data[0].write().unwrap().resize(&self.shape).unwrap();
+        output_gradient[0].write().unwrap().resize(&self.shape).unwrap();
     }
 }
 

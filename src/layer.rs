@@ -251,7 +251,7 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
         let blob_gradient: ArcLock<SharedTensor<f32>>;
 
         if layer_config.input(output_id).is_some() && *layer_config.input(output_id).unwrap() == blob_name {
-            info!("{} -> {} (in-place)", layer_config.name, blob_name);
+            info!("Layer {:<15} -> Output {:>15} (in-place)", layer_config.name, blob_name);
             blob_data = registry[&blob_name].0.clone();
             blob_gradient = registry[&blob_name].1.clone();
         } else if registry.contains_key(&blob_name) {
@@ -1130,7 +1130,7 @@ impl LayerType {
             LayerType::ReLU => true,
             LayerType::Sigmoid => true,
             LayerType::NegativeLogLikelihood(_) => false,
-            LayerType::Reshape(_) => false, // TODO: add in-place support
+            LayerType::Reshape(_) => true,
         }
     }
 }
