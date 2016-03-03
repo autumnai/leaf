@@ -241,12 +241,12 @@ impl<B: IBackend + LayerOps<f32> + 'static> ILayer<B> for Sequential<B> {
                input_data: &[ArcLock<SharedTensor<f32>>],
                weights_data: &[ArcLock<SharedTensor<f32>>],
                output_data: &mut [ArcLock<SharedTensor<f32>>]) {
-        if let Some(first_layer) = self.layers.first() {
-            for (i, input) in input_data.iter().enumerate() {
-                first_layer.borrow_mut().input_blobs_data[i] = input.clone();
-            }
-        }
         for layer in &self.layers {
+            for (i, (input, input_name)) in input_data.iter().zip(self.input_tensor_names.iter()).enumerate() {
+                if &layer.borrow().input_blob_names[i] == input_name {
+                    layer.borrow_mut().input_blobs_data[i] = input.clone();
+                }
+            }
             layer.borrow_mut().forward(&[]);
         }
         if let Some(last_layer) = self.layers.last() {
@@ -357,6 +357,10 @@ impl SequentialConfig {
                             return Some(output_name.to_owned())
                         }
                     }
+                }
+                // use input if there are no previous layers to use
+                if let Some(input) = self.inputs.get(0) {
+                    return Some(input.0.to_owned())
                 }
             }
         }
