@@ -136,8 +136,7 @@ mod cuda {
             num_output: 64,
             filter_shape: vec![11],
             padding: vec![2],
-            stride: vec![4],
-            axis: None
+            stride: vec![4]
         };
         let mut conv1_cfg = LayerConfig::new("conv1", LayerType::Convolution(conv1_layer_cfg));
         conv1_cfg.add_input("data");
@@ -164,8 +163,7 @@ mod cuda {
             num_output: 192,
             filter_shape: vec![5],
             padding: vec![2],
-            stride: vec![1],
-            axis: None
+            stride: vec![1]
         };
         let mut conv2_cfg = LayerConfig::new("conv2", LayerType::Convolution(conv2_layer_cfg));
         conv2_cfg.add_input("pool1_out");
@@ -192,8 +190,7 @@ mod cuda {
             num_output: 384,
             filter_shape: vec![3],
             padding: vec![1],
-            stride: vec![1],
-            axis: None
+            stride: vec![1]
         };
         let mut conv3_cfg = LayerConfig::new("conv3", LayerType::Convolution(conv3_layer_cfg));
         conv3_cfg.add_input("pool2_out");
@@ -209,8 +206,7 @@ mod cuda {
             num_output: 256,
             filter_shape: vec![3],
             padding: vec![1],
-            stride: vec![1],
-            axis: None
+            stride: vec![1]
         };
         let mut conv4_cfg = LayerConfig::new("conv4", LayerType::Convolution(conv4_layer_cfg));
         conv4_cfg.add_input("conv3_out");
@@ -226,8 +222,7 @@ mod cuda {
             num_output: 256,
             filter_shape: vec![3],
             padding: vec![1],
-            stride: vec![1],
-            axis: None
+            stride: vec![1]
         };
         let mut conv5_cfg = LayerConfig::new("conv5", LayerType::Convolution(conv5_layer_cfg));
         conv5_cfg.add_input("conv4_out");
@@ -298,8 +293,7 @@ mod cuda {
             num_output: 32,
             filter_shape: vec![11],
             padding: vec![2],
-            stride: vec![4],
-            axis: None
+            stride: vec![4]
         };
         let mut conv1_cfg = LayerConfig::new("conv1", LayerType::Convolution(conv1_layer_cfg));
         conv1_cfg.add_input("data");
@@ -326,8 +320,7 @@ mod cuda {
             num_output: 96,
             filter_shape: vec![5],
             padding: vec![2],
-            stride: vec![1],
-            axis: None
+            stride: vec![1]
         };
         let mut conv2_cfg = LayerConfig::new("conv2", LayerType::Convolution(conv2_layer_cfg));
         conv2_cfg.add_input("pool1_out");
@@ -354,8 +347,7 @@ mod cuda {
             num_output: 142,
             filter_shape: vec![3],
             padding: vec![1],
-            stride: vec![1],
-            axis: None
+            stride: vec![1]
         };
         let mut conv3_cfg = LayerConfig::new("conv3", LayerType::Convolution(conv3_layer_cfg));
         conv3_cfg.add_input("pool2_out");
@@ -371,8 +363,7 @@ mod cuda {
             num_output: 128,
             filter_shape: vec![3],
             padding: vec![1],
-            stride: vec![1],
-            axis: None
+            stride: vec![1]
         };
         let mut conv4_cfg = LayerConfig::new("conv4", LayerType::Convolution(conv4_layer_cfg));
         conv4_cfg.add_input("conv3_out");
@@ -388,8 +379,7 @@ mod cuda {
             num_output: 128,
             filter_shape: vec![3],
             padding: vec![1],
-            stride: vec![1],
-            axis: None
+            stride: vec![1]
         };
         let mut conv5_cfg = LayerConfig::new("conv5", LayerType::Convolution(conv5_layer_cfg));
         conv5_cfg.add_input("conv4_out");

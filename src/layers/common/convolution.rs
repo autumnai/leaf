@@ -1,7 +1,16 @@
 //! Convolves the input tensor.
 //!
-//! Does this convolution with a set of learnable filters, each producing one
-//! feature map in the output tensor.
+//! Computes this convolution with a set of learnable filters,
+//! each producing one feature map in the output tensor.
+//!
+//! [This site][cs231n_convnets] provides a good overview of the functionality
+//! of convolutional layers.
+//!
+//! ## Input Data
+//!
+//! The layer expects the input to be in 4D NCHW format (2 spatial dimensions).
+//!
+//! [cs231n_convnets]: https://cs231n.github.io/convolutional-networks
 use std::rc::Rc;
 use std::sync::{Arc, RwLock};
 use co::prelude::*;
@@ -15,7 +24,6 @@ use super::FilterLayer;
 #[derive(Debug, Clone)]
 /// Convolution Layer
 pub struct Convolution<B: conn::Convolution<f32>> {
-    axis: usize,
     num_output: usize,
     filter_shape: Vec<usize>,
     stride: Vec<usize>,
@@ -35,8 +43,6 @@ impl<B: conn::Convolution<f32>> Convolution<B> {
             stride: config.stride.clone(),
             padding: config.padding.clone(),
 
-            axis: config.axis(),
-
             workspace: None,
             convolution_config: None,
         }
@@ -46,7 +52,7 @@ impl<B: conn::Convolution<f32>> Convolution<B> {
         let num_spatial_dims = self.num_spatial_dims(input_shape);
         let spatial_dims = self.spatial_filter_dims(num_spatial_dims);
         let filter_n = self.num_output; // number of output feature maps
-        let filter_c = input_shape[self.axis]; // number of input feature maps
+        let filter_c = input_shape[1]; // number of input feature maps
         let filter_h = spatial_dims[0];
         let filter_w = spatial_dims[1];
 
@@ -61,7 +67,7 @@ impl<B: conn::Convolution<f32>> Convolution<B> {
 }
 
 impl<B: conn::Convolution<f32>> FilterLayer for Convolution<B> {
-    /// Calculates the number of spatial dimensions for the pooling operation.
+    /// Calculates the number of spatial dimensions for the convolution operation.
     fn num_spatial_dims(&self, input_shape: &[usize]) -> usize {
         match input_shape.len() {
             4 => 2,
@@ -75,11 +81,11 @@ impl<B: conn::Convolution<f32>> FilterLayer for Convolution<B> {
         let padding = self.padding_dims(num_spatial_dims);
         let stride = self.stride_dims(num_spatial_dims);
         let mut output_shape = Vec::new();
-        for dim in &input_shape[0..self.axis].to_vec() {
+        for dim in &input_shape[0..1].to_vec() {
             output_shape.push(*dim);
         }
         output_shape.push(self.num_output);
-        for spatial_dim in Self::calculate_spatial_output_dims(&input_shape[(self.axis + 1)..], &filter, &padding, &stride) {
+        for spatial_dim in Self::calculate_spatial_output_dims(&input_shape[2..], &filter, &padding, &stride) {
             output_shape.push(spatial_dim);
         }
 
@@ -213,7 +219,7 @@ impl<B: IBackend + conn::Convolution<f32>> ComputeParametersGradient<f32, B> for
 #[derive(Debug, Clone)]
 /// Specifies configuration parameters for a Convolution Layer.
 pub struct ConvolutionConfig {
-    /// The number of output values
+    /// The number of output feature maps
     pub num_output: usize,
     /// The size of the kernel
     pub filter_shape: Vec<usize>,
@@ -221,25 +227,6 @@ pub struct ConvolutionConfig {
     pub stride: Vec<usize>,
     /// The padding size
     pub padding: Vec<usize>,
-    /// The axis to interpret as "channels" when performing convolution.
-    ///
-    /// Preceding dimensions are treated as independent inputs, and
-    /// succeeding dimensions are treated as "spatial".
-    ///
-    /// Defaults to `1`
-    pub axis: Option<usize>,
-}
-
-impl ConvolutionConfig {
-    /// The axis to interpret as "channels" when performing convolution.
-    ///
-    /// Preceding dimensions are treated as independent inputs, and
-    /// succeeding dimensions are treated as "spatial".
-    ///
-    /// Defaults to `1`
-    pub fn axis(&self) -> usize {
-        self.axis.unwrap_or(1)
-    }
 }
 
 impl Into<LayerType> for ConvolutionConfig {
@@ -263,8 +250,6 @@ mod tests {
             filter_shape: vec![11],
             padding: vec![2],
             stride: vec![4],
-
-            axis: None,
         };
         let layer = Convolution::<Backend<Cuda>>::from_config(&cfg);
         let num_spatial_dims = layer.num_spatial_dims(&vec![1, 3, 224, 224]);
