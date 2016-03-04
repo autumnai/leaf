@@ -12,13 +12,8 @@
 //!
 //! ## Architecture
 //!
-//! Leaf's [Network][network] is a compositional model, representing a collection of connected
+//! Leaf's Networks are a compositional model, representing a collection of connected
 //! [layers][layers], making operations over numerical data.
-//!
-//! The Network defines the entire model, by defining the hirarchical structure of layers from
-//! bottom to top. At execution time, the Network passes the data, flowing through the Network,
-//! from one layer to the next. The output of one layer is the input for the layer on top. On a
-//! backward pass, the Network passes the derivatives inverted through the Network.
 //!
 //! Layers, the building block of a Leaf Network, are small units, describing computation over
 //! numerical input data. Generally speaking Layers take input and produce an output, but
@@ -27,17 +22,20 @@
 //! Layer types which are closer defined at the [Layers page][layers]. Every
 //! layer serves a special purpose and can occur zero, one or many times inside a Network.
 //!
-//! Leaf uses a Blob, provided by the [Phloem][phloem] module, an N-dimensional array
+//! Leaf uses [Collenchymas'][collenchyma] SharedTensor, an N-dimensional array
 //! for a unified memory interface over the actual data for automatic synchronization between
-//! different devices (CUDA, OpenCL, host CPU). A Blob stores the actual data as well as the
-//! derivatives and is used for the data flowing through the system and for the state
-//! representation of Layers, which is important for portability and performance.
-//! A Blob can be swapped from backend to backend and can be used for computations on CUDA, OpenCL
-//! and native host CPU. It provides performance optimizations and automatically takes care of
-//! memory management and synchronization.
+//! different devices (CUDA, OpenCL, host CPU). A SharedTensor stores the actual data flowing
+//! through the system and the weights required for some Layers.
+//! The data in a SharedTensor can be copied from backend to backend
+//! and can be used for computations on CUDA, OpenCL and native host CPU.
+//! It provides performance optimizations and automatically takes care of memory management and synchronization.
+//!
+//! A neural network can be created by combining container layers like the `Sequential` Layer.
+//! Those can be nested and allow for bigger neural networks to be constructed while still
+//! retaining the interface of a Layer.
 //!
 //! The learning and optimization of the Network happens at the [Solver][solver] and is decoupled
-//! from the Network making the setup clean and flexible. One of the four layer types is a Loss
+//! from the network making the setup clean and flexible. One of the four layer types is a Loss
 //! Layer, which is used for the interaction of Network and Solver. The Network produces the loss
 //! and gradients, which the Solver uses to optimize the Network through parameter updates. Beside
 //! that, the Solver provides housekeeping and other evaluations of the Network. All operation
@@ -49,9 +47,8 @@
 //! help future research and production development alike as it combines expressiveness,
 //! performance and usability.
 //!
-//! [network]: ./network/index.html
 //! [layers]: ./layers/index.html
-//! [phloem]: https://github.com/autumnai/phloem
+//! [collenchyma]: https://github.com/autumnai/collenchyma
 //! [solver]: ./solvers/index.html
 //!
 //! ## Philosophy
@@ -73,11 +70,6 @@
 //! A well-written documentation that addresses both concepts and
 //! implementations, empowers developers and researchers to contribute their
 //! unique experience to the project for the benefit of everyone.
-//!
-//! ## Examples
-//!
-//! ```
-//! ```
 //!
 //! ## Development
 //!
