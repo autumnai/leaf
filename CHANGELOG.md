@@ -1,3 +1,43 @@
+<a name="0.2.0"></a>
+## 0.2.0 (2016-03-04)
+
+
+#### Bug Fixes
+
+* **convolution:**  add missing weight initialization ([79f71095](https://github.com/autumnai/leaf/commit/79f710955374daf1a878edfdf5dd5977edd75550))
+* **dependency:**  make collenchyma version constraint stricter ([6b3f6af3](https://github.com/autumnai/leaf/commit/6b3f6af30005ebed40bf84b3dc9d36770db509a2))
+* **nll:**  add NLLConfig to specify number of classes ([34568774](https://github.com/autumnai/leaf/commit/34568774ad0e491f7a31d624f68513b3dedaa14c))
+* **reshape:**  fix reshaping of network input blobs ([20d97e9d](https://github.com/autumnai/leaf/commit/20d97e9d42161db7ac5aa95c48c8db04f8f950e9))
+* **sequential:**  synchronize after forward/backward ([d1c1030f](https://github.com/autumnai/leaf/commit/d1c1030ff64166263012aad0572cdc7e2be865bf))
+* **test:**  fix tests after adding collenchyma ([a7f8a695](https://github.com/autumnai/leaf/commit/a7f8a69521130289fc6b5a3eebc7f28133a7fac4))
+
+#### Features
+
+* **activations:**  add in-place activations ([920b6419](https://github.com/autumnai/leaf/commit/920b64191d642e8536deffdf55d7c26bf287a7b9))
+* **convolution:**
+  *  remove convolution axis ([a8345ee1](https://github.com/autumnai/leaf/commit/a8345ee1555c0c256f5a30cdabf7ebcc46d52455))
+  *  add shared workspace for convolution layer ([f5f25c31](https://github.com/autumnai/leaf/commit/f5f25c31a4c8bd058cd576c789ba732241ab4496))
+* **everything:**  introduce most of the changes for 0.2.0 ([1e0db777](https://github.com/autumnai/leaf/commit/1e0db7774b5bdb38615d444c881265ec7cec390e))
+* **layer:**  add Sequential layer ([aaacc1ed](https://github.com/autumnai/leaf/commit/aaacc1edf351d2fb07f1f7a375cffac03d9932ed))
+* **layers:**  implement Into<LayerType> for all layers ([b9a4e8f6](https://github.com/autumnai/leaf/commit/b9a4e8f6dd86fe1bd80a669ae1aa2e17a017c4c1))
+* **license:**  change license to dual MIT/Apache-2.0 ([a06b7c52](https://github.com/autumnai/leaf/commit/a06b7c522c7e9f1c837b96ce27a9eca4b34d2bad))
+* **reshape:**  added in-place functonality to reshape layer ([f03bfc20](https://github.com/autumnai/leaf/commit/f03bfc20711451493a8324cad553f7f2f00ffcbe))
+* **solvers:**  reintroduce solvers for Layers ([0254a432](https://github.com/autumnai/leaf/commit/0254a432b0d990990564aed8c25b237bda15a685))
+
+#### Performance
+
+* **sequential:**  enable in-place inside Sequential containers ([5f0a40cb](https://github.com/autumnai/leaf/commit/5f0a40cba2becb86eb948363192895855fa49c75))
+
+
+<a name="0.1.2"></a>
+## 0.1.2 (2015-12-19)
+
+
+#### Bug Fixes
+
+* **dependency:**  make collenchyma version constraint stricter ([594f207c](https://github.com/autumnai/leaf/commit/594f207c129da424637285185ca804429d48c8b0))
+
+
 <a name="0.1.1"></a>
 ## 0.1.1 (2015-11-30)
 

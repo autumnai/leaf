@@ -1,4 +1,4 @@
-# Leaf • [![Join the chat at https://gitter.im/autumnai/leaf](https://img.shields.io/badge/gitter-join%20chat-brightgreen.svg)](https://gitter.im/autumnai/leaf?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/autumnai/leaf.svg?branch=master)](https://travis-ci.org/autumnai/leaf)  [![Crates.io](http://meritbadge.herokuapp.com/leaf)](https://crates.io/crates/leaf) [![License](https://img.shields.io/crates/l/leaf.svg)](LICENSE)
+# Leaf • [![Join the chat at https://gitter.im/autumnai/leaf](https://img.shields.io/badge/gitter-join%20chat-brightgreen.svg)](https://gitter.im/autumnai/leaf?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/autumnai/leaf.svg?branch=master)](https://travis-ci.org/autumnai/leaf) [![Crates.io](http://meritbadge.herokuapp.com/leaf)](https://crates.io/crates/leaf) [![License](https://img.shields.io/crates/l/leaf.svg)](LICENSE)
 
 ## Introduction
 
@@ -59,7 +59,7 @@ If you're using Cargo, just add Leaf to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-leaf = "0.1.2"
+leaf = "0.2.0"
 ```
 
 If you're using [Cargo Edit][cargo-edit], you can
@@ -77,7 +77,7 @@ can selectively enable them like this in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-leaf = { version = "0.1.2", default-features = false }
+leaf = { version = "0.2.0", default-features = false }
 
 [features]
 default = ["native"] # include only the ones you want to use, in this case "native"
