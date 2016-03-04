@@ -2,39 +2,39 @@
 
 ## Introduction
 
-Leaf is a open source framework for machine intelligence, sharing concepts from
-[TensorFlow][tensorflow] and [Caffe][caffe].
+Leaf is a Machine Intelligence Framework engineered by software developers, not
+scientists. It was inspired by the brilliant people behind TensorFlow, Torch,
+Caffe, Rust and numerous research papers and brings modularity, performance and
+portability to deep learning. Leaf is lean and tries to introduce minimal
+technical debt to your stack.
 
-Leaf was started at [Autumn][autumn] to bridge the gap between research and
-production of deep learning networks. Leaf is written in [Rust][rust], a
-language which is well suited for state-of-the-art machine learning. It allows
-for the performance, memory-security, and extensibility, that other frameworks
-(TensorFlow, Caffe, Theano) only gain by combining high-level languages (Python)
-with low-level languages (C, C++).
+Leaf is a few months old, but thanks to its architecture and Rust already one of
+the fastest Machine Intelligence Frameworks in the world.
 
-The architecture of Leaf's network is composed of layers, which represent
-operations over n-dimensional numerical inputs into the network, known as Blobs.
-This expressive and highly modular architecture allows you to deploy and
-distribute your network over multiple device types, such as servers, desktops, mobile,
-and use a variable number of CPUs or GPUs for computation.  
-Layers usually implement mathematical operations, but can be used for many more
-such as feeding in data, logging, or returning results. You can use the layers
-that ship with Leaf (e.g. Convolutional, ReLU, RNN, SVM,
-etc.) or thanks to Rust, easily extend Leaf with your own layers.
+<div align="center">
+  <img src="http://autumnai.com/images/autumn_leaf_benchmarks_alexnet.png"><br><br>
+</div>
 
-Leaf strives for [leading-edge performance][benchmarks], while providing a clear and
-expressive architecture that creates - as we hope - an innovative and active
-community around machine intelligence and fuels future research.
+> See more Deep Neural Networks benchmarks on [Deep Learning Benchmarks][deep-learning-benchmarks-website].
 
-We see Leaf as the core of constructing high-performance learning networks that
-can be distributed and extended with other libraries e.g. for reinforcement
-learning (Q-learning), visualizing and monitoring the learning of the network,
-[automated preprocessing of non-numerical data][cuticula] or scale, deploy and
-distribute your network to the cloud.
+Leaf is portable. Run it on CPUs, GPUs, FPGAs on machines with an OS or on
+machines without one. Run it with OpenCL or CUDA. Credit goes to
+[Collenchyma][collenchyma] and Rust.
 
-For more information,
+Leaf is part of the [Autumn][autumn] Machine Intelligence Platform, which is
+working on making AI algorithms 100x more computational efficient. Bringing
+real-time, offline AI to smartphones and embedded devices.
 
-* see Leafs' [Documentation][documentation] or
+We see Leaf as the core of constructing high-performance machine intelligence
+applications. Leafs' design makes it easy to publish independent modules to make
+e.g. deep reinforcement learning, visualization and monitoring, network
+distribution, [automated preprocessing][cuticula] or scaleable production
+deployment easily accessible for everyone.
+
+For more info refer to,
+* the [Leaf examples][leaf-examples],
+* the [Leaf Documentation][documentation],
+* the [Autumn Website][autumn] or
 * the [Q&A](#qa)
 
 [caffe]: https://github.com/BVLC/caffe
@@ -42,70 +42,95 @@ For more information,
 [autumn]: http://autumnai.com
 [tensorflow]: https://github.com/tensorflow/tensorflow
 [benchmarks]: #benchmarks
+[leaf-examples]: #examples
+[deep-learning-benchmarks-website]: http://autumnai.com/deep-learning-benchmarks
 [documentation]: http://autumnai.github.io/leaf
 
-> Disclaimer: Leaf is currently in a very early and heavy stage of development.
+> Disclaimer: Leaf is currently in an early stage of development.
 > If you are experiencing any bugs that are not due to not yet implemented
 > features, feel free to create a issue.
 
 ## Getting Started
 
-If you're using Cargo, just add Leaf to your Cargo.toml:
+If you are new to Rust you can it install it as detailed [here][rust_download],
+and we recommend taking a look at the [official Getting Started Guide][rust_getting_started].
 
-    [dependencies]
-    leaf = "0.1.2"
+If you're using Cargo, just add Leaf to your `Cargo.toml`:
+
+```toml
+[dependencies]
+leaf = "0.1.2"
+```
 
 If you're using [Cargo Edit][cargo-edit], you can
 call:
 
-    $ cargo add leaf
-
-
-You can find examples at [Leaf Examples][leaf-examples].
-Leaf Examples provides a CLI, so you can run popular Deep Learning examples with
-Leaf right from the command line.
-
+```bash
+cargo add leaf
+```
+[rust_download]: https://www.rust-lang.org/downloads.html
+[rust_getting_started]: https://doc.rust-lang.org/book/getting-started.html
 [cargo-edit]: https://github.com/killercup/cargo-edit
+
+If you are on a machine that doesn't have support for CUDA or OpenCL you
+can selectively enable them like this in your `Cargo.toml`:
+
+```toml
+[dependencies]
+leaf = { version = "0.1.2", default-features = false }
+
+[features]
+default = ["native"] # include only the ones you want to use, in this case "native"
+native  = ["leaf/native"]
+cuda    = ["leaf/cuda"]
+opencl  = ["leaf/opencl"]
+```
+
+
+## Examples
+
+We are providing a [Leaf examples repository][leaf-examples], where we and
+others publish executable machine learning models build with Leaf. It features
+a CLI for easy usage and has a detailed guide in the [project
+README.md][leaf-examples].
+
+And Leaf comes with an examples directory as well, which features popular neural
+networks (e.g. Alexnet, Overfeat, VGG). To run them on your machine, just follow
+the install guide, clone this repoistory and then run
+
+```bash
+cargo run --release --example benchmarks
+```
+
 [leaf-examples]: https://github.com/autumnai/leaf-examples
 
-## Benchmarks
+## Ecosystem / Extensions
 
-| (in ms)          | Leaf    | Torch    | Neon    | Caffe    | Tensorflow |
-| ---------------- |---------|----------|---------|----------|------------|
-| **Alexnet**
-| *FORWARD*        |    30.8 |     33.0 |    30.9 |     42.0 |       46.1 |
-| *BACKWARD*       |    70.6 |     66.1 |    67.2 |     85.3 |      156.0 |
-| *TOTAL*          |   101.4 |     99.1 |    98.1 |    127.3 |      202.1 |
-| **Overfeat**                                
-| *FORWARD*        |   104.6 |    113.5 |         |    142.3 |            |
-| *BACKWARD*       |   216.7 |    213.7 |         |    287.9 |            |
-| *TOTAL*          |   321.3 |    327.2 |         |    430.2 |            |
-|                  |         |          |         |          |            | |
-
-
-## Leaf Ecosystem and Extensions
-
-We design Leaf and all other crates for machine learning completely modular and
-as extensible as possible. More helpful crates you can use with Leaf:
+We design Leaf and the other crates of the [Autumn Platform][autumn] as modular
+and extensible as possible. More helpful crates you can use with Leaf:
 
 - [**Cuticula**][cuticula]: Preprocessing Framework for Machine Learning
-- [**Collenchyma**][collen]: Portable, High Performance Computation on CUDA,
-  OpenCL and common CPU
+- [**Collenchyma**][collenchyma]: Portable, HPC-Framework on any hardware with CUDA, OpenCL, Rust
 
 [cuticula]: https://github.com/autumnai/cuticula
-[phloem]: https://github.com/autumnai/phloem
-[collen]: https://github.com/autumnai/collenchyma
+[collenchyma]: https://github.com/autumnai/collenchyma
 
-## Contributing and Contact
+## Support / Contact
 
-Want to contribute? Awesome! We have
-[instructions to help you get started contributing code or documentation][contributing].
+- With a bit of luck you find us online on the #rust-machine-learing IRC at irc.mozilla.org,
+- but we are always approachable on [Gitter/Leaf][gitter-leaf]
+- For bugs and feature request, you can create a [Github issue][leaf-issue]
+- And for more private matters, send us a mail straight to our inbox developers@autumnai.com.
+- Refer to [Autumn][autumn] for more information
+
+[leaf-issue]: https://github.com/autumnai/leaf/issues
+
+## Contributing
+
+Want to contribute? Awesome! We have [instructions to help you get started][contributing].
 
 Leaf has a near real-time collaboration culture and happens here on Github and
-on the [Leaf Gitter Channels][gitter-leaf].
-
-You can also reach out to the Maintainers [@MJ][mj] and [@hobofan][hobofan]
-directly or engage at the [#rust-machine-learning][irc] IRC on irc.mozilla.org.
+on the [Leaf Gitter Channel][gitter-leaf].
 
 Unless you explicitly state otherwise, any contribution intentionally
 submitted for inclusion in the work by you, as defined in the Apache-2.0
@@ -120,16 +145,9 @@ conditions.
 
 ## Changelog
 
-You can find the release history in the root file [CHANGELOG.md][changelog].
-
-A changelog is a log or record of all the changes made to a project, such as a
-website or software project, usually including such records as bug fixes, new
-features, etc. - [Wikipedia][changelog-quote]
-
-We are using [Clog][clog], the Rust tool for auto-generating CHANGELOG files.
+You can find the release history at the [CHANGELOG.md][changelog]. We are using [Clog][clog], the Rust tool for auto-generating CHANGELOG files.
 
 [changelog]: CHANGELOG.md
-[changelog-quote]: https://en.wikipedia.org/wiki/Changelog
 [Clog]: https://github.com/clog-tool/clog-cli
 
 ## Q&A
