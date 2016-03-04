@@ -1,3 +1,8 @@
+<div align="center">
+  <img src="http://autumnai.com/images/autumn_leaf_benchmarks_alexnet.png"><br><br>
+</div>
+> Forward and Backward duration for Leaf 0.2 and other Machine Learning Frameworks on the popular Alexnet.
+
 # Announcing Leaf 0.2
 
 We are happy to announce today the release of Leaf 0.2 on which we have been
@@ -25,12 +30,7 @@ today. Rust was a big help in developing the entire platform over the course of
 a few months. We achieved a very efficient GPU utilization and oriented our
 architecture close to Torch and achieved the distribution capabilities of
 Tensorflow, on a lower abstraction level. More information in the
-following sections. Following the Forward and Backward duration for Leaf 0.2 and
-other Machine Learning Frameworks on the Alexnet.
-
-<div align="center">
-  <img src="http://autumnai.com/images/autumn_leaf_benchmarks_alexnet.png"><br><br>
-</div>
+following sections. 
 
 More Benchmarks and comparisons, including Memory utilization, can be found on
 [Deep Learning Benchmarks][deep-learning-benchmarks-website].
