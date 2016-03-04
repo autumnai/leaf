@@ -1,12 +1,9 @@
 //! Provides common utility functions
 use std::sync::{Arc, RwLock};
-use co::backend::{Backend, BackendConfig};
-use co::framework::IFramework;
-use co::frameworks::Native;
-use co::memory::MemoryType;
-use co::tensor::SharedTensor;
+use co::prelude::*;
 use coblas::plugin::*;
 use conn;
+use num::traits::{NumCast, cast};
 
 /// Shared Lock used for our tensors
 pub type ArcLock<T> = Arc<RwLock<T>>;
@@ -22,12 +19,18 @@ pub fn native_backend() -> Backend<Native> {
 }
 
 /// Write into a native Collenchyma Memory.
-pub fn write_to_memory<T: ::std::marker::Copy>(mem: &mut MemoryType, data: &[T]) {
+pub fn write_to_memory<T: NumCast + ::std::marker::Copy>(mem: &mut MemoryType, data: &[T]) {
+    write_to_memory_offset(mem, data, 0);
+}
+
+/// Write into a native Collenchyma Memory with a offset.
+pub fn write_to_memory_offset<T: NumCast + ::std::marker::Copy>(mem: &mut MemoryType, data: &[T], offset: usize) {
     match mem {
         &mut MemoryType::Native(ref mut mem) => {
-            let mut mem_buffer = mem.as_mut_slice::<T>();
+            let mut mem_buffer = mem.as_mut_slice::<f32>();
             for (index, datum) in data.iter().enumerate() {
-                mem_buffer[index] = *datum;
+                // mem_buffer[index + offset] = *datum;
+                mem_buffer[index + offset] = cast(*datum).unwrap();
             }
         },
         #[cfg(any(feature = "opencl", feature = "cuda"))]
@@ -35,8 +38,26 @@ pub fn write_to_memory<T: ::std::marker::Copy>(mem: &mut MemoryType, data: &[T])
     }
 }
 
+/// Write the `i`th sample of a batch into a SharedTensor.
+///
+/// The size of a single sample is infered through
+/// the first dimension of the SharedTensor, which
+/// is asumed to be the batchsize.
+///
+/// Allocates memory on a Native Backend if neccessary.
+pub fn write_batch_sample<T: NumCast + ::std::marker::Copy>(tensor: &mut SharedTensor<f32>, data: &[T], i: usize) {
+    let native_backend = native_backend();
+
+    let batch_size = tensor.desc().size();
+    let sample_size = batch_size / tensor.desc()[0];
+
+    let _ = tensor.add_device(native_backend.device());
+    tensor.sync(native_backend.device()).unwrap();
+    write_to_memory_offset(tensor.get_mut(native_backend.device()).unwrap(), &data, i * sample_size);
+}
+
 /// Create a Collenchyma SharedTensor for a scalar value.
-pub fn native_scalar<T: ::std::marker::Copy>(scalar: T) -> SharedTensor<T> {
+pub fn native_scalar<T: NumCast + ::std::marker::Copy>(scalar: T) -> SharedTensor<T> {
     let native = native_backend();
     let mut shared_scalar = SharedTensor::<T>::new(native.device(), &vec![1]).unwrap();
     write_to_memory(shared_scalar.get_mut(native.device()).unwrap(), &[scalar]);
@@ -58,6 +79,15 @@ pub trait Axpby<F> : Axpy<F> + Scal<F> {
     /// Performs the operation y := a*x + b*y .
     ///
     /// Consists of a scal(b, y) followed by a axpby(a,x,y).
+    fn axpby(&self, a: &mut SharedTensor<F>, x: &mut SharedTensor<F>, b: &mut SharedTensor<F>, y: &mut SharedTensor<F>) -> Result<(), ::co::error::Error> {
+        try!(self.scal(b, y));
+        try!(self.axpy(a, x, y));
+        Ok(())
+    }
+
+    /// Performs the operation y := a*x + b*y .
+    ///
+    /// Consists of a scal(b, y) followed by a axpby(a,x,y).
     fn axpby_plain(&self, a: &SharedTensor<F>, x: &SharedTensor<F>, b: &SharedTensor<F>, y: &mut SharedTensor<F>) -> Result<(), ::co::error::Error> {
         try!(self.scal_plain(b, y));
         try!(self.axpy_plain(a, x, y));
@@ -68,9 +98,12 @@ pub trait Axpby<F> : Axpy<F> + Scal<F> {
 impl<T: Axpy<f32> + Scal<f32>> Axpby<f32> for T {}
 
 /// Encapsulates all traits required by Solvers.
-pub trait SolverOps<F> : Axpby<F> + Dot<F> + Copy<F> {}
+// pub trait SolverOps<F> : Axpby<F> + Dot<F> + Copy<F> {}
+//
+// impl<T: Axpby<f32> + Dot<f32> + Copy<f32>> SolverOps<f32> for T {}
+pub trait SolverOps<F> : LayerOps<F> + Axpby<F> + Dot<F> + Copy<F> {}
 
-impl<T: Axpby<f32> + Dot<f32> + Copy<f32>> SolverOps<f32> for T {}
+impl<T: LayerOps<f32> + Axpby<f32> + Dot<f32> + Copy<f32>> SolverOps<f32> for T {}
 
 /// Encapsulates all traits used in Layers.
 pub trait LayerOps<F> : conn::Convolution<F>

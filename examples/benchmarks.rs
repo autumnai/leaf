@@ -157,7 +157,6 @@ fn bench_alexnet() {
         let func = || {
             let forward_time = timeit_loops!(1, {
                 {
-                    let loss = &mut 0f32;
                     let inp = SharedTensor::<f32>::new(backend.device(), &vec![128, 3, 224, 224]).unwrap();
 
                     let inp_lock = Arc::new(RwLock::new(inp));
@@ -239,7 +238,6 @@ fn bench_overfeat() {
         let func = || {
             let forward_time = timeit_loops!(1, {
                 {
-                    let loss = &mut 0f32;
                     let inp = SharedTensor::<f32>::new(backend.device(), &vec![128, 3, 231, 231]).unwrap();
 
                     let inp_lock = Arc::new(RwLock::new(inp));
@@ -324,7 +322,6 @@ fn bench_vgg_a() {
     cfg.add_layer(LayerConfig::new("conv8/relu", LayerType::ReLU));
     let pool5_layer_cfg = PoolingConfig { mode: PoolingMode::Max, filter_shape: vec![2], stride: vec![2], padding: vec![0] };
     cfg.add_layer(LayerConfig::new("pool5", pool5_layer_cfg));
-    let fc1_layer_cfg = LinearConfig { output_size: 4096 };
     cfg.add_layer(LayerConfig::new("fc1", LinearConfig { output_size: 4096 }));
     cfg.add_layer(LayerConfig::new("fc2", LinearConfig { output_size: 4096 }));
     cfg.add_layer(LayerConfig::new("fc3", LinearConfig { output_size: 1000 }));
@@ -337,7 +334,6 @@ fn bench_vgg_a() {
         let func = || {
             let forward_time = timeit_loops!(1, {
                 {
-                    let loss = &mut 0f32;
                     let inp = SharedTensor::<f32>::new(backend.device(), &vec![64, 3, 224, 224]).unwrap();
 
                     let inp_lock = Arc::new(RwLock::new(inp));

@@ -34,7 +34,7 @@ pub mod sgd;
 use co::{IBackend, MemoryType, SharedTensor};
 use conn::NN;
 use solver::*;
-use network::Network;
+use layer::*;
 use util::{ArcLock, native_backend, LayerOps, SolverOps};
 
 trait SGDSolver<SolverB: IBackend + SolverOps<f32>, NetB: IBackend + LayerOps<f32>> : ISolver<SolverB, NetB> {
@@ -58,21 +58,21 @@ trait SGDSolver<SolverB: IBackend + SolverOps<f32>, NetB: IBackend + LayerOps<f3
     /// [3]: https://en.wikipedia.org/wiki/Recurrent_neural_network
     /// [4]: https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm
     #[allow(unused_must_use)]
-    fn clip_gradients<B: IBackend + LayerOps<f32>>(&self, config: &SolverConfig, net: &mut Network<B>) {
+    fn clip_gradients<B: IBackend + LayerOps<f32> + 'static>(&self, config: &SolverConfig, net: &mut Layer<B>) {
         // skip clipping gradients if SolverConfig.clip_gradients is set to None
         if let Some(clip_threshold) = config.clip_gradients {
             let native = native_backend();
 
-            let net_gradients = net.learnable_weight_gradients();
+            let net_gradients = net.learnable_weights_gradients();
             let mut sumsq_diff = 0f32;
             let backend = self.backend();
-            for net_gradient in net_gradients {
+            for net_gradient in net_gradients.clone() {
                 let gradient = net_gradient.read().unwrap();
-                let mut result = SharedTensor::<f32>::new(backend.device(), &1).unwrap();
+                let mut result = SharedTensor::<f32>::new(IBackend::device(backend), &1).unwrap();
                 // gradient.sumsq_diff(self.backend(), &mut result);
                 self.backend().dot_plain(&gradient, &gradient, &mut result);
 
-                let mut result = SharedTensor::<f32>::new(backend.device(), &1).unwrap();
+                let mut result = SharedTensor::<f32>::new(IBackend::device(backend), &1).unwrap();
                 match result.add_device(native.device()) { _ => result.sync(native.device()).unwrap() }
                 if let &MemoryType::Native(ref sumsq_result) = result.get(native.device()).unwrap() {
                     let sumsq_diff_slice = sumsq_result.as_slice::<f32>();
@@ -124,7 +124,8 @@ trait SGDSolver<SolverB: IBackend + SolverOps<f32>, NetB: IBackend + LayerOps<f3
             } else {
                 panic!();
             }
-            self.backend().scal_plain(&scale_factor_shared, &mut gradient).unwrap();
+            // self.backend().scal_plain(&scale_factor_shared, &mut gradient).unwrap();
+            self.backend().scal(&mut scale_factor_shared, &mut gradient).unwrap();
         }
     }
 

@@ -6,7 +6,6 @@ mod layer_spec {
     use std::rc::Rc;
     use co::prelude::*;
     use leaf::layer::*;
-    use leaf::layers::*;
 
     fn new_layer_config() -> LayerConfig {
         LayerConfig::new("foo", LayerType::Sigmoid)
@@ -59,7 +58,7 @@ mod layer_spec {
             model.add_layer(LayerConfig::new("sigmoid", LayerType::Sigmoid));
             model.add_layer(LayerConfig::new("linear2", LinearConfig { output_size: 10 }));
 
-            let network = Layer::from_config(cuda_backend(), &LayerConfig::new("model", LayerType::Sequential(model)));
+            let _ = Layer::from_config(cuda_backend(), &LayerConfig::new("model", LayerType::Sequential(model)));
         }
 
         #[test]

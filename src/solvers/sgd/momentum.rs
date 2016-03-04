@@ -12,11 +12,9 @@
 //! since if you keep adjusting the gradients
 //! into the same direction you will reach the optimum faster.
 //! It also makes solving more stable.
-use co::backend::*;
-use co::tensor::*;
-use co::memory::MemoryType;
-// use shared_memory::*;
-use network::Network;
+use co::prelude::*;
+use coblas::plugin::Copy;
+use layer::*;
 use solver::*;
 use solvers::SGDSolver;
 use std::rc::Rc;
@@ -50,19 +48,9 @@ impl<SolverB: IBackend + SolverOps<f32>> Momentum<SolverB> {
         }
     }
 
-    /// Initialize the SGD Momentum solver, allocating memory for its history.
-    fn init<B: IBackend + LayerOps<f32>>(&mut self, net: &Network<B>) {
-        self.history = Vec::with_capacity(net.learnable_weight_gradients().len());
-
-        for weight_gradient in net.learnable_weight_gradients() {
-            let shape = weight_gradient.read().unwrap().desc().clone();
-            let history_tensor = Arc::new(RwLock::new(SharedTensor::new(self.backend.device(), &shape).unwrap()));
-            self.history.push(history_tensor);
-        }
-    }
 }
 
-impl<B: IBackend + SolverOps<f32>, NetB: IBackend + LayerOps<f32>> SGDSolver<B, NetB> for Momentum<B> {
+impl<B: IBackend + SolverOps<f32>, NetB: IBackend + LayerOps<f32> + 'static> SGDSolver<B, NetB> for Momentum<B> {
     fn compute_update_value(&mut self,
                             config: &SolverConfig,
                             weight_gradient: &ArcLock<SharedTensor<f32>>,
@@ -73,31 +61,25 @@ impl<B: IBackend + SolverOps<f32>, NetB: IBackend + LayerOps<f32>> SGDSolver<B, 
         let local_momentum = config.momentum;
         let local_lr = global_lr * blob_lr;
 
-        let mut lr_shared = SharedTensor::<f32>::new(self.backend.device(), &1).unwrap();
-        if let &mut MemoryType::Native(ref mut lr) = lr_shared.get_mut(self.backend.device()).unwrap() {
-            let lr_slice = lr.as_mut_slice::<f32>();
-            lr_slice[0] = local_lr;
-        } else {
-            panic!();
-        }
+        let native_backend = native_backend();
+        let backend = ISolver::<B, NetB>::backend(self);
+        let device = IBackend::device(backend);
 
-        let mut momentum_shared = SharedTensor::<f32>::new(self.backend.device(), &1).unwrap();
-        if let &mut MemoryType::Native(ref mut momentum) = momentum_shared.get_mut(self.backend.device()).unwrap() {
-            let momentum_slice = momentum.as_mut_slice::<f32>();
-            momentum_slice[0] = local_momentum;
-        } else {
-            panic!();
-        }
+        let lr_shared = native_scalar(local_lr);
+        let momentum_shared = native_scalar(local_momentum);
 
-        // Compute the update to history, then copy it to the parameter diff.
-        let _ = Axpby::<f32>::axpby_plain(ISolver::<B, NetB>::backend(self),
+        let _ = weight_gradient.write().unwrap().add_device(native_backend.device());
+        weight_gradient.write().unwrap().sync(native_backend.device()).unwrap();
+        let _ = history_blob.write().unwrap().add_device(native_backend.device());
+        history_blob.write().unwrap().sync(native_backend.device()).unwrap();
+        Axpby::<f32>::axpby_plain(&native_backend,
                                                &lr_shared,
                                                &weight_gradient.read().unwrap(),
                                                &momentum_shared,
-                                               &mut history_blob.write().unwrap());
+                                               &mut history_blob.write().unwrap()).unwrap();
 
-        let _ = ISolver::<B, NetB>::backend(self).copy_plain(
-            &history_blob.read().unwrap(), &mut weight_gradient.write().unwrap());
+        native_backend.copy_plain(
+            &history_blob.read().unwrap(), &mut weight_gradient.write().unwrap()).unwrap();
     }
 }
 

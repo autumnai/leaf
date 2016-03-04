@@ -1,6 +1,6 @@
 //! Provides the generics and interfaces for the specific [Layers][layers].
 //! [layers]: ../layers/index.html
-use co::{IBackend, ITensorDesc, SharedTensor};
+use co::prelude::*;
 use layers::*;
 use weight::WeightConfig;
 use util::{ArcLock, native_backend, LayerOps};
@@ -610,13 +610,12 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
     /// [3]: ../solver/enum.LRPolicy.html
     pub fn update_weights<SolverB: IBackend + ::util::SolverOps<f32>>(&mut self, backend: &SolverB) {
         let mut shared_a = ::util::native_scalar(-1f32);
-        let _ = shared_a.add_device(backend.device());
-        shared_a.sync(backend.device()).unwrap();
+        let _ = shared_a.add_device(IBackend::device(backend));
+        shared_a.sync(IBackend::device(backend)).unwrap();
         for (weight_gradient, weight_data) in self.learnable_weights_gradients().iter().zip(&mut self.learnable_weights_data()) {
-            weight_gradient.write().unwrap().sync(backend.device()).unwrap();
-            weight_data.write().unwrap().sync(backend.device()).unwrap();
+            weight_gradient.write().unwrap().sync(IBackend::device(backend)).unwrap();
+            weight_data.write().unwrap().sync(IBackend::device(backend)).unwrap();
             backend.axpy_plain(&shared_a, &weight_gradient.read().unwrap(), &mut weight_data.write().unwrap()).unwrap();
-            // weight_blob.write().unwrap().apply_diff(backend) // TODO: solver
         }
     }
 
@@ -689,6 +688,17 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
     pub fn learnable_weights_gradients(&self) -> Vec<ArcLock<SharedTensor<f32>>> {
         if let Some(gradients) = self.worker.learnable_weights_gradients() { gradients }
         else { self.weights_gradient.clone() }
+    }
+
+    /// Returns the learning rate for all the learnable weights in the layer.
+    ///
+    /// If the layer is a container layer it will return all learning rates of the
+    /// layers inside it.
+    pub fn learnable_weights_lr(&self) -> Vec<Option<f32>> {
+        if let Some(lr) = self.worker.learnable_weights_lr() { lr }
+        // else { self.weights_lr.clone() }
+        else {
+            self.learnable_weights_data().iter().map(|_| Some(1f32)).collect::<Vec<_>>() }
     }
 }
 
@@ -1024,6 +1034,14 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
     fn learnable_weights_gradients(&self) -> Option<Vec<ArcLock<SharedTensor<f32>>>> {
         None
     }
+
+    /// Return the learning rates for the learnable weights inside the layer.
+    ///
+    /// This should only be overridden by container layers,
+    /// where the weights are not easily exposable.
+    fn learnable_weights_lr(&self) -> Option<Vec<Option<f32>>> {
+        None
+    }
 }
 
 /// A Layer that can compute the output for a given input.
@@ -1061,7 +1079,7 @@ pub trait ComputeParametersGradient<T, B: IBackend> {
 
 impl<B: IBackend> fmt::Debug for ILayer<B> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({}, {})", "foo", "bar")
+        write!(f, "({})", "ILayer")
     }
 }
 
