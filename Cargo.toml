@@ -20,6 +20,7 @@ collenchyma-nn = { version = "0.3.2", default-features = false }
 
 log = "0.3.2"
 rand = "0.3.0"
+num = "0.1"
 
 clippy = { version = "0.0.41", optional = true }
 

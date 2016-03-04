@@ -124,15 +124,16 @@ extern crate timeit;
 #[macro_use]
 extern crate log;
 extern crate rand;
+extern crate num;
 extern crate collenchyma as co;
 extern crate collenchyma_blas as coblas;
 extern crate collenchyma_nn as conn;
 pub mod layer;
 pub mod layers;
-// #[cfg(feature="cuda")]
-// pub mod solver;
-// #[cfg(feature="cuda")]
-// pub mod solvers;
+#[cfg(feature="cuda")]
+pub mod solver;
+#[cfg(feature="cuda")]
+pub mod solvers;
 pub mod weight;
 
 pub mod util;
