@@ -117,7 +117,7 @@ and extensible as possible. More helpful crates you can use with Leaf:
 
 ## Support / Contact
 
-- With a bit of luck you find us online on the #rust-machine-learing IRC at irc.mozilla.org,
+- With a bit of luck you find us online on the #rust-machine-learning IRC at irc.mozilla.org,
 - but we are always approachable on [Gitter/Leaf][gitter-leaf]
 - For bugs and feature request, you can create a [Github issue][leaf-issue]
 - And for more private matters, send us a mail straight to our inbox developers@autumnai.com.
