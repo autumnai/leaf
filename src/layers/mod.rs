@@ -1,5 +1,4 @@
-//! Provides the fundamental units of computation for the [Network][1].
-//! [1]: ../network/index.html
+//! Provides the fundamental units of computation in a Neural Network.
 //!
 //! These layers provide different type of operations to the data Blobs
 //! that flow through them.

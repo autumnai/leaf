@@ -47,10 +47,6 @@
 //! help future research and production development alike as it combines expressiveness,
 //! performance and usability.
 //!
-//! [layers]: ./layers/index.html
-//! [collenchyma]: https://github.com/autumnai/collenchyma
-//! [solver]: ./solvers/index.html
-//!
 //! ## Philosophy
 //!
 //! We are strong believers in the technology of Machine Learning.
