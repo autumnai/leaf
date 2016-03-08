@@ -1,4 +1,6 @@
-//! Provides the generics and interfaces for the specific [Layers][layers].
+//! Provides the generics and interfaces for the specific Layers.
+//!
+//! See [Layers][layers]
 //! [layers]: ../layers/index.html
 use co::prelude::*;
 use layers::*;
@@ -12,7 +14,7 @@ use std::sync::{Arc, RwLock};
 
 #[derive(Debug)]
 /// The generic Layer
-pub struct Layer<B: IBackend + LayerOps<f32>> {
+pub struct Layer<B: IBackend> {
     /// Identifies the Network
     ///
     /// The name is mainly used for logging purposes.
@@ -79,73 +81,8 @@ pub struct Layer<B: IBackend + LayerOps<f32>> {
     pub blob_names: HashMap<String, (ArcLock<SharedTensor<f32>>, ArcLock<SharedTensor<f32>>)>,
 }
 
-impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
-    /// Creates a new Layer from a [LayerConfig][1].
-    /// [1]: ./struct.LayerConfig.html
-    ///
-    /// Used during [Network][2] initalization.
-    ///
-    /// [2]: ../network/struct.Network.html
-    pub fn from_config(backend: Rc<B>, config: &LayerConfig) -> Layer<B> {
-        let cl = config.clone();
-        let cfg = Box::<LayerConfig>::new(cl);
-        let mut layer = Layer {
-            name: cfg.name.clone(),
-
-            needs_backward: true,
-
-            weights_data: Vec::new(),
-            weights_gradient: Vec::new(),
-            learnable_weights: Vec::new(),
-            weight_propagate_down: Vec::new(),
-            weights_lr: Vec::new(),
-            weights_weight_decay: Vec::new(),
-            weights_display_names: Vec::new(),
-
-            input_blobs_data: Vec::new(),
-            input_blobs_gradient: Vec::new(),
-            input_blob_names: Vec::new(),
-            input_need_backwards: Vec::new(),
-
-            output_blobs_data: Vec::new(),
-            output_blobs_gradient: Vec::new(),
-            output_blob_names: Vec::new(),
-            loss: vec![1f32, 1f32, 1f32],
-
-            blob_names: HashMap::new(),
-
-            backend: backend.clone(),
-
-            worker: Layer::<B>::worker_from_config(backend, &cfg),
-            config: cfg,
-        };
-        layer.expose_inputs();
-        layer.expose_outputs();
-
-        layer
-    }
-
-    /// Helper for [from_config] to match a [LayerType][2] to its [implementation][3].
-    /// [1]: #method.from_config
-    /// [2]: ./enum.LayerType.html
-    /// [3]: ../layers/index.html
-    fn worker_from_config(backend: Rc<B>, config: &LayerConfig) -> Box<ILayer<B>> {
-        match config.layer_type.clone() {
-            LayerType::Convolution(layer_config) => Box::new(Convolution::from_config(&layer_config)),
-            LayerType::Linear(layer_config) => Box::new(Linear::from_config(&layer_config)),
-            LayerType::LogSoftmax => Box::new(LogSoftmax::default()),
-            LayerType::Pooling(layer_config) => Box::new(Pooling::from_config(&layer_config)),
-            LayerType::Sequential(layer_config) => Box::new(Sequential::from_config(backend, &layer_config)),
-            LayerType::Softmax => Box::new(Softmax::default()),
-            LayerType::ReLU => Box::new(ReLU),
-            LayerType::Sigmoid => Box::new(Sigmoid),
-            LayerType::NegativeLogLikelihood(layer_config) => Box::new(NegativeLogLikelihood::from_config(&layer_config)),
-            LayerType::Reshape(layer_config) => Box::new(Reshape::from_config(&layer_config)),
-        }
-    }
-
-    /// Connect the layer to the other layers in a [Network][1] and set up Blobs.
-    /// [1]: ../network/struct.Network.html
+impl<B: IBackend> Layer<B> {
+    /// Connect the layer to another layers and set up tensors for intermediate results and weights.
     ///
     /// Connects to the outputs provided by other layers via the `registry`.
     /// Adds output blobs to the layer and then adds them to the `registry`, so the next
@@ -154,7 +91,7 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
     ///
     /// [2]: ./trait.ILayer.html
     ///
-    /// Called during [Network][1] initialization.
+    /// Called during initialization of containter layers.
     pub fn connect(
         &mut self,
         registry: &mut HashMap<String, (ArcLock<SharedTensor<f32>>, ArcLock<SharedTensor<f32>>)>,
@@ -702,24 +639,81 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
     }
 }
 
-/// A Layer in a [Neural Network][1] that can handle forward and backward of a computation step.
-/// [1]: ../network/index.html
+impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
+    /// Creates a new Layer from a [LayerConfig][1].
+    /// [1]: ./struct.LayerConfig.html
+    pub fn from_config(backend: Rc<B>, config: &LayerConfig) -> Layer<B> {
+        let cl = config.clone();
+        let cfg = Box::<LayerConfig>::new(cl);
+        let mut layer = Layer {
+            name: cfg.name.clone(),
+
+            needs_backward: true,
+
+            weights_data: Vec::new(),
+            weights_gradient: Vec::new(),
+            learnable_weights: Vec::new(),
+            weight_propagate_down: Vec::new(),
+            weights_lr: Vec::new(),
+            weights_weight_decay: Vec::new(),
+            weights_display_names: Vec::new(),
+
+            input_blobs_data: Vec::new(),
+            input_blobs_gradient: Vec::new(),
+            input_blob_names: Vec::new(),
+            input_need_backwards: Vec::new(),
+
+            output_blobs_data: Vec::new(),
+            output_blobs_gradient: Vec::new(),
+            output_blob_names: Vec::new(),
+            loss: vec![1f32, 1f32, 1f32],
+
+            blob_names: HashMap::new(),
+
+            backend: backend.clone(),
+
+            worker: Layer::<B>::worker_from_config(backend, &cfg),
+            config: cfg,
+        };
+        layer.expose_inputs();
+        layer.expose_outputs();
+
+        layer
+    }
+
+    /// Helper for [from_config] to match a [LayerType][2] to its [implementation][3].
+    /// [1]: #method.from_config
+    /// [2]: ./enum.LayerType.html
+    /// [3]: ../layers/index.html
+    fn worker_from_config(backend: Rc<B>, config: &LayerConfig) -> Box<ILayer<B>> {
+        match config.layer_type.clone() {
+            LayerType::Convolution(layer_config) => Box::new(Convolution::from_config(&layer_config)),
+            LayerType::Linear(layer_config) => Box::new(Linear::from_config(&layer_config)),
+            LayerType::LogSoftmax => Box::new(LogSoftmax::default()),
+            LayerType::Pooling(layer_config) => Box::new(Pooling::from_config(&layer_config)),
+            LayerType::Sequential(layer_config) => Box::new(Sequential::from_config(backend, &layer_config)),
+            LayerType::Softmax => Box::new(Softmax::default()),
+            LayerType::ReLU => Box::new(ReLU),
+            LayerType::Sigmoid => Box::new(Sigmoid),
+            LayerType::NegativeLogLikelihood(layer_config) => Box::new(NegativeLogLikelihood::from_config(&layer_config)),
+            LayerType::Reshape(layer_config) => Box::new(Reshape::from_config(&layer_config)),
+        }
+    }
+}
+
+/// A Layer in a Neural Network that can handle forward and backward of a computation step.
 pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32, B> + ComputeParametersGradient<f32, B> {
     /// Initialize the layer for computation.
     ///
     /// Allows for layer-specific one time setup, e.g. precomputing constant values.
-    ///
-    /// Is called during [Network][1] initalization.
-    /// [1]: ../network/type.Network.html
     fn init(&mut self, backend: Rc<B>) {}
 
     /// Adjust to shapes of the output blobs to fit the shapes of the input blobs.
     ///
-    /// Is called during [Network][1] initalization, after [init][2].
+    /// Should be called during Layer initalization, after [init][2].
     ///
     /// **Caution**: `input_data` should only be reshaped, but not resized.
     ///
-    /// [1]: ../network/type.Network.html
     /// [2]: #method.init
     fn reshape(&mut self,
                backend: Rc<B>,
@@ -747,12 +741,10 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
     /// Compute the [feedforward][1] layer output using the provided Backend.
     /// [1]: https://en.wikipedia.org/wiki/Feedforward_neural_network
     ///
-    /// Aquires read locks for the input blobs ([ReadBlob][2])
-    /// and write locks for the output blobs ([WriteBlob][3]) to ensure sequential computation,
+    /// Aquires read locks for the input tensors
+    /// and write locks for the output tensors to ensure sequential computation,
     /// and then passes them to computation method specific function ([forward_cpu][4]).
     ///
-    /// [2]: ./type.ReadBlob.html
-    /// [3]: ./type.WriteBlob.html
     /// [3]: #method.forward_cpu
     #[cfg_attr(lint, allow(map_clone))]
     fn forward(&self,

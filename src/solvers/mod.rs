@@ -1,5 +1,4 @@
-//! Provides the trainers for the [Network][network].
-//! [network]: ../network/index.html
+//! Provides the trainers for the Layers.
 //!
 //! The optimal state of a neural network would be the one where
 //! for any given input to the network, it would produce an output perfectly
@@ -22,6 +21,7 @@
 //! - How to execute the backpropagation to compute the gradient.
 //! - How to comute the weight update from the gradient.
 //!
+//! [layer]: ../layer/index.html
 //! [loss]: ../layers/loss/index.html
 //! [weight]: https://en.wikipedia.org/wiki/Synaptic_weight
 //! [minimum]: http://mathworld.wolfram.com/GlobalMinimum.html

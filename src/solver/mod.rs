@@ -1,4 +1,6 @@
-//! Provides the generics and interfaces for the specific [Solvers][solvers].
+//! Provides the generics and interfaces for the specific Solvers.
+//!
+//! See [Solvers][solvers]
 //! [solvers]: ../solvers/index.html
 
 pub mod confusion_matrix;
@@ -14,8 +16,8 @@ use solvers::*;
 use util::{ArcLock, LayerOps, SolverOps};
 
 #[derive(Debug)]
-/// Solver that optimizes a [Network][1].
-/// [1]: ../network/struct.Network.html
+/// Solver that optimizes a [Layer][1] with a given objective.
+/// [1]: ../layer/index.html
 pub struct Solver<SolverB: IBackend + SolverOps<f32>, B: IBackend + LayerOps<f32>> {
     net: Layer<B>,
     objective: Layer<SolverB>,

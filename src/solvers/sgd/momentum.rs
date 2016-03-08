@@ -37,9 +37,8 @@ impl<SolverB: IBackend + SolverOps<f32>> Momentum<SolverB> {
     /// Create a new SGD Momentum solver.
     ///
     /// Should not be called directly.
-    /// Use [Network::from_config][1] or [Solver::from_config][2] instead.
+    /// Use [Solver::from_config][2] instead.
     ///
-    /// [1]: ../../../network/struct.Network.html#method.from_config
     /// [2]: ../../../solver/struct.Solver.html#method.from_config
     pub fn new(backend: Rc<SolverB>) -> Momentum<SolverB> {
         Momentum {

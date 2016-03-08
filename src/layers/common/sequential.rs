@@ -323,8 +323,9 @@ impl<B: IBackend + LayerOps<f32> + 'static> ComputeParametersGradient<f32, B> fo
 #[allow(missing_copy_implementations)]
 /// Specifies configuration parameters for a Sequential Layer.
 pub struct SequentialConfig {
-    /// Defines the layers of the container via [LayerConfig][1]s.
-    /// [1]: ../layer/struct.LayerConfig.html
+    /// Defines the layers of the container via [LayerConfig][layer_config]s.
+    ///
+    /// [layer_config]: ../../../layer/struct.LayerConfig.html
     pub layers: Vec<LayerConfig>,
 
     /// Defines the names and shapes of the input tensors.
@@ -332,7 +333,7 @@ pub struct SequentialConfig {
     /// The inputs are identified by name so they can be referenced as input tensors
     /// in a [LayerConfig][layer_config].
     ///
-    /// [layer_config]: ../layer/struct.LayerConfig.html
+    /// [layer_config]: ../../../layer/struct.LayerConfig.html
     pub inputs: Vec<(String, Vec<usize>)>,
 
     /// Defines if the container will force every layer to do [backpropagation][1].

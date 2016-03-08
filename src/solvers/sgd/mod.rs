@@ -1,6 +1,5 @@
-//! Provides [ISolver][1] implementations based on [Stochastic Gradient
+//! Provides ISolver implementations based on [Stochastic Gradient
 //! Descent][2].
-//! [1]: ../solver/trait.ISolver.html
 //! [2]: https://en.wikipedia.org/wiki/Stochastic_gradient_descent
 //!
 //! One of the steps during [backpropagation][backprop] is determining the
