@@ -52,7 +52,7 @@ For more info refer to,
 
 ## Getting Started
 
-If you are new to Rust you can it install it as detailed [here][rust_download],
+If you are new to Rust you can install it as detailed [here][rust_download],
 and we recommend taking a look at the [official Getting Started Guide][rust_getting_started].
 
 If you're using Cargo, just add Leaf to your `Cargo.toml`:
