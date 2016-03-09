@@ -8,7 +8,7 @@ Caffe, Rust and numerous research papers and brings modularity, performance and
 portability to deep learning. Leaf is lean and tries to introduce minimal
 technical debt to your stack.
 
-Leaf is a few months old, but thanks to its architecture and Rust it's already one of
+Leaf is a few months old, but thanks to its architecture and Rust already one of
 the fastest Machine Intelligence Frameworks in the world.
 
 <div align="center">
@@ -17,7 +17,7 @@ the fastest Machine Intelligence Frameworks in the world.
 
 > See more Deep Neural Networks benchmarks on [Deep Learning Benchmarks][deep-learning-benchmarks-website].
 
-Leaf is portable. Run it on CPUs, GPUs, FPGAs, machines with an OS, or
+Leaf is portable. Run it on CPUs, GPUs, and FPGAs, on machines with an OS, or on
 machines without one. Run it with OpenCL or CUDA. Credit goes to
 [Collenchyma][collenchyma] and Rust.
 
@@ -55,14 +55,14 @@ For more info refer to,
 If you are new to Rust you can install it as detailed [here][rust_download],
 and we recommend taking a look at the [official Getting Started Guide][rust_getting_started].
 
-If you're using Cargo, just add Leaf to your `Cargo.toml`:
+If you are using Cargo, just add Leaf to your `Cargo.toml`:
 
 ```toml
 [dependencies]
 leaf = "0.2.0"
 ```
 
-If you're using [Cargo Edit][cargo-edit], you can
+If you are using [Cargo Edit][cargo-edit], you can
 call:
 
 ```bash
@@ -72,7 +72,7 @@ cargo add leaf
 [rust_getting_started]: https://doc.rust-lang.org/book/getting-started.html
 [cargo-edit]: https://github.com/killercup/cargo-edit
 
-If you're on a machine that doesn't have support for CUDA or OpenCL you
+If you are on a machine that doesn't have support for CUDA or OpenCL you
 can selectively enable them like this in your `Cargo.toml`:
 
 ```toml
