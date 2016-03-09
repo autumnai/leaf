@@ -113,7 +113,10 @@ fn get_time_scale<'a>(sec: f64) -> (f64, &'a str) {
 }
 
 #[cfg(not(feature = "cuda"))]
-fn bench_alexnet() {}
+fn bench_alexnet() {
+    println!("Examples run only with CUDA support at the moment, because of missing native convolution implementation for the Collenchyma NN Plugin.");
+    println!("Try compiling with the \"cuda\" feature flag.");
+}
 #[cfg(feature = "cuda")]
 fn bench_alexnet() {
     let mut cfg = SequentialConfig::default();
@@ -194,6 +197,7 @@ fn bench_alexnet() {
 #[cfg(not(feature = "cuda"))]
 fn bench_overfeat() {
     println!("Examples run only with CUDA support at the moment, because of missing native convolution implementation for the Collenchyma NN Plugin.");
+    println!("Try compiling with the \"cuda\" feature flag.");
 }
 #[cfg(feature = "cuda")]
 fn bench_overfeat() {
@@ -275,6 +279,7 @@ fn bench_overfeat() {
 #[cfg(not(feature = "cuda"))]
 fn bench_vgg_a() {
     println!("Examples run only with CUDA support at the moment, because of missing native convolution implementation for the Collenchyma NN Plugin.");
+    println!("Try compiling with the \"cuda\" feature flag.");
 }
 #[cfg(feature = "cuda")]
 fn bench_vgg_a() {

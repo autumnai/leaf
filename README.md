@@ -99,6 +99,7 @@ networks (e.g. Alexnet, Overfeat, VGG). To run them on your machine, just follow
 the install guide, clone this repoistory and then run
 
 ```bash
+# The examples currently require CUDA support.
 cargo run --release --example benchmarks
 ```
 
@@ -132,8 +133,7 @@ Want to contribute? Awesome! We have [instructions to help you get started][cont
 Leaf has a near real-time collaboration culture that happens here on Github and
 on the [Leaf Gitter Channel][gitter-leaf].
 
-Unless you explicitly state otherwise, any contribution intentionally
-submitted for inclusion in the work by you, as defined in the Apache-2.0
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0
 license, shall be dual licensed as below, without any additional terms or
 conditions.
 
