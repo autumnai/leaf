@@ -87,7 +87,7 @@ impl<B: IBackend> Layer<B> {
     /// Connects to the outputs provided by other layers via the `registry`.
     /// Adds output blobs to the layer and then adds them to the `registry`, so the next
     /// layers can connect them as their inputs.
-    /// In the end it intializes the underlying [layer implementation][2].
+    /// In the end it initializes the underlying [layer implementation][2].
     ///
     /// [2]: ./trait.ILayer.html
     ///
