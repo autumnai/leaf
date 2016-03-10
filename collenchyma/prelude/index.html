@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `prelude` mod in crate `collenchyma`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, prelude">
+
+    <title>collenchyma::prelude - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>collenchyma</a></p><script>window.sidebarCurrent = {name: 'prelude', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>collenchyma</a>::<wbr><a class='mod' href=''>prelude</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-971' class='srclink' href='../../src/collenchyma/lib.rs.html#204-217' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>A module meant to be glob imported when using Collenchyma.</p>
+
+<p>For instance:</p>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>collenchyma</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;</pre>
+
+<p>This module contains several important traits that provide many
+of the convenience methods in Collenchyma, as well as most important types.
+Another type that is often needed but is likely to cause a name collision
+when imported is <code>collenchyma::Error</code>.</p>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use <a class='mod' href='../../collenchyma/backend/index.html' title='collenchyma::backend'>backend</a>::*;</code></td></tr><tr><td><code>pub use device::{<a class='trait' href='../../collenchyma/device/trait.IDevice.html' title='collenchyma::device::IDevice'>IDevice</a>, <a class='enum' href='../../collenchyma/device/enum.DeviceType.html' title='collenchyma::device::DeviceType'>DeviceType</a>};</code></td></tr><tr><td><code>pub use hardware::{<a class='trait' href='../../collenchyma/hardware/trait.IHardware.html' title='collenchyma::hardware::IHardware'>IHardware</a>, <a class='enum' href='../../collenchyma/hardware/enum.HardwareType.html' title='collenchyma::hardware::HardwareType'>HardwareType</a>};</code></td></tr><tr><td><code>pub use framework::<a class='trait' href='../../collenchyma/framework/trait.IFramework.html' title='collenchyma::framework::IFramework'>IFramework</a>;</code></td></tr><tr><td><code>pub use memory::{<a class='trait' href='../../collenchyma/memory/trait.IMemory.html' title='collenchyma::memory::IMemory'>IMemory</a>, <a class='enum' href='../../collenchyma/memory/enum.MemoryType.html' title='collenchyma::memory::MemoryType'>MemoryType</a>};</code></td></tr><tr><td><code>pub use tensor::{<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>, <a class='type' href='../../collenchyma/tensor/type.TensorDesc.html' title='collenchyma::tensor::TensorDesc'>TensorDesc</a>, <a class='trait' href='../../collenchyma/tensor/trait.ITensorDesc.html' title='collenchyma::tensor::ITensorDesc'>ITensorDesc</a>, <a class='trait' href='../../collenchyma/tensor/trait.IntoTensorDesc.html' title='collenchyma::tensor::IntoTensorDesc'>IntoTensorDesc</a>};</code></td></tr><tr><td><code>pub use frameworks::<a class='struct' href='../../collenchyma/frameworks/native/struct.Native.html' title='collenchyma::frameworks::native::Native'>Native</a>;</code></td></tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "collenchyma";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

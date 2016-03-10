@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `linear` mod in crate `leaf`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, linear">
+
+    <title>leaf::layers::common::linear - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../../index.html'>leaf</a>::<wbr><a href='../../index.html'>layers</a>::<wbr><a href='../index.html'>common</a></p><script>window.sidebarCurrent = {name: 'linear', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../../index.html'>leaf</a>::<wbr><a href='../../index.html'>layers</a>::<wbr><a href='../index.html'>common</a>::<wbr><a class='mod' href=''>linear</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-1045' class='srclink' href='../../../../src/leaf/layers/common/linear.rs.html#1-191' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Applies a linear transformation to the input data <code>y = a * x + b</code></p>
+
+<p>The variables are:</p>
+
+<ul>
+<li><code>y</code>: output value</li>
+<li><code>a</code>: weight (a trainable weight in a neural network)</li>
+<li><code>x</code>: input value</li>
+<li><code>b</code>: bias (not implemented yet)</li>
+</ul>
+
+<h2 id='input-data' class='section-header'><a href='#input-data'>Input Data</a></h2>
+<p>The input can either have one or two dimensions:</p>
+
+<ul>
+<li>If the input has one dimension the transformation will just be applied to the input data.</li>
+<li>If the input has two dimensions <strong>the first dimension is treated as batch size</strong> (<code>N</code>)
+and the transformation will be applied to every vector in the second dimension, using the
+same weights and biases.</li>
+</ul>
+
+<p>In the context of convolutional neural networks this layer is also
+called a &quot;fully-connected layer&quot; if it is used at the end of the network.</p>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.Linear.html'
+                               title='leaf::layers::common::linear::Linear'>Linear</a></td>
+                        <td class='docblock short'>
+                             <p>Linear Layer</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.LinearConfig.html'
+                               title='leaf::layers::common::linear::LinearConfig'>LinearConfig</a></td>
+                        <td class='docblock short'>
+                             <p>Specifies configuration parameters for a Linear Layer.</p>
+
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../../";
+        window.currentCrate = "leaf";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../jquery.js"></script>
+    <script src="../../../../main.js"></script>
+    
+    <script defer src="../../../../search-index.js"></script>
+</body>
+</html>

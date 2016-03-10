@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `layers` mod in crate `leaf`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, layers">
+
+    <title>leaf::layers - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>leaf</a></p><script>window.sidebarCurrent = {name: 'layers', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>leaf</a>::<wbr><a class='mod' href=''>layers</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-724' class='srclink' href='../../src/leaf/layers/mod.rs.html#1-79' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Provides the fundamental units of computation in a Neural Network.</p>
+
+<p>These layers provide different type of operations to the data Blobs
+that flow through them.
+The operations provided by the layers can be
+roughly grouped into four categories:</p>
+
+<ul>
+<li><p><a href="./activation/index.html"><strong>Activation</strong></a></br>
+Activation Layers provide element-wise operations and produce one top Blob
+of the same size as the bottom Blob.
+It can be seen as a synonym to nonlinear <a href="https://en.wikipedia.org/wiki/Activation_function">Activation Functions</a>.</p></li>
+<li><p><a href="./common/index.html"><strong>Common</strong></a></br>
+Common Layers can differ in their connectivity and behavior and are
+typically all network layer
+types which are not covered by activation or loss layers.
+Examples would be fully connected
+layers, covolutional layers, pooling layers, etc.</p></li>
+<li><p><a href="./loss/index.html"><strong>Loss</strong></a></br>
+Loss Layers compare an output to a target value and assign cost to
+minimize. Loss Layers are often the last layer in a [Network][1].</p></li>
+<li><p><a href="./utility/index.html"><strong>Utility</strong></a></br>
+Utility Layers provide all kind of helpful functionality, which might not
+be directly related
+to machine learning and neural nets. This could be operations for
+normalizing,
+restructuring or transforming information, log and debug behavior or data
+access.
+Utility Layers follow the general behavior of a layer, like the other types
+do.</p></li>
+</ul>
+
+<p>For more information about how these layers work together, see the
+documentation for the general <a href="../layer/index.html">Layer module</a>.</p>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use self::activation::{<a class='struct' href='../../leaf/layers/activation/relu/struct.ReLU.html' title='leaf::layers::activation::relu::ReLU'>ReLU</a>, <a class='struct' href='../../leaf/layers/activation/sigmoid/struct.Sigmoid.html' title='leaf::layers::activation::sigmoid::Sigmoid'>Sigmoid</a>};</code></td></tr><tr><td><code>pub use self::common::{<a class='struct' href='../../leaf/layers/common/convolution/struct.Convolution.html' title='leaf::layers::common::convolution::Convolution'>Convolution</a>, <a class='struct' href='../../leaf/layers/common/convolution/struct.ConvolutionConfig.html' title='leaf::layers::common::convolution::ConvolutionConfig'>ConvolutionConfig</a>, <a class='struct' href='../../leaf/layers/common/linear/struct.Linear.html' title='leaf::layers::common::linear::Linear'>Linear</a>, <a class='struct' href='../../leaf/layers/common/linear/struct.LinearConfig.html' title='leaf::layers::common::linear::LinearConfig'>LinearConfig</a>, <a class='struct' href='../../leaf/layers/common/log_softmax/struct.LogSoftmax.html' title='leaf::layers::common::log_softmax::LogSoftmax'>LogSoftmax</a>, <a class='struct' href='../../leaf/layers/common/pooling/struct.Pooling.html' title='leaf::layers::common::pooling::Pooling'>Pooling</a>, <a class='struct' href='../../leaf/layers/common/pooling/struct.PoolingConfig.html' title='leaf::layers::common::pooling::PoolingConfig'>PoolingConfig</a>, <a class='enum' href='../../leaf/layers/common/pooling/enum.PoolingMode.html' title='leaf::layers::common::pooling::PoolingMode'>PoolingMode</a>, <a class='struct' href='../../leaf/layers/common/sequential/struct.Sequential.html' title='leaf::layers::common::sequential::Sequential'>Sequential</a>, <a class='struct' href='../../leaf/layers/common/sequential/struct.SequentialConfig.html' title='leaf::layers::common::sequential::SequentialConfig'>SequentialConfig</a>, <a class='struct' href='../../leaf/layers/common/softmax/struct.Softmax.html' title='leaf::layers::common::softmax::Softmax'>Softmax</a>};</code></td></tr><tr><td><code>pub use self::loss::{<a class='struct' href='../../leaf/layers/loss/negative_log_likelihood/struct.NegativeLogLikelihood.html' title='leaf::layers::loss::negative_log_likelihood::NegativeLogLikelihood'>NegativeLogLikelihood</a>, <a class='struct' href='../../leaf/layers/loss/negative_log_likelihood/struct.NegativeLogLikelihoodConfig.html' title='leaf::layers::loss::negative_log_likelihood::NegativeLogLikelihoodConfig'>NegativeLogLikelihoodConfig</a>};</code></td></tr><tr><td><code>pub use self::utility::{<a class='struct' href='../../leaf/layers/utility/flatten/struct.Flatten.html' title='leaf::layers::utility::flatten::Flatten'>Flatten</a>, <a class='struct' href='../../leaf/layers/utility/reshape/struct.Reshape.html' title='leaf::layers::utility::reshape::Reshape'>Reshape</a>, <a class='struct' href='../../leaf/layers/utility/reshape/struct.ReshapeConfig.html' title='leaf::layers::utility::reshape::ReshapeConfig'>ReshapeConfig</a>};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='activation/index.html'
+                               title='leaf::layers::activation'>activation</a></td>
+                        <td class='docblock short'>
+                             <p>Provides nonlinear activation methods.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='common/index.html'
+                               title='leaf::layers::common'>common</a></td>
+                        <td class='docblock short'>
+                             <p>Provides common neural network layers.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='loss/index.html'
+                               title='leaf::layers::loss'>loss</a></td>
+                        <td class='docblock short'>
+                             <p>Provides methods to calculate the loss (cost) of some output.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='utility/index.html'
+                               title='leaf::layers::utility'>utility</a></td>
+                        <td class='docblock short'>
+                             <p>Provides various helpful layers, which might be not directly related to
+neural networks in general.</p>
+
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "leaf";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

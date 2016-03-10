@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["cblas_dasum",""],["cblas_daxpy",""],["cblas_dcopy",""],["cblas_ddot",""],["cblas_dnrm2",""],["cblas_drot",""],["cblas_drotg",""],["cblas_drotm",""],["cblas_drotmg",""],["cblas_dscal",""],["cblas_dsdot",""],["cblas_dswap",""],["cblas_dzasum",""],["cblas_dznrm2",""]]});

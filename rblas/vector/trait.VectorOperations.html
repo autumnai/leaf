@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `VectorOperations` trait in crate `rblas`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, VectorOperations">
+
+    <title>rblas::vector::VectorOperations - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>rblas</a>::<wbr><a href='index.html'>vector</a></p><script>window.sidebarCurrent = {name: 'VectorOperations', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>rblas</a>::<wbr><a href='index.html'>vector</a>::<wbr><a class='trait' href=''>VectorOperations</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-855' class='srclink' href='../../src/rblas/vector/mod.rs.html#41-75' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait VectorOperations&lt;T&gt;: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a> + <a class='trait' href='../../rblas/vector/trait.Vector.html' title='rblas::vector::Vector'>Vector</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../rblas/vector/ops/trait.Copy.html' title='rblas::vector::ops::Copy'>Copy</a> + <a class='trait' href='../../rblas/vector/ops/trait.Axpy.html' title='rblas::vector::ops::Axpy'>Axpy</a> + <a class='trait' href='../../rblas/vector/ops/trait.Scal.html' title='rblas::vector::ops::Scal'>Scal</a> + <a class='trait' href='../../rblas/vector/ops/trait.Dot.html' title='rblas::vector::ops::Dot'>Dot</a> + <a class='trait' href='../../rblas/vector/ops/trait.Nrm2.html' title='rblas::vector::ops::Nrm2'>Nrm2</a> + <a class='trait' href='../../rblas/vector/ops/trait.Asum.html' title='rblas::vector::ops::Asum'>Asum</a> + <a class='trait' href='../../rblas/vector/ops/trait.Iamax.html' title='rblas::vector::ops::Iamax'>Iamax</a></span> {
+    fn <a href='#method.update' class='fnname'>update</a>(&amp;mut self, alpha: &amp;T, x: &amp;<a class='trait' href='../../rblas/vector/trait.Vector.html' title='rblas::vector::Vector'>Vector</a>&lt;T&gt;) -&gt; &amp;mut Self { ... }
+    fn <a href='#method.scale' class='fnname'>scale</a>(&amp;mut self, alpha: &amp;T) -&gt; &amp;mut Self { ... }
+    fn <a href='#method.dot' class='fnname'>dot</a>(&amp;self, x: &amp;<a class='trait' href='../../rblas/vector/trait.Vector.html' title='rblas::vector::Vector'>Vector</a>&lt;T&gt;) -&gt; T { ... }
+    fn <a href='#method.abs_sum' class='fnname'>abs_sum</a>(&amp;self) -&gt; T { ... }
+    fn <a href='#method.norm' class='fnname'>norm</a>(&amp;self) -&gt; T { ... }
+    fn <a href='#method.max_index' class='fnname'>max_index</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a> { ... }
+}</pre>
+            <h2 id='provided-methods'>Provided Methods</h2>
+            <div class='methods'>
+        <h3 id='method.update' class='method stab '><code>fn <a href='#method.update' class='fnname'>update</a>(&amp;mut self, alpha: &amp;T, x: &amp;<a class='trait' href='../../rblas/vector/trait.Vector.html' title='rblas::vector::Vector'>Vector</a>&lt;T&gt;) -&gt; &amp;mut Self</code></h3><h3 id='method.scale' class='method stab '><code>fn <a href='#method.scale' class='fnname'>scale</a>(&amp;mut self, alpha: &amp;T) -&gt; &amp;mut Self</code></h3><h3 id='method.dot' class='method stab '><code>fn <a href='#method.dot' class='fnname'>dot</a>(&amp;self, x: &amp;<a class='trait' href='../../rblas/vector/trait.Vector.html' title='rblas::vector::Vector'>Vector</a>&lt;T&gt;) -&gt; T</code></h3><h3 id='method.abs_sum' class='method stab '><code>fn <a href='#method.abs_sum' class='fnname'>abs_sum</a>(&amp;self) -&gt; T</code></h3><h3 id='method.norm' class='method stab '><code>fn <a href='#method.norm' class='fnname'>norm</a>(&amp;self) -&gt; T</code></h3><h3 id='method.max_index' class='method stab '><code>fn <a href='#method.max_index' class='fnname'>max_index</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h3></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    <li><code>impl <a class='trait' href='../../rblas/vector/trait.VectorOperations.html' title='rblas::vector::VectorOperations'>VectorOperations</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt; for <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;</code></li>
+<li><code>impl <a class='trait' href='../../rblas/vector/trait.VectorOperations.html' title='rblas::vector::VectorOperations'>VectorOperations</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt; for <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;</code></li>
+<li><code>impl <a class='trait' href='../../rblas/vector/trait.VectorOperations.html' title='rblas::vector::VectorOperations'>VectorOperations</a>&lt;<a class='type' href='../../num/complex/type.Complex32.html' title='num::complex::Complex32'>Complex32</a>&gt; for <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='type' href='../../num/complex/type.Complex32.html' title='num::complex::Complex32'>Complex32</a>&gt;</code></li>
+<li><code>impl <a class='trait' href='../../rblas/vector/trait.VectorOperations.html' title='rblas::vector::VectorOperations'>VectorOperations</a>&lt;<a class='type' href='../../num/complex/type.Complex64.html' title='num::complex::Complex64'>Complex64</a>&gt; for <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='type' href='../../num/complex/type.Complex64.html' title='num::complex::Complex64'>Complex64</a>&gt;</code></li>
+</ul><script type="text/javascript" async
+                              src="../../implementors/rblas/vector/trait.VectorOperations.js">
+                      </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "rblas";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

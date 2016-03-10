@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Softmax","Softmax Layer"]]});

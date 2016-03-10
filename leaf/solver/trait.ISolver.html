@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `ISolver` trait in crate `leaf`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ISolver">
+
+    <title>leaf::solver::ISolver - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>leaf</a>::<wbr><a href='index.html'>solver</a></p><script>window.sidebarCurrent = {name: 'ISolver', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>leaf</a>::<wbr><a href='index.html'>solver</a>::<wbr><a class='trait' href=''>ISolver</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-2127' class='srclink' href='../../src/leaf/solver/mod.rs.html#112-131' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait ISolver&lt;SolverB, B: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a> + <a class='trait' href='../../leaf/util/trait.LayerOps.html' title='leaf::util::LayerOps'>LayerOps</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt; {
+    fn <a href='#tymethod.compute_update' class='fnname'>compute_update</a>(&amp;mut self, param: &amp;<a class='struct' href='../../leaf/solver/struct.SolverConfig.html' title='leaf::solver::SolverConfig'>SolverConfig</a>, network: &amp;mut <a class='struct' href='../../leaf/layer/struct.Layer.html' title='leaf::layer::Layer'>Layer</a>&lt;B&gt;, iter: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>);
+    fn <a href='#tymethod.backend' class='fnname'>backend</a>(&amp;self) -&gt; &amp;SolverB;
+
+    fn <a href='#method.init' class='fnname'>init</a>(&amp;mut self, net: &amp;<a class='struct' href='../../leaf/layer/struct.Layer.html' title='leaf::layer::Layer'>Layer</a>&lt;B&gt;) { ... }
+}</pre><div class='docblock'><p>Implementation of a specific Solver.</p>
+
+<p>See <a href="../solvers/index.html">Solvers</a></p>
+</div>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.compute_update' class='method stab '><code>fn <a href='#tymethod.compute_update' class='fnname'>compute_update</a>(&amp;mut self, param: &amp;<a class='struct' href='../../leaf/solver/struct.SolverConfig.html' title='leaf::solver::SolverConfig'>SolverConfig</a>, network: &amp;mut <a class='struct' href='../../leaf/layer/struct.Layer.html' title='leaf::layer::Layer'>Layer</a>&lt;B&gt;, iter: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h3><div class='docblock'><p>Update the weights of the net with part of the gradient.</p>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Backpropagation#Phase_2:_Weight_update">second phase of backpropagation learning</a>.
+Calculates the gradient update that should be applied to the network,
+and then applies that gradient to the network, changing its weights.</p>
+
+<p>Used by <a href="./struct.Solver.html#method.step">step</a> to optimize the network.</p>
+</div><h3 id='tymethod.backend' class='method stab '><code>fn <a href='#tymethod.backend' class='fnname'>backend</a>(&amp;self) -&gt; &amp;SolverB</code></h3><div class='docblock'><p>Returns the backend used by the solver.</p>
+</div></div>
+            <h2 id='provided-methods'>Provided Methods</h2>
+            <div class='methods'>
+        <h3 id='method.init' class='method stab '><code>fn <a href='#method.init' class='fnname'>init</a>(&amp;mut self, net: &amp;<a class='struct' href='../../leaf/layer/struct.Layer.html' title='leaf::layer::Layer'>Layer</a>&lt;B&gt;)</code></h3><div class='docblock'><p>Initialize the solver, setting up any network related data.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;SolverB, B: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a> + <a class='trait' href='../../leaf/util/trait.LayerOps.html' title='leaf::util::LayerOps'>LayerOps</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='trait' href='../../leaf/solver/trait.ISolver.html' title='leaf::solver::ISolver'>ISolver</a>&lt;SolverB, B&gt;</code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    <li><code>impl&lt;SolverB: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a> + <a class='trait' href='../../leaf/util/trait.SolverOps.html' title='leaf::util::SolverOps'>SolverOps</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;, NetB: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a> + <a class='trait' href='../../leaf/util/trait.LayerOps.html' title='leaf::util::LayerOps'>LayerOps</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt; + 'static&gt; <a class='trait' href='../../leaf/solver/trait.ISolver.html' title='leaf::solver::ISolver'>ISolver</a>&lt;SolverB, NetB&gt; for <a class='struct' href='../../leaf/solvers/sgd/momentum/struct.Momentum.html' title='leaf::solvers::sgd::momentum::Momentum'>Momentum</a>&lt;SolverB&gt;</code></li>
+</ul><script type="text/javascript" async
+                              src="../../implementors/leaf/solver/trait.ISolver.js">
+                      </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "leaf";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Sigmoid","Sigmoid Activation Layer"]]});

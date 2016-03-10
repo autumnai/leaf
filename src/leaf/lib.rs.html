@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="Source to the Rust file `src/lib.rs`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang">
+
+    <title>lib.rs.html -- source</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content source"><pre class="line-numbers"><span id="1">  1</span>
+<span id="2">  2</span>
+<span id="3">  3</span>
+<span id="4">  4</span>
+<span id="5">  5</span>
+<span id="6">  6</span>
+<span id="7">  7</span>
+<span id="8">  8</span>
+<span id="9">  9</span>
+<span id="10"> 10</span>
+<span id="11"> 11</span>
+<span id="12"> 12</span>
+<span id="13"> 13</span>
+<span id="14"> 14</span>
+<span id="15"> 15</span>
+<span id="16"> 16</span>
+<span id="17"> 17</span>
+<span id="18"> 18</span>
+<span id="19"> 19</span>
+<span id="20"> 20</span>
+<span id="21"> 21</span>
+<span id="22"> 22</span>
+<span id="23"> 23</span>
+<span id="24"> 24</span>
+<span id="25"> 25</span>
+<span id="26"> 26</span>
+<span id="27"> 27</span>
+<span id="28"> 28</span>
+<span id="29"> 29</span>
+<span id="30"> 30</span>
+<span id="31"> 31</span>
+<span id="32"> 32</span>
+<span id="33"> 33</span>
+<span id="34"> 34</span>
+<span id="35"> 35</span>
+<span id="36"> 36</span>
+<span id="37"> 37</span>
+<span id="38"> 38</span>
+<span id="39"> 39</span>
+<span id="40"> 40</span>
+<span id="41"> 41</span>
+<span id="42"> 42</span>
+<span id="43"> 43</span>
+<span id="44"> 44</span>
+<span id="45"> 45</span>
+<span id="46"> 46</span>
+<span id="47"> 47</span>
+<span id="48"> 48</span>
+<span id="49"> 49</span>
+<span id="50"> 50</span>
+<span id="51"> 51</span>
+<span id="52"> 52</span>
+<span id="53"> 53</span>
+<span id="54"> 54</span>
+<span id="55"> 55</span>
+<span id="56"> 56</span>
+<span id="57"> 57</span>
+<span id="58"> 58</span>
+<span id="59"> 59</span>
+<span id="60"> 60</span>
+<span id="61"> 61</span>
+<span id="62"> 62</span>
+<span id="63"> 63</span>
+<span id="64"> 64</span>
+<span id="65"> 65</span>
+<span id="66"> 66</span>
+<span id="67"> 67</span>
+<span id="68"> 68</span>
+<span id="69"> 69</span>
+<span id="70"> 70</span>
+<span id="71"> 71</span>
+<span id="72"> 72</span>
+<span id="73"> 73</span>
+<span id="74"> 74</span>
+<span id="75"> 75</span>
+<span id="76"> 76</span>
+<span id="77"> 77</span>
+<span id="78"> 78</span>
+<span id="79"> 79</span>
+<span id="80"> 80</span>
+<span id="81"> 81</span>
+<span id="82"> 82</span>
+<span id="83"> 83</span>
+<span id="84"> 84</span>
+<span id="85"> 85</span>
+<span id="86"> 86</span>
+<span id="87"> 87</span>
+<span id="88"> 88</span>
+<span id="89"> 89</span>
+<span id="90"> 90</span>
+<span id="91"> 91</span>
+<span id="92"> 92</span>
+<span id="93"> 93</span>
+<span id="94"> 94</span>
+<span id="95"> 95</span>
+<span id="96"> 96</span>
+<span id="97"> 97</span>
+<span id="98"> 98</span>
+<span id="99"> 99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+</pre><pre class='rust '>
+<span class='doccomment'>//! Leaf is a open, modular and clear-designed Machine Intelligence Framework providing</span>
+<span class='doccomment'>//! state-of-the-art performance for distributed (Deep|Machine) Learning - sharing concepts from</span>
+<span class='doccomment'>//! Tensorflow and Caffe.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! An important module in Leaf is the backend-agnostic, high-performance computation Framework</span>
+<span class='doccomment'>//! [Collenchyma][collenchyma], which combines performance and usability for Leaf Networks.</span>
+<span class='doccomment'>//! This allows you to run and deploy Leaf Networks to servers, desktops or even mobiles</span>
+<span class='doccomment'>//! using the full available computation power of GPUs or other CUDA/OpenCL supported</span>
+<span class='doccomment'>//! devices for the learning of your Networks. And if your machine does not have a GPU or you do</span>
+<span class='doccomment'>//! not want to install CUDA/OpenCL on your local machine, Leaf will gracefully fall back to</span>
+<span class='doccomment'>//! your native host CPU.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! ## Architecture</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! Leaf&#39;s Networks are a compositional model, representing a collection of connected</span>
+<span class='doccomment'>//! [layers][layers], making operations over numerical data.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! Layers, the building block of a Leaf Network, are small units, describing computation over</span>
+<span class='doccomment'>//! numerical input data. Generally speaking Layers take input and produce an output, but</span>
+<span class='doccomment'>//! essentially a Layer can describe any functionality e.g. logging as long as it obeys to the</span>
+<span class='doccomment'>//! general behaviour specifications of a Layer. A Layer can be grouped in one of four</span>
+<span class='doccomment'>//! Layer types which are closer defined at the [Layers page][layers]. Every</span>
+<span class='doccomment'>//! layer serves a special purpose and can occur zero, one or many times inside a Network.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! Leaf uses [Collenchymas&#39;][collenchyma] SharedTensor, an N-dimensional array</span>
+<span class='doccomment'>//! for a unified memory interface over the actual data for automatic synchronization between</span>
+<span class='doccomment'>//! different devices (CUDA, OpenCL, host CPU). A SharedTensor stores the actual data flowing</span>
+<span class='doccomment'>//! through the system and the weights required for some Layers.</span>
+<span class='doccomment'>//! The data in a SharedTensor can be copied from backend to backend</span>
+<span class='doccomment'>//! and can be used for computations on CUDA, OpenCL and native host CPU.</span>
+<span class='doccomment'>//! It provides performance optimizations and automatically takes care of memory management and synchronization.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! A neural network can be created by combining container layers like the `Sequential` Layer.</span>
+<span class='doccomment'>//! Those can be nested and allow for bigger neural networks to be constructed while still</span>
+<span class='doccomment'>//! retaining the interface of a Layer.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! The learning and optimization of the Network happens at the [Solver][solver] and is decoupled</span>
+<span class='doccomment'>//! from the network making the setup clean and flexible. One of the four layer types is a Loss</span>
+<span class='doccomment'>//! Layer, which is used for the interaction of Network and Solver. The Network produces the loss</span>
+<span class='doccomment'>//! and gradients, which the Solver uses to optimize the Network through parameter updates. Beside</span>
+<span class='doccomment'>//! that, the Solver provides housekeeping and other evaluations of the Network. All operation</span>
+<span class='doccomment'>//! on the Solver happen through Collenchyma, therefore can be executed on Cuda, OpenCL or native</span>
+<span class='doccomment'>//! host CPU as well.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! Leaf provides a robust and modular design, which allows to express almost any numerical</span>
+<span class='doccomment'>//! computation including SVMs, RNNs and other popular learning algorithms. We hope that Leaf can</span>
+<span class='doccomment'>//! help future research and production development alike as it combines expressiveness,</span>
+<span class='doccomment'>//! performance and usability.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! ## Philosophy</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! We are strong believers in the technology of Machine Learning.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! We put our experience in software engineering into Leaf, to solve our own</span>
+<span class='doccomment'>//! need for a modern, performant and easy-to-use Deep Learning Framework.</span>
+<span class='doccomment'>//! These principles direct our decisions on Leaf and related projects.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! * __Cutting Edge Performance__:&lt;/br&gt;</span>
+<span class='doccomment'>//! For research and industry speed and efficency are curcial for</span>
+<span class='doccomment'>//! state-of-the-art machine learning over massive data and networks.</span>
+<span class='doccomment'>//! * __Open and Expressive Architecture__:&lt;/br&gt;</span>
+<span class='doccomment'>//! Designing an open architecture that follows best practices and concepts in</span>
+<span class='doccomment'>//! Engineering such as modularity, flexibility and expressiveness is critical</span>
+<span class='doccomment'>//! to stimulate future innovation.</span>
+<span class='doccomment'>//! * __Clear and Transparent Documentation__:&lt;/br&gt;</span>
+<span class='doccomment'>//! A well-written documentation that addresses both concepts and</span>
+<span class='doccomment'>//! implementations, empowers developers and researchers to contribute their</span>
+<span class='doccomment'>//! unique experience to the project for the benefit of everyone.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! ## Development</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! The implementation of various Layers is pretty scarce at the moment.&lt;br/&gt;</span>
+<span class='doccomment'>//! There are around a dozen layers, which are really important and would</span>
+<span class='doccomment'>//! increase the value and functionality of Leaf tremendously.&lt;br/&gt;</span>
+<span class='doccomment'>//! Progress is tracked at&lt;br/&gt;</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! - [Issue #18 for Loss Layers][issue-loss]</span>
+<span class='doccomment'>//! - [Issue #19 for Activation Layers][issue-activation]</span>
+<span class='doccomment'>//! - [Issue #20 for Common Layers][issue-common]</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! [collenchyma]: https://github.com/autumnai/collenchyma</span>
+<span class='doccomment'>//! [network]: ./network/index.html</span>
+<span class='doccomment'>//! [layers]: ./layers/index.html</span>
+<span class='doccomment'>//! [activation]: ./layers/activation/index.html</span>
+<span class='doccomment'>//! [loss]: ./layers/loss/index.html</span>
+<span class='doccomment'>//! [solvers]: ./solvers/index.html</span>
+<span class='doccomment'>//! [optimization]: https://en.wikipedia.org/wiki/Stochastic_optimization</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! [issue-loss]: https://github.com/autumnai/leaf/issues/18</span>
+<span class='doccomment'>//! [issue-activation]: https://github.com/autumnai/leaf/issues/19</span>
+<span class='doccomment'>//! [issue-common]: https://github.com/autumnai/leaf/issues/20</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span><span class='op'>=</span><span class='string'>&quot;lint&quot;</span>, <span class='ident'>feature</span>(<span class='ident'>plugin</span>))]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span><span class='op'>=</span><span class='string'>&quot;lint&quot;</span>, <span class='ident'>plugin</span>(<span class='ident'>clippy</span>))]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span><span class='op'>=</span><span class='string'>&quot;lint&quot;</span>, <span class='ident'>allow</span>(<span class='ident'>type_complexity</span>))]</span>
+
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>unused_variables</span>)]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>deny</span>(<span class='ident'>missing_docs</span>,
+        <span class='ident'>missing_debug_implementations</span>, <span class='ident'>missing_copy_implementations</span>,
+        <span class='ident'>trivial_casts</span>, <span class='ident'>trivial_numeric_casts</span>,
+        <span class='ident'>unsafe_code</span>,
+        <span class='ident'>unused_import_braces</span>, <span class='ident'>unused_qualifications</span>)]</span>
+
+<span class='comment'>// used when run with  cargo test --no-run --features clippy</span>
+<span class='comment'>// or cargo build --features clippy</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span><span class='op'>=</span><span class='string'>&quot;clippy&quot;</span>, <span class='ident'>feature</span>(<span class='ident'>plugin</span>))]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span><span class='op'>=</span><span class='string'>&quot;clippy&quot;</span>, <span class='ident'>plugin</span>(<span class='ident'>clippy</span>))]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span><span class='op'>=</span><span class='string'>&quot;clippy&quot;</span>, <span class='ident'>deny</span>(<span class='ident'>clippy</span>, <span class='ident'>clippy_pedantic</span>))]</span>
+
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>timeit</span>;
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>log</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>rand</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>num</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>collenchyma</span> <span class='kw'>as</span> <span class='ident'>co</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>collenchyma_blas</span> <span class='kw'>as</span> <span class='ident'>coblas</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>collenchyma_nn</span> <span class='kw'>as</span> <span class='ident'>conn</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>layer</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>layers</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>solver</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>solvers</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>weight</span>;
+
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>util</span>;
+</pre>
+</section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "leaf";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

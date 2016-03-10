@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `cblas_s` mod in crate `rblas`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, cblas_s">
+
+    <title>rblas::vector::ll::cblas_s - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../../index.html'>rblas</a>::<wbr><a href='../../index.html'>vector</a>::<wbr><a href='../index.html'>ll</a></p><script>window.sidebarCurrent = {name: 'cblas_s', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../../index.html'>rblas</a>::<wbr><a href='../../index.html'>vector</a>::<wbr><a href='../index.html'>ll</a>::<wbr><a class='mod' href=''>cblas_s</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-161' class='srclink' href='../../../../src/rblas/vector/ll.rs.html#7-41' title='goto source code'>[src]</a></span></h1>
+<h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/vector/ll/cblas_s/fn.cblas_scopy.html' title='rblas::vector::ll::cblas_s::cblas_scopy'>cblas_scopy</a> as copy;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/vector/ll/cblas_s/fn.cblas_saxpy.html' title='rblas::vector::ll::cblas_s::cblas_saxpy'>cblas_saxpy</a> as axpy;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/vector/ll/cblas_s/fn.cblas_sscal.html' title='rblas::vector::ll::cblas_s::cblas_sscal'>cblas_sscal</a> as scal;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/vector/ll/cblas_s/fn.cblas_sswap.html' title='rblas::vector::ll::cblas_s::cblas_sswap'>cblas_sswap</a> as swap;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/vector/ll/cblas_s/fn.cblas_sdsdot.html' title='rblas::vector::ll::cblas_s::cblas_sdsdot'>cblas_sdsdot</a> as dsdot;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/vector/ll/cblas_s/fn.cblas_sdot.html' title='rblas::vector::ll::cblas_s::cblas_sdot'>cblas_sdot</a> as dot;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/vector/ll/cblas_s/fn.cblas_sasum.html' title='rblas::vector::ll::cblas_s::cblas_sasum'>cblas_sasum</a> as asum;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/vector/ll/cblas_s/fn.cblas_scasum.html' title='rblas::vector::ll::cblas_s::cblas_scasum'>cblas_scasum</a> as casum;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/vector/ll/cblas_s/fn.cblas_snrm2.html' title='rblas::vector::ll::cblas_s::cblas_snrm2'>cblas_snrm2</a> as nrm2;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/vector/ll/cblas_s/fn.cblas_scnrm2.html' title='rblas::vector::ll::cblas_s::cblas_scnrm2'>cblas_scnrm2</a> as cnrm2;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/vector/ll/cblas_s/fn.cblas_srot.html' title='rblas::vector::ll::cblas_s::cblas_srot'>cblas_srot</a> as rot;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/vector/ll/cblas_s/fn.cblas_srotm.html' title='rblas::vector::ll::cblas_s::cblas_srotm'>cblas_srotm</a> as rotm;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/vector/ll/cblas_s/fn.cblas_srotg.html' title='rblas::vector::ll::cblas_s::cblas_srotg'>cblas_srotg</a> as rotg;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/vector/ll/cblas_s/fn.cblas_srotmg.html' title='rblas::vector::ll::cblas_s::cblas_srotmg'>cblas_srotmg</a> as rotmg;</code></td></tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_sasum.html'
+                               title='rblas::vector::ll::cblas_s::cblas_sasum'>cblas_sasum</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_saxpy.html'
+                               title='rblas::vector::ll::cblas_s::cblas_saxpy'>cblas_saxpy</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_scasum.html'
+                               title='rblas::vector::ll::cblas_s::cblas_scasum'>cblas_scasum</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_scnrm2.html'
+                               title='rblas::vector::ll::cblas_s::cblas_scnrm2'>cblas_scnrm2</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_scopy.html'
+                               title='rblas::vector::ll::cblas_s::cblas_scopy'>cblas_scopy</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_sdot.html'
+                               title='rblas::vector::ll::cblas_s::cblas_sdot'>cblas_sdot</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_sdsdot.html'
+                               title='rblas::vector::ll::cblas_s::cblas_sdsdot'>cblas_sdsdot</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_snrm2.html'
+                               title='rblas::vector::ll::cblas_s::cblas_snrm2'>cblas_snrm2</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_srot.html'
+                               title='rblas::vector::ll::cblas_s::cblas_srot'>cblas_srot</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_srotg.html'
+                               title='rblas::vector::ll::cblas_s::cblas_srotg'>cblas_srotg</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_srotm.html'
+                               title='rblas::vector::ll::cblas_s::cblas_srotm'>cblas_srotm</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_srotmg.html'
+                               title='rblas::vector::ll::cblas_s::cblas_srotmg'>cblas_srotmg</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_sscal.html'
+                               title='rblas::vector::ll::cblas_s::cblas_sscal'>cblas_sscal</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_sswap.html'
+                               title='rblas::vector::ll::cblas_s::cblas_sswap'>cblas_sswap</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../../";
+        window.currentCrate = "rblas";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../jquery.js"></script>
+    <script src="../../../../main.js"></script>
+    
+    <script defer src="../../../../search-index.js"></script>
+</body>
+</html>

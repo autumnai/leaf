@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="Source to the Rust file `/home/travis/.cargo/registry/src/github.com-88ac128001ac3a9a/collenchyma-0.0.8/src/plugin.rs`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang">
+
+    <title>plugin.rs.html -- source</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content source"><pre class="line-numbers"><span id="1"> 1</span>
+<span id="2"> 2</span>
+<span id="3"> 3</span>
+<span id="4"> 4</span>
+<span id="5"> 5</span>
+<span id="6"> 6</span>
+<span id="7"> 7</span>
+<span id="8"> 8</span>
+<span id="9"> 9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+</pre><pre class='rust '>
+<span class='doccomment'>//! Provides helpers for explicit implementations of Backend [Operations][operation].</span>
+<span class='doccomment'>//! [operation]: ../operation/index.html</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! A Backend is a Rust struct like any other, therefore you probably would like to implement</span>
+<span class='doccomment'>//! certain methods for the Backend. As the whole purpose of a Backend is to provide an</span>
+<span class='doccomment'>//! abstraction over various computation devices and computation languages, these implemented</span>
+<span class='doccomment'>//! methods will than be able to excute on different devices and use the full power of the machine&#39;s</span>
+<span class='doccomment'>//! underlying hardware.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! So extending the Backend with operations is easy. In Collenchyma we call crates, which provide</span>
+<span class='doccomment'>//! operations for the Backend, Plugins. Plugins are usually a group of related operations of a common</span>
+<span class='doccomment'>//! field. Two examples for Collenchyma Plugins are [BLAS][collenchyma-blas] and [NN][ollenchyma-nn].</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! A Plugin does roughly two important things. It provides generic traits and the explicit implementation</span>
+<span class='doccomment'>//! of these traits for one or (even better) all available Collenchyma Frameworks - common host CPU, OpenCL,</span>
+<span class='doccomment'>//! CUDA.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! The structure of Plugin is pretty easy with as less overhead as possible. Macros make implementations</span>
+<span class='doccomment'>//! even easier. If you would like to use specific Plugins for you Backend, all you need to do is,</span>
+<span class='doccomment'>//! setting them as dependencies in your Cargo file in addition to the Collenchyma crate. The Plugin</span>
+<span class='doccomment'>//! then automatically extends the Backend provided by Collenchyma.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! If you would like to extend the Backend with your own Plugin, than this is a straight forward process.</span>
+<span class='doccomment'>//! For now we recommend that you take a look at the general code structure of [Collenchyma-BLAS][collenchyma-blas]</span>
+<span class='doccomment'>//! or its documentation. Let us now about your Plugin on the Gitter chat, we are happy to feature</span>
+<span class='doccomment'>//! your Collenchyma Plugin on the README.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! [program]: ../program/index.html</span>
+<span class='doccomment'>//! [collenchyma-blas]: https://github.com/autumnai/collenchyma-blas</span>
+<span class='doccomment'>//! [collenchyma-nn]: https://github.com/autumnai/collenchyma-nn</span>
+
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>numeric_helpers</span>::<span class='ident'>Float</span>;
+
+<span class='doccomment'>/// Describes numeric types and traits for a Plugin.</span>
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>numeric_helpers</span> {
+    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>num</span>::<span class='ident'>traits</span>::<span class='op'>*</span>;
+}
+
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>Copy</span>, <span class='ident'>Clone</span>)]</span>
+<span class='doccomment'>/// Defines a high-level Plugin Error.</span>
+<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Error</span> {
+    <span class='doccomment'>/// Failure at receiving the correct device memory from the SharedMemory.</span>
+    <span class='ident'>MissingMemoryForDevice</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>),
+    <span class='doccomment'>/// Failure at the execution of the Operation.</span>
+    <span class='ident'>Operation</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>),
+    <span class='doccomment'>/// Failure at the Plugin.</span>
+    <span class='ident'>Plugin</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>),
+}
+
+<span class='kw'>impl</span> ::<span class='ident'>std</span>::<span class='ident'>fmt</span>::<span class='ident'>Display</span> <span class='kw'>for</span> <span class='ident'>Error</span> {
+    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> ::<span class='ident'>std</span>::<span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> ::<span class='ident'>std</span>::<span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
+        <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
+            <span class='ident'>Error</span>::<span class='ident'>MissingMemoryForDevice</span>(<span class='kw-2'>ref</span> <span class='ident'>err</span>) <span class='op'>=&gt;</span> <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;MissingMemoryForDevice error: {}&quot;</span>, <span class='ident'>err</span>),
+            <span class='ident'>Error</span>::<span class='ident'>Operation</span>(<span class='kw-2'>ref</span> <span class='ident'>err</span>) <span class='op'>=&gt;</span> <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;Operation error: {}&quot;</span>, <span class='ident'>err</span>),
+            <span class='ident'>Error</span>::<span class='ident'>Plugin</span>(<span class='kw-2'>ref</span> <span class='ident'>err</span>) <span class='op'>=&gt;</span> <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;Plugin error: {}&quot;</span>, <span class='ident'>err</span>),
+        }
+    }
+}
+
+<span class='kw'>impl</span> ::<span class='ident'>std</span>::<span class='ident'>error</span>::<span class='ident'>Error</span> <span class='kw'>for</span> <span class='ident'>Error</span> {
+    <span class='kw'>fn</span> <span class='ident'>description</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>str</span> {
+        <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
+            <span class='ident'>Error</span>::<span class='ident'>MissingMemoryForDevice</span>(<span class='kw-2'>ref</span> <span class='ident'>err</span>) <span class='op'>=&gt;</span> <span class='ident'>err</span>,
+            <span class='ident'>Error</span>::<span class='ident'>Operation</span>(<span class='kw-2'>ref</span> <span class='ident'>err</span>) <span class='op'>=&gt;</span> <span class='ident'>err</span>,
+            <span class='ident'>Error</span>::<span class='ident'>Plugin</span>(<span class='kw-2'>ref</span> <span class='ident'>err</span>) <span class='op'>=&gt;</span> <span class='ident'>err</span>,
+        }
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>cause</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span>::<span class='ident'>std</span>::<span class='ident'>error</span>::<span class='ident'>Error</span><span class='op'>&gt;</span> {
+        <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
+            <span class='ident'>Error</span>::<span class='ident'>MissingMemoryForDevice</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>,
+            <span class='ident'>Error</span>::<span class='ident'>Operation</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>,
+            <span class='ident'>Error</span>::<span class='ident'>Plugin</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>,
+        }
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>Error</span><span class='op'>&gt;</span> <span class='kw'>for</span> ::<span class='ident'>error</span>::<span class='ident'>Error</span> {
+    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>err</span>: <span class='ident'>Error</span>) <span class='op'>-&gt;</span> ::<span class='ident'>error</span>::<span class='ident'>Error</span> {
+        ::<span class='ident'>error</span>::<span class='ident'>Error</span>::<span class='ident'>Plugin</span>(<span class='ident'>err</span>)
+    }
+}
+
+</pre>
+</section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "collenchyma";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

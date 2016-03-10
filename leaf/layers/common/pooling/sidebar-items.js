@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["PoolingMode","The different modes of pooling that can be calculated."]],"struct":[["Pooling","Pooling Layer"],["PoolingConfig","Specifies configuration parameters for a Pooling Layer."]]});

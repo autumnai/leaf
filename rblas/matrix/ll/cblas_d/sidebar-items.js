@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["cblas_dgemm",""],["cblas_dsymm",""],["cblas_dsyr2k",""],["cblas_dsyrk",""],["cblas_dtrmm",""],["cblas_dtrsm",""]]});

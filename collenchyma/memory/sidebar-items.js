@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["MemoryType","Container for all known IMemory implementations"]],"trait":[["IMemory","Specifies Memory behavior accross frameworks."]]});

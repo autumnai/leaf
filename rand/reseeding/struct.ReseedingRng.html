@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `ReseedingRng` struct in crate `rand`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ReseedingRng">
+
+    <title>rand::reseeding::ReseedingRng - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="https://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        <a href='../../rand/index.html'><img src='https://www.rust-lang.org/logos/rust-logo-128x128-blk.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>rand</a>::<wbr><a href='index.html'>reseeding</a></p><script>window.sidebarCurrent = {name: 'ReseedingRng', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>rand</a>::<wbr><a href='index.html'>reseeding</a>::<wbr><a class='struct' href=''>ReseedingRng</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-910' class='srclink' href='../../src/rand/reseeding.rs.html#24-30' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct ReseedingRng&lt;R, Rsdr&gt; {
+    pub reseeder: Rsdr,
+    // some fields omitted
+}</pre><div class='docblock'><p>A wrapper around any RNG which reseeds the underlying RNG after it
+has generated a certain number of random bytes.</p>
+</div><h2 class='fields'>Fields</h2>
+<table><tr class='stab '>
+                                  <td id='structfield.reseeder'><code>reseeder</code></td><td><div class='docblock'><p>Controls the behaviour when reseeding the RNG.</p>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;R: <a class='trait' href='../../rand/trait.Rng.html' title='rand::Rng'>Rng</a>, Rsdr: <a class='trait' href='../../rand/reseeding/trait.Reseeder.html' title='rand::reseeding::Reseeder'>Reseeder</a>&lt;R&gt;&gt; <a class='struct' href='../../rand/reseeding/struct.ReseedingRng.html' title='rand::reseeding::ReseedingRng'>ReseedingRng</a>&lt;R, Rsdr&gt;</code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(rng: R, generation_threshold: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, reseeder: Rsdr) -&gt; <a class='struct' href='../../rand/reseeding/struct.ReseedingRng.html' title='rand::reseeding::ReseedingRng'>ReseedingRng</a>&lt;R, Rsdr&gt;</code></h4>
+<div class='docblock'><p>Create a new <code>ReseedingRng</code> with the given parameters.</p>
+
+<h1 id='arguments' class='section-header'><a href='#arguments'>Arguments</a></h1>
+<ul>
+<li><code>rng</code>: the random number generator to use.</li>
+<li><code>generation_threshold</code>: the number of bytes of entropy at which to reseed the RNG.</li>
+<li><code>reseeder</code>: the reseeding object to use.</li>
+</ul>
+</div><h4 id='method.reseed_if_necessary' class='method'><code>fn <a href='#method.reseed_if_necessary' class='fnname'>reseed_if_necessary</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Reseed the internal RNG if the number of bytes that have been
+generated exceed the threshold.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;R: <a class='trait' href='../../rand/trait.Rng.html' title='rand::Rng'>Rng</a>, Rsdr: <a class='trait' href='../../rand/reseeding/trait.Reseeder.html' title='rand::reseeding::Reseeder'>Reseeder</a>&lt;R&gt;&gt; <a class='trait' href='../../rand/trait.Rng.html' title='rand::Rng'>Rng</a> for <a class='struct' href='../../rand/reseeding/struct.ReseedingRng.html' title='rand::reseeding::ReseedingRng'>ReseedingRng</a>&lt;R, Rsdr&gt;</code></h3><div class='impl-items'><h4 id='method.next_u32' class='method'><code>fn <a href='../../rand/trait.Rng.html#method.next_u32' class='fnname'>next_u32</a>(&amp;mut self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a></code></h4>
+<h4 id='method.next_u64' class='method'><code>fn <a href='../../rand/trait.Rng.html#method.next_u64' class='fnname'>next_u64</a>(&amp;mut self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a></code></h4>
+<h4 id='method.fill_bytes' class='method'><code>fn <a href='../../rand/trait.Rng.html#method.fill_bytes' class='fnname'>fill_bytes</a>(&amp;mut self, dest: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;mut [</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>)</code></h4>
+<h4 id='method.next_f32' class='method'><code>fn <a href='../../rand/trait.Rng.html#method.next_f32' class='fnname'>next_f32</a>(&amp;mut self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a></code></h4>
+<h4 id='method.next_f64' class='method'><code>fn <a href='../../rand/trait.Rng.html#method.next_f64' class='fnname'>next_f64</a>(&amp;mut self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a></code></h4>
+<h4 id='method.gen' class='method'><code>fn <a href='../../rand/trait.Rng.html#method.gen' class='fnname'>gen</a>&lt;T: <a class='trait' href='../../rand/trait.Rand.html' title='rand::Rand'>Rand</a>&gt;(&amp;mut self) -&gt; T <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.gen_iter' class='method'><code>fn <a href='../../rand/trait.Rng.html#method.gen_iter' class='fnname'>gen_iter</a>&lt;'a, T: <a class='trait' href='../../rand/trait.Rand.html' title='rand::Rand'>Rand</a>&gt;(&amp;'a mut self) -&gt; <a class='struct' href='../../rand/struct.Generator.html' title='rand::Generator'>Generator</a>&lt;'a, T, Self&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.gen_range' class='method'><code>fn <a href='../../rand/trait.Rng.html#method.gen_range' class='fnname'>gen_range</a>&lt;T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a> + <a class='trait' href='../../rand/distributions/range/trait.SampleRange.html' title='rand::distributions::range::SampleRange'>SampleRange</a>&gt;(&amp;mut self, low: T, high: T) -&gt; T <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.gen_weighted_bool' class='method'><code>fn <a href='../../rand/trait.Rng.html#method.gen_weighted_bool' class='fnname'>gen_weighted_bool</a>(&amp;mut self, n: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a> <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.gen_ascii_chars' class='method'><code>fn <a href='../../rand/trait.Rng.html#method.gen_ascii_chars' class='fnname'>gen_ascii_chars</a>&lt;'a&gt;(&amp;'a mut self) -&gt; <a class='struct' href='../../rand/struct.AsciiGenerator.html' title='rand::AsciiGenerator'>AsciiGenerator</a>&lt;'a, Self&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.choose' class='method'><code>fn <a href='../../rand/trait.Rng.html#method.choose' class='fnname'>choose</a>&lt;'a, T&gt;(&amp;mut self, values: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;'a [</a>T<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'a T&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.shuffle' class='method'><code>fn <a href='../../rand/trait.Rng.html#method.shuffle' class='fnname'>shuffle</a>&lt;T&gt;(&amp;mut self, values: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;mut [</a>T<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+</div><h3 class='impl'><code>impl&lt;S, R: <a class='trait' href='../../rand/trait.SeedableRng.html' title='rand::SeedableRng'>SeedableRng</a>&lt;S&gt;, Rsdr: <a class='trait' href='../../rand/reseeding/trait.Reseeder.html' title='rand::reseeding::Reseeder'>Reseeder</a>&lt;R&gt; + <a class='trait' href='https://doc.rust-lang.org/nightly/core/default/trait.Default.html' title='core::default::Default'>Default</a>&gt; <a class='trait' href='../../rand/trait.SeedableRng.html' title='rand::SeedableRng'>SeedableRng</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(Rsdr, S)</a>&gt; for <a class='struct' href='../../rand/reseeding/struct.ReseedingRng.html' title='rand::reseeding::ReseedingRng'>ReseedingRng</a>&lt;R, Rsdr&gt;</code></h3><div class='impl-items'><h4 id='method.reseed' class='method'><code>fn <a href='../../rand/trait.SeedableRng.html#method.reseed' class='fnname'>reseed</a>(&amp;mut self, (rsdr, seed): <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(Rsdr, S)</a>)</code></h4>
+<h4 id='method.from_seed' class='method'><code>fn <a href='../../rand/trait.SeedableRng.html#method.from_seed' class='fnname'>from_seed</a>((rsdr, seed): <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(Rsdr, S)</a>) -&gt; <a class='struct' href='../../rand/reseeding/struct.ReseedingRng.html' title='rand::reseeding::ReseedingRng'>ReseedingRng</a>&lt;R, Rsdr&gt;</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "rand";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

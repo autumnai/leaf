@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Mat` struct in crate `rblas`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Mat">
+
+    <title>rblas::math::mat::Mat - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>rblas</a>::<wbr><a href='../index.html'>math</a>::<wbr><a href='index.html'>mat</a></p><script>window.sidebarCurrent = {name: 'Mat', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>rblas</a>::<wbr><a href='../index.html'>math</a>::<wbr><a href='index.html'>mat</a>::<wbr><a class='struct' href=''>Mat</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-3291' class='srclink' href='../../../src/rblas/math/mat.rs.html#16-20' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Mat&lt;T&gt; {
+    // some fields omitted
+}</pre><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;T&gt; <a class='struct' href='../../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(n: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, m: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='struct' href='../../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt;</code></h4>
+<h4 id='method.rows' class='method'><code>fn <a href='#method.rows' class='fnname'>rows</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h4>
+<h4 id='method.cols' class='method'><code>fn <a href='#method.cols' class='fnname'>cols</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h4>
+<h4 id='method.set_rows' class='method'><code>unsafe fn <a href='#method.set_rows' class='fnname'>set_rows</a>(&amp;mut self, n: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h4>
+<h4 id='method.set_cols' class='method'><code>unsafe fn <a href='#method.set_cols' class='fnname'>set_cols</a>(&amp;mut self, n: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h4>
+<h4 id='method.push' class='method'><code>unsafe fn <a href='#method.push' class='fnname'>push</a>(&amp;mut self, val: T)</code></h4>
+</div><h3 class='impl'><code>impl&lt;T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>&gt; <a class='struct' href='../../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.fill' class='method'><code>fn <a href='#method.fill' class='fnname'>fill</a>(value: T, n: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, m: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='struct' href='../../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt;</code></h4>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Index.html' title='core::ops::Index'>Index</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>&gt; for <a class='struct' href='../../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='assoc_type.Output' class='type'><code>type Output = <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>[T]</a></code></h4>
+<h4 id='method.index' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Index.html#method.index' class='fnname'>index</a>&lt;'a&gt;(&amp;'a self, index: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;'a [</a>T<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a></code></h4>
+</div><h3 class='impl'><code>impl&lt;T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html' title='core::fmt::Display'>Display</a>&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html' title='core::fmt::Display'>Display</a> for <a class='struct' href='../../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='../../../rblas/matrix/trait.Matrix.html' title='rblas::matrix::Matrix'>Matrix</a>&lt;T&gt; for <a class='struct' href='../../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.rows-1' class='method'><code>fn <a href='../../../rblas/matrix/trait.Matrix.html#method.rows' class='fnname'>rows</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a></code></h4>
+<h4 id='method.cols-1' class='method'><code>fn <a href='../../../rblas/matrix/trait.Matrix.html#method.cols' class='fnname'>cols</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a></code></h4>
+<h4 id='method.as_ptr' class='method'><code>unsafe fn <a href='../../../rblas/matrix/trait.Matrix.html#method.as_ptr' class='fnname'>as_ptr</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*const T</a></code></h4>
+<h4 id='method.as_mut_ptr' class='method'><code>unsafe fn <a href='../../../rblas/matrix/trait.Matrix.html#method.as_mut_ptr' class='fnname'>as_mut_ptr</a>(&amp;mut self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*mut T</a></code></h4>
+<h4 id='method.lead_dim' class='method'><code>fn <a href='../../../rblas/matrix/trait.Matrix.html#method.lead_dim' class='fnname'>lead_dim</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a></code></h4>
+<h4 id='method.order' class='method'><code>fn <a href='../../../rblas/matrix/trait.Matrix.html#method.order' class='fnname'>order</a>(&amp;self) -&gt; <a class='enum' href='../../../rblas/attribute/enum.Order.html' title='rblas::attribute::Order'>Order</a></code></h4>
+</div><h3 class='impl'><code>impl&lt;'a, T&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.From.html' title='core::convert::From'>From</a>&lt;&amp;'a <a class='trait' href='../../../rblas/matrix/trait.Matrix.html' title='rblas::matrix::Matrix'>Matrix</a>&lt;T&gt;&gt; for <a class='struct' href='../../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../../rblas/vector/ops/trait.Copy.html' title='rblas::vector::ops::Copy'>Copy</a></span></code></h3><div class='impl-items'><h4 id='method.from' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/convert/trait.From.html#method.from' class='fnname'>from</a>(a: &amp;<a class='trait' href='../../../rblas/matrix/trait.Matrix.html' title='rblas::matrix::Matrix'>Matrix</a>&lt;T&gt;) -&gt; <a class='struct' href='../../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt;</code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl&lt;T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a>&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='struct' href='../../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.eq' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt;) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt;) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><code>impl&lt;T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a>&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.fmt-1' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "rblas";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

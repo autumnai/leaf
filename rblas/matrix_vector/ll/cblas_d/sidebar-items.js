@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["cblas_dgbmv",""],["cblas_dgemv",""],["cblas_dger",""],["cblas_dsbmv",""],["cblas_dspmv",""],["cblas_dspr",""],["cblas_dspr2",""],["cblas_dsymv",""],["cblas_dsyr",""],["cblas_dsyr2",""],["cblas_dtbmv",""],["cblas_dtbsv",""],["cblas_dtpmv",""],["cblas_dtpsv",""],["cblas_dtrmv",""],["cblas_dtrsv",""]]});

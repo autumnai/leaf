@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `num` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, num">
+
+    <title>num - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    <link rel="shortcut icon" href="http://rust-num.github.io/num/favicon.ico">
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        <a href='../num/index.html'><img src='http://rust-num.github.io/num/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'></p><script>window.sidebarCurrent = {name: 'num', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>num</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-0' class='srclink' href='../src/num/lib.rs.html#11-213' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>A collection of numeric types and traits for Rust.</p>
+
+<p>This includes new types for big integers, rationals, and complex numbers,
+new traits for generic programming on numeric properties like <code>Integer</code>,
+and generic range iterators.</p>
+
+<h2 id='example' class='section-header'><a href='#example'>Example</a></h2>
+<p>This example uses the BigRational type and <a href="https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method">Newton&#39;s method</a> to
+approximate a square root to arbitrary precision:</p>
+<span class='rusttest'>extern crate num;
+#[cfg(all(feature = &quot;bigint&quot;, feature=&quot;rational&quot;))]
+mod test {
+
+use num::FromPrimitive;
+use num::bigint::BigInt;
+use num::rational::{Ratio, BigRational};
+
+pub
+fn approx_sqrt(number: u64, iterations: usize) -&gt; BigRational {
+    let start: Ratio&lt;BigInt&gt; = Ratio::from_integer(FromPrimitive::from_u64(number).unwrap());
+    let mut approx = start.clone();
+
+    for _ in 0..iterations {
+        approx = (&amp;approx + (&amp;start / &amp;approx)) /
+            Ratio::from_integer(FromPrimitive::from_u64(2).unwrap());
+    }
+
+    approx
+}
+}
+#[cfg(not(all(feature = &quot;bigint&quot;, feature=&quot;rational&quot;)))]
+mod test { pub fn approx_sqrt(n: u64, _: usize) -&gt; u64 { n } }
+use test::approx_sqrt;
+
+fn main() {
+    println!(&quot;{}&quot;, approx_sqrt(10, 4)); // prints 4057691201/1283082416
+}
+</span><pre class='rust rust-example-rendered'>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>num</span>;
+
+<span class='kw'>use</span> <span class='ident'>num</span>::<span class='ident'>FromPrimitive</span>;
+<span class='kw'>use</span> <span class='ident'>num</span>::<span class='ident'>bigint</span>::<span class='ident'>BigInt</span>;
+<span class='kw'>use</span> <span class='ident'>num</span>::<span class='ident'>rational</span>::{<span class='ident'>Ratio</span>, <span class='ident'>BigRational</span>};
+
+<span class='kw'>fn</span> <span class='ident'>approx_sqrt</span>(<span class='ident'>number</span>: <span class='ident'>u64</span>, <span class='ident'>iterations</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>BigRational</span> {
+    <span class='kw'>let</span> <span class='ident'>start</span>: <span class='ident'>Ratio</span><span class='op'>&lt;</span><span class='ident'>BigInt</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Ratio</span>::<span class='ident'>from_integer</span>(<span class='ident'>FromPrimitive</span>::<span class='ident'>from_u64</span>(<span class='ident'>number</span>).<span class='ident'>unwrap</span>());
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>approx</span> <span class='op'>=</span> <span class='ident'>start</span>.<span class='ident'>clone</span>();
+
+    <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='number'>0</span>..<span class='ident'>iterations</span> {
+        <span class='ident'>approx</span> <span class='op'>=</span> (<span class='kw-2'>&amp;</span><span class='ident'>approx</span> <span class='op'>+</span> (<span class='kw-2'>&amp;</span><span class='ident'>start</span> <span class='op'>/</span> <span class='kw-2'>&amp;</span><span class='ident'>approx</span>)) <span class='op'>/</span>
+            <span class='ident'>Ratio</span>::<span class='ident'>from_integer</span>(<span class='ident'>FromPrimitive</span>::<span class='ident'>from_u64</span>(<span class='number'>2</span>).<span class='ident'>unwrap</span>());
+    }
+
+    <span class='ident'>approx</span>
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>approx_sqrt</span>(<span class='number'>10</span>, <span class='number'>4</span>)); <span class='comment'>// prints 4057691201/1283082416</span>
+}
+</pre>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use bigint::{<a class='struct' href='../num/bigint/struct.BigInt.html' title='num::bigint::BigInt'>BigInt</a>, <a class='struct' href='../num/bigint/struct.BigUint.html' title='num::bigint::BigUint'>BigUint</a>};</code></td></tr><tr><td><code>pub use rational::<a class='type' href='../num/rational/type.Rational.html' title='num::rational::Rational'>Rational</a>;</code></td></tr><tr><td><code>pub use rational::<a class='type' href='../num/rational/type.BigRational.html' title='num::rational::BigRational'>BigRational</a>;</code></td></tr><tr><td><code>pub use complex::<a class='struct' href='../num/complex/struct.Complex.html' title='num::complex::Complex'>Complex</a>;</code></td></tr><tr><td><code>pub use integer::<a class='trait' href='../num/integer/trait.Integer.html' title='num::integer::Integer'>Integer</a>;</code></td></tr><tr><td><code>pub use iter::{<a class='fn' href='../num/iter/fn.range.html' title='num::iter::range'>range</a>, <a class='fn' href='../num/iter/fn.range_inclusive.html' title='num::iter::range_inclusive'>range_inclusive</a>, <a class='fn' href='../num/iter/fn.range_step.html' title='num::iter::range_step'>range_step</a>, <a class='fn' href='../num/iter/fn.range_step_inclusive.html' title='num::iter::range_step_inclusive'>range_step_inclusive</a>};</code></td></tr><tr><td><code>pub use traits::{<a class='trait' href='../num/traits/trait.Num.html' title='num::traits::Num'>Num</a>, <a class='trait' href='../num/traits/trait.Zero.html' title='num::traits::Zero'>Zero</a>, <a class='trait' href='../num/traits/trait.One.html' title='num::traits::One'>One</a>, <a class='trait' href='../num/traits/trait.Signed.html' title='num::traits::Signed'>Signed</a>, <a class='trait' href='../num/traits/trait.Unsigned.html' title='num::traits::Unsigned'>Unsigned</a>, <a class='trait' href='../num/traits/trait.Bounded.html' title='num::traits::Bounded'>Bounded</a>, <a class='trait' href='../num/traits/trait.Saturating.html' title='num::traits::Saturating'>Saturating</a>, <a class='trait' href='../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a>, <a class='trait' href='../num/traits/trait.CheckedSub.html' title='num::traits::CheckedSub'>CheckedSub</a>, <a class='trait' href='../num/traits/trait.CheckedMul.html' title='num::traits::CheckedMul'>CheckedMul</a>, <a class='trait' href='../num/traits/trait.CheckedDiv.html' title='num::traits::CheckedDiv'>CheckedDiv</a>, <a class='trait' href='../num/traits/trait.PrimInt.html' title='num::traits::PrimInt'>PrimInt</a>, <a class='trait' href='../num/traits/trait.Float.html' title='num::traits::Float'>Float</a>, <a class='trait' href='../num/traits/trait.ToPrimitive.html' title='num::traits::ToPrimitive'>ToPrimitive</a>, <a class='trait' href='../num/traits/trait.FromPrimitive.html' title='num::traits::FromPrimitive'>FromPrimitive</a>, <a class='trait' href='../num/traits/trait.NumCast.html' title='num::traits::NumCast'>NumCast</a>, <a class='fn' href='../num/traits/fn.cast.html' title='num::traits::cast'>cast</a>};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='bigint/index.html'
+                               title='num::bigint'>bigint</a></td>
+                        <td class='docblock short'>
+                             <p>A Big integer (signed version: <code>BigInt</code>, unsigned version: <code>BigUint</code>).</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='complex/index.html'
+                               title='num::complex'>complex</a></td>
+                        <td class='docblock short'>
+                             <p>Complex numbers.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='integer/index.html'
+                               title='num::integer'>integer</a></td>
+                        <td class='docblock short'>
+                             <p>Integer trait and functions.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='iter/index.html'
+                               title='num::iter'>iter</a></td>
+                        <td class='docblock short'>
+                             <p>External iterators for generic mathematics</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='rational/index.html'
+                               title='num::rational'>rational</a></td>
+                        <td class='docblock short'>
+                             <p>Rational numbers</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='traits/index.html'
+                               title='num::traits'>traits</a></td>
+                        <td class='docblock short'>
+                             <p>Numeric traits for generic mathematics</p>
+
+                        </td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.abs.html'
+                               title='num::abs'>abs</a></td>
+                        <td class='docblock short'>
+                             <p>Computes the absolute value.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.abs_sub.html'
+                               title='num::abs_sub'>abs_sub</a></td>
+                        <td class='docblock short'>
+                             <p>The positive difference of two numbers.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.checked_pow.html'
+                               title='num::checked_pow'>checked_pow</a></td>
+                        <td class='docblock short'>
+                             <p>Raises a value to the power of exp, returning <code>None</code> if an overflow occurred.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.one.html'
+                               title='num::one'>one</a></td>
+                        <td class='docblock short'>
+                             <p>Returns the multiplicative identity, <code>1</code>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.pow.html'
+                               title='num::pow'>pow</a></td>
+                        <td class='docblock short'>
+                             <p>Raises a value to the power of exp, using exponentiation by squaring.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.signum.html'
+                               title='num::signum'>signum</a></td>
+                        <td class='docblock short'>
+                             <p>Returns the sign of the number.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.zero.html'
+                               title='num::zero'>zero</a></td>
+                        <td class='docblock short'>
+                             <p>Returns the additive identity, <code>0</code>.</p>
+
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "num";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    <script src="../playpen.js"></script>
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

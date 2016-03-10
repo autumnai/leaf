@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Backend` struct in crate `collenchyma`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Backend">
+
+    <title>collenchyma::backend::Backend - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>collenchyma</a>::<wbr><a href='index.html'>backend</a></p><script>window.sidebarCurrent = {name: 'Backend', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>collenchyma</a>::<wbr><a href='index.html'>backend</a>::<wbr><a class='struct' href=''>Backend</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-16' class='srclink' href='../../src/collenchyma/backend.rs.html#49-63' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Backend&lt;F: <a class='trait' href='../../collenchyma/framework/trait.IFramework.html' title='collenchyma::framework::IFramework'>IFramework</a>&gt; {
+    // some fields omitted
+}</pre><div class='docblock'><p>Defines the main and highest struct of Collenchyma.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;F: <a class='trait' href='../../collenchyma/framework/trait.IFramework.html' title='collenchyma::framework::IFramework'>IFramework</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>&gt; <a class='struct' href='../../collenchyma/backend/struct.Backend.html' title='collenchyma::backend::Backend'>Backend</a>&lt;F&gt;</code></h3><div class='docblock'><p>Defines the functionality of the Backend.</p>
+</div><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(config: <a class='struct' href='../../collenchyma/backend/struct.BackendConfig.html' title='collenchyma::backend::BackendConfig'>BackendConfig</a>&lt;F&gt;) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../collenchyma/backend/struct.Backend.html' title='collenchyma::backend::Backend'>Backend</a>&lt;F&gt;, <a class='enum' href='../../collenchyma/error/enum.Error.html' title='collenchyma::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Initialize a new native Backend from a BackendConfig.</p>
+</div><h4 id='method.hardwares' class='method'><code>fn <a href='#method.hardwares' class='fnname'>hardwares</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>F::H<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a></code></h4>
+<div class='docblock'><p>Returns the available hardware.</p>
+</div><h4 id='method.framework' class='method'><code>fn <a href='#method.framework' class='fnname'>framework</a>(&amp;self) -&gt; &amp;<a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;F&gt;</code></h4>
+<div class='docblock'><p>Returns the backend framework.</p>
+</div><h4 id='method.device' class='method'><code>fn <a href='#method.device' class='fnname'>device</a>(&amp;self) -&gt; &amp;<a class='enum' href='../../collenchyma/device/enum.DeviceType.html' title='collenchyma::device::DeviceType'>DeviceType</a></code></h4>
+<div class='docblock'><p>Returns the backend device.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a> for <a class='struct' href='../../collenchyma/backend/struct.Backend.html' title='collenchyma::backend::Backend'>Backend</a>&lt;<a class='struct' href='../../collenchyma/frameworks/native/struct.Native.html' title='collenchyma::frameworks::native::Native'>Native</a>&gt;</code></h3><div class='impl-items'><h4 id='assoc_type.F' class='type'><code>type F = <a class='struct' href='../../collenchyma/frameworks/native/struct.Native.html' title='collenchyma::frameworks::native::Native'>Native</a></code></h4>
+<h4 id='method.device-1' class='method'><code>fn <a href='../../collenchyma/backend/trait.IBackend.html#method.device' class='fnname'>device</a>(&amp;self) -&gt; &amp;<a class='enum' href='../../collenchyma/device/enum.DeviceType.html' title='collenchyma::device::DeviceType'>DeviceType</a></code></h4>
+<h4 id='method.default' class='method'><code>fn <a href='../../collenchyma/backend/trait.IBackend.html#method.default' class='fnname'>default</a>() -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../collenchyma/backend/struct.Backend.html' title='collenchyma::backend::Backend'>Backend</a>&lt;Self::<a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>F</a>&gt;, <a class='enum' href='../../collenchyma/error/enum.Error.html' title='collenchyma::error::Error'>Error</a>&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.synchronize' class='method'><code>fn <a href='../../collenchyma/backend/trait.IBackend.html#method.synchronize' class='fnname'>synchronize</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../../collenchyma/framework/enum.Error.html' title='collenchyma::framework::Error'>Error</a>&gt;</code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl&lt;F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='../../collenchyma/framework/trait.IFramework.html' title='collenchyma::framework::IFramework'>IFramework</a>&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../collenchyma/backend/struct.Backend.html' title='collenchyma::backend::Backend'>Backend</a>&lt;F&gt;</code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../collenchyma/backend/struct.Backend.html' title='collenchyma::backend::Backend'>Backend</a>&lt;F&gt;</code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl&lt;F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> + <a class='trait' href='../../collenchyma/framework/trait.IFramework.html' title='collenchyma::framework::IFramework'>IFramework</a>&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../../collenchyma/backend/struct.Backend.html' title='collenchyma::backend::Backend'>Backend</a>&lt;F&gt;</code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "collenchyma";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

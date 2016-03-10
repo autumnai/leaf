@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `ComputeOutput` trait in crate `leaf`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ComputeOutput">
+
+    <title>leaf::layer::ComputeOutput - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>leaf</a>::<wbr><a href='index.html'>layer</a></p><script>window.sidebarCurrent = {name: 'ComputeOutput', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>leaf</a>::<wbr><a href='index.html'>layer</a>::<wbr><a class='trait' href=''>ComputeOutput</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-579' class='srclink' href='../../src/leaf/layer.rs.html#1040-1047' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait ComputeOutput&lt;T, B: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a>&gt; {
+    fn <a href='#tymethod.compute_output' class='fnname'>compute_output</a>(&amp;self, backend: &amp;B, weights_data: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>&amp;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;T&gt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, input_data: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>&amp;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;T&gt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, output_data: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;mut [</a>&amp;mut <a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;T&gt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>);
+}</pre><div class='docblock'><p>A Layer that can compute the output for a given input.</p>
+</div>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.compute_output' class='method stab '><code>fn <a href='#tymethod.compute_output' class='fnname'>compute_output</a>(&amp;self, backend: &amp;B, weights_data: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>&amp;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;T&gt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, input_data: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>&amp;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;T&gt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, output_data: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;mut [</a>&amp;mut <a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;T&gt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>)</code></h3><div class='docblock'><p>Compute output for given input and write them into <code>output_data</code>.</p>
+</div></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    <li><code>impl&lt;B: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a> + <a class='trait' href='../../collenchyma_nn/plugin/trait.Relu.html' title='collenchyma_nn::plugin::Relu'>Relu</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt; + <a class='trait' href='../../collenchyma_nn/plugin/trait.ReluPointwise.html' title='collenchyma_nn::plugin::ReluPointwise'>ReluPointwise</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt; <a class='trait' href='../../leaf/layer/trait.ComputeOutput.html' title='leaf::layer::ComputeOutput'>ComputeOutput</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, B&gt; for <a class='struct' href='../../leaf/layers/activation/relu/struct.ReLU.html' title='leaf::layers::activation::relu::ReLU'>ReLU</a></code></li>
+<li><code>impl&lt;B: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a> + <a class='trait' href='../../collenchyma_nn/plugin/trait.Sigmoid.html' title='collenchyma_nn::plugin::Sigmoid'>Sigmoid</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt; + <a class='trait' href='../../collenchyma_nn/plugin/trait.SigmoidPointwise.html' title='collenchyma_nn::plugin::SigmoidPointwise'>SigmoidPointwise</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt; <a class='trait' href='../../leaf/layer/trait.ComputeOutput.html' title='leaf::layer::ComputeOutput'>ComputeOutput</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, B&gt; for <a class='struct' href='../../leaf/layers/activation/sigmoid/struct.Sigmoid.html' title='leaf::layers::activation::sigmoid::Sigmoid'>Sigmoid</a></code></li>
+<li><code>impl&lt;B: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a> + <a class='trait' href='../../collenchyma_nn/plugin/trait.Convolution.html' title='collenchyma_nn::plugin::Convolution'>Convolution</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt; <a class='trait' href='../../leaf/layer/trait.ComputeOutput.html' title='leaf::layer::ComputeOutput'>ComputeOutput</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, B&gt; for <a class='struct' href='../../leaf/layers/common/convolution/struct.Convolution.html' title='leaf::layers::common::convolution::Convolution'>Convolution</a>&lt;B&gt;</code></li>
+<li><code>impl&lt;B: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a> + <a class='trait' href='../../leaf/util/trait.LayerOps.html' title='leaf::util::LayerOps'>LayerOps</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt; <a class='trait' href='../../leaf/layer/trait.ComputeOutput.html' title='leaf::layer::ComputeOutput'>ComputeOutput</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, B&gt; for <a class='struct' href='../../leaf/layers/common/linear/struct.Linear.html' title='leaf::layers::common::linear::Linear'>Linear</a></code></li>
+<li><code>impl&lt;B: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a> + <a class='trait' href='../../collenchyma_nn/plugin/trait.LogSoftmax.html' title='collenchyma_nn::plugin::LogSoftmax'>LogSoftmax</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt; <a class='trait' href='../../leaf/layer/trait.ComputeOutput.html' title='leaf::layer::ComputeOutput'>ComputeOutput</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, B&gt; for <a class='struct' href='../../leaf/layers/common/log_softmax/struct.LogSoftmax.html' title='leaf::layers::common::log_softmax::LogSoftmax'>LogSoftmax</a></code></li>
+<li><code>impl&lt;B: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a> + <a class='trait' href='../../collenchyma_nn/plugin/trait.Pooling.html' title='collenchyma_nn::plugin::Pooling'>Pooling</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt; <a class='trait' href='../../leaf/layer/trait.ComputeOutput.html' title='leaf::layer::ComputeOutput'>ComputeOutput</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, B&gt; for <a class='struct' href='../../leaf/layers/common/pooling/struct.Pooling.html' title='leaf::layers::common::pooling::Pooling'>Pooling</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, B&gt;</code></li>
+<li><code>impl&lt;B: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a> + <a class='trait' href='../../leaf/util/trait.LayerOps.html' title='leaf::util::LayerOps'>LayerOps</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt; + 'static&gt; <a class='trait' href='../../leaf/layer/trait.ComputeOutput.html' title='leaf::layer::ComputeOutput'>ComputeOutput</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, B&gt; for <a class='struct' href='../../leaf/layers/common/sequential/struct.Sequential.html' title='leaf::layers::common::sequential::Sequential'>Sequential</a>&lt;B&gt;</code></li>
+<li><code>impl&lt;B: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a> + <a class='trait' href='../../collenchyma_nn/plugin/trait.Softmax.html' title='collenchyma_nn::plugin::Softmax'>Softmax</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt; <a class='trait' href='../../leaf/layer/trait.ComputeOutput.html' title='leaf::layer::ComputeOutput'>ComputeOutput</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, B&gt; for <a class='struct' href='../../leaf/layers/common/softmax/struct.Softmax.html' title='leaf::layers::common::softmax::Softmax'>Softmax</a></code></li>
+<li><code>impl&lt;B: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a>&gt; <a class='trait' href='../../leaf/layer/trait.ComputeOutput.html' title='leaf::layer::ComputeOutput'>ComputeOutput</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, B&gt; for <a class='struct' href='../../leaf/layers/loss/negative_log_likelihood/struct.NegativeLogLikelihood.html' title='leaf::layers::loss::negative_log_likelihood::NegativeLogLikelihood'>NegativeLogLikelihood</a></code></li>
+<li><code>impl&lt;B: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a>&gt; <a class='trait' href='../../leaf/layer/trait.ComputeOutput.html' title='leaf::layer::ComputeOutput'>ComputeOutput</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, B&gt; for <a class='struct' href='../../leaf/layers/utility/reshape/struct.Reshape.html' title='leaf::layers::utility::reshape::Reshape'>Reshape</a></code></li>
+</ul><script type="text/javascript" async
+                              src="../../implementors/leaf/layer/trait.ComputeOutput.js">
+                      </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "leaf";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

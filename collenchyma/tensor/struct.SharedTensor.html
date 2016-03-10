@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `SharedTensor` struct in crate `collenchyma`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, SharedTensor">
+
+    <title>collenchyma::tensor::SharedTensor - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>collenchyma</a>::<wbr><a href='index.html'>tensor</a></p><script>window.sidebarCurrent = {name: 'SharedTensor', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>collenchyma</a>::<wbr><a href='index.html'>tensor</a>::<wbr><a class='struct' href=''>SharedTensor</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-571' class='srclink' href='../../src/collenchyma/tensor.rs.html#62-68' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct SharedTensor&lt;T&gt; {
+    // some fields omitted
+}</pre><div class='docblock'><p>Container that handles synchronization of <a href="../memory/index.html">Memory</a> of type <code>T</code>.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;T&gt; <a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>&lt;D: <a class='trait' href='../../collenchyma/tensor/trait.IntoTensorDesc.html' title='collenchyma::tensor::IntoTensorDesc'>IntoTensorDesc</a>&gt;(dev: &amp;<a class='enum' href='../../collenchyma/device/enum.DeviceType.html' title='collenchyma::device::DeviceType'>DeviceType</a>, desc: &amp;D) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;T&gt;, <a class='enum' href='../../collenchyma/tensor/enum.Error.html' title='collenchyma::tensor::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Create new Tensor by allocating <a href="../memory/index.html">Memory</a> on a Device.</p>
+</div><h4 id='method.reshape' class='method'><code>fn <a href='#method.reshape' class='fnname'>reshape</a>&lt;D: <a class='trait' href='../../collenchyma/tensor/trait.IntoTensorDesc.html' title='collenchyma::tensor::IntoTensorDesc'>IntoTensorDesc</a>&gt;(&amp;mut self, desc: &amp;D) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../../collenchyma/tensor/enum.Error.html' title='collenchyma::tensor::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Change the shape of the Tensor.</p>
+
+<p>Will return an Error if size of new shape is not equal to the old shape.
+If you want to change the shape to one of a different size, use <code>resize</code>.</p>
+</div><h4 id='method.resize' class='method'><code>fn <a href='#method.resize' class='fnname'>resize</a>&lt;D: <a class='trait' href='../../collenchyma/tensor/trait.IntoTensorDesc.html' title='collenchyma::tensor::IntoTensorDesc'>IntoTensorDesc</a>&gt;(&amp;mut self, desc: &amp;D) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../../collenchyma/tensor/enum.Error.html' title='collenchyma::tensor::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Change the size and shape of the Tensor.</p>
+
+<p><strong>Caution</strong>: Drops all copies which are not on the current device.</p>
+
+<p>&#39;reshape&#39; is preffered over this method if the size of the old and new shape
+are identical because it will not reallocate memory.</p>
+</div><h4 id='method.sync' class='method'><code>fn <a href='#method.sync' class='fnname'>sync</a>(&amp;mut self, destination: &amp;<a class='enum' href='../../collenchyma/device/enum.DeviceType.html' title='collenchyma::device::DeviceType'>DeviceType</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../../collenchyma/tensor/enum.Error.html' title='collenchyma::tensor::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Synchronize memory from latest location to <code>destination</code>.</p>
+</div><h4 id='method.get' class='method'><code>fn <a href='#method.get' class='fnname'>get</a>(&amp;self, device: &amp;<a class='enum' href='../../collenchyma/device/enum.DeviceType.html' title='collenchyma::device::DeviceType'>DeviceType</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;<a class='enum' href='../../collenchyma/memory/enum.MemoryType.html' title='collenchyma::memory::MemoryType'>MemoryType</a>&gt;</code></h4>
+<div class='docblock'><p>Get a reference to the memory copy on the provided <code>device</code>.</p>
+
+<p>Returns <code>None</code> if there is no memory copy on the device.</p>
+</div><h4 id='method.get_mut' class='method'><code>fn <a href='#method.get_mut' class='fnname'>get_mut</a>(&amp;mut self, device: &amp;<a class='enum' href='../../collenchyma/device/enum.DeviceType.html' title='collenchyma::device::DeviceType'>DeviceType</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;mut <a class='enum' href='../../collenchyma/memory/enum.MemoryType.html' title='collenchyma::memory::MemoryType'>MemoryType</a>&gt;</code></h4>
+<div class='docblock'><p>Get a mutable reference to the memory copy on the provided <code>device</code>.</p>
+
+<p>Returns <code>None</code> if there is no memory copy on the device.</p>
+</div><h4 id='method.remove_copy' class='method'><code>fn <a href='#method.remove_copy' class='fnname'>remove_copy</a>(&amp;mut self, destination: &amp;<a class='enum' href='../../collenchyma/device/enum.DeviceType.html' title='collenchyma::device::DeviceType'>DeviceType</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='../../collenchyma/memory/enum.MemoryType.html' title='collenchyma::memory::MemoryType'>MemoryType</a>, <a class='enum' href='../../collenchyma/tensor/enum.Error.html' title='collenchyma::tensor::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Removes Copy from SharedTensor and therefore aquires ownership over the removed memory copy for synchronizing.</p>
+</div><h4 id='method.add_device' class='method'><code>fn <a href='#method.add_device' class='fnname'>add_device</a>(&amp;mut self, device: &amp;<a class='enum' href='../../collenchyma/device/enum.DeviceType.html' title='collenchyma::device::DeviceType'>DeviceType</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;&amp;mut Self, <a class='enum' href='../../collenchyma/tensor/enum.Error.html' title='collenchyma::tensor::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Track a new <code>device</code> and allocate memory on it.</p>
+
+<p>Returns an error if the Tensor is already tracking the <code>device</code>.</p>
+</div><h4 id='method.latest_device' class='method'><code>fn <a href='#method.latest_device' class='fnname'>latest_device</a>(&amp;self) -&gt; &amp;<a class='enum' href='../../collenchyma/device/enum.DeviceType.html' title='collenchyma::device::DeviceType'>DeviceType</a></code></h4>
+<div class='docblock'><p>Returns the device that contains the up-to-date memory copy.</p>
+</div><h4 id='method.capacity' class='method'><code>fn <a href='#method.capacity' class='fnname'>capacity</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h4>
+<div class='docblock'><p>Returns the number of elements for which the Tensor has been allocated.</p>
+</div><h4 id='method.desc' class='method'><code>fn <a href='#method.desc' class='fnname'>desc</a>(&amp;self) -&gt; &amp;<a class='type' href='../../collenchyma/tensor/type.TensorDesc.html' title='collenchyma::tensor::TensorDesc'>TensorDesc</a></code></h4>
+<div class='docblock'><p>Returns the descriptor of the Tensor.</p>
+</div><h4 id='method.mem_size' class='method'><code>fn <a href='#method.mem_size' class='fnname'>mem_size</a>(capacity: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h4>
+<div class='docblock'><p>Returns the allocated Memory size in bytes.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl&lt;T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a>&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "collenchyma";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

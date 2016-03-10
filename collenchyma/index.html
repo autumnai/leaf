@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `collenchyma` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, collenchyma">
+
+    <title>collenchyma - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'></p><script>window.sidebarCurrent = {name: 'collenchyma', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>collenchyma</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-0' class='srclink' href='../src/collenchyma/lib.rs.html#1-217' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Provides a simple and unified API to run fast and highly parallel computations on different
+devices such as CPUs and GPUs, accross different computation languages such as OpenCL and
+CUDA and allows you to swap your backend on run-time.</p>
+
+<p>Collenchyma was started at <a href="http://autumnai.com">Autumn</a> to create an easy and performant abstraction over
+different backends for the Machine Intelligence Framework <a href="https://github.com/autumnai/leaf">Leaf</a>, with no hard
+dependency on any driver or libraries so that it can easily be used without the need for a
+long and painful build process.</p>
+
+<h2 id='abstract' class='section-header'><a href='#abstract'>Abstract</a></h2>
+<p>Code often is executed on the native CPU, but could be executed on other devices such as GPUs
+and Accelerators as well. These devices are accessable through frameworks like OpenCL and CUDA
+but have a more complicated interfaces than your every-day native CPU
+which makes the use of these devices a painful experience. Some of the pain points, when
+writing such device code, are:</p>
+
+<ul>
+<li>non-portable: frameworks have different interfaces, devices support different versions and
+machines might have different hardware - all this leads to code that will be executable only on
+a very specific set of machines and platforms.</li>
+<li>steep learning curve: executing code on a device through a framework is quite different to
+running code on the native CPU and comes with a lot of hurdles. OpenCLs 1.2 specification for
+example has close to 400 pages.</li>
+<li>custom code: integrating support for devices into your project, requires the need for writing
+a lot of custom code e.g. kernels, memory management, genereal business logic.</li>
+</ul>
+
+<p>But writing code for devices would often be a good choice as these devices can execute many
+operations a lot faster than the native CPUs. GPUs for example can execute operations roughly
+one to two orders of magnitudes faster, thanks to better support of parallising operations.
+OpenCL and CUDA make parallising operations super easy.</p>
+
+<p>With Collenchyma we eleminate the pain points of writing device code, so you can run your code
+like any other Rust code, don&#39;t need to learn about kernels, events, or memory
+synchronization, and can deploy your code with ease to servers, desktops or mobiles and
+your code will make full use of the underlying hardware.</p>
+
+<h2 id='architecture' class='section-header'><a href='#architecture'>Architecture</a></h2>
+<p>The single entry point of Collenchyma is a <a href="./backend/index.html">Backend</a>. A Backend is agnostic over the <a href="./device/index.html">Device</a> it
+runs <a href="./operation/index.html">Operations</a> on. In order to be agnostic over the Device, such as native host CPU, GPUs,
+Accelerators or other types of <a href="./hardware/index.html">Hardware</a>, the Backend needs to be agnostic over the
+<a href="./framework/index.html">Framework</a> as well. A Framework is a computation language such as OpenCL, Cuda or the native programming
+language. The Framework is important, as it provides us with the interface to turn Hardware into Devices and
+therefore, among other things, execute Operations on the created Device. With a Framework, we get access to Hardware
+as long as the Hardware supports the Framework. As different vendors of Hardware use different
+Frameworks, it becomes important that the Backend is agnostic over the Framework, which allows us, that we can
+really run computations on any machine such as servers, desktops and mobiles without the need to worry about what
+Hardware is available on the machine. That gives us the freedom to write code once and deploy it on different
+machines where it will execute on the most potent Hardware by default.</p>
+
+<p>Operations get introduced by a <a href="./plugin/index.html">Plugin</a>. A Plugin extends your Backend with ready-to-execute Operations.
+All you need to do is, providing these Collenchyma Plugin crates alongside the Collenchyma crate in your Cargo
+file. Your Backend will than be extend with the operations provided by the Plugin. The interface is just common
+Rust e.g. to execute the dot product operation of the <a href="https://github.com/autumnai/collenchyma-blas">Collenchyma-BLAS</a> Plugin,
+we can simply call <code>backend.dot(...)</code>. If the dot Operation is executed on e.g.
+one or many GPUs or CPUs depends solely on how you configured the Backend or if you did not further specify which
+Framework and Hardware to use, solely on the machine you execute the dot Operation on. In the field of Operations
+is one more component - the <a href="./binary/index.html">Binary</a>. As - different to executing code on the native CPU - devices need
+to compile and build the Operation manually at run-time, which makes a significant part of a Framework, we need
+an initlizable instance for holding the state and compiled Operations, wich the Binary is good for.</p>
+
+<p>The last peace of Collenchyma is the <a href="./memory/index.html">Memory</a>. A Operation happens over data, but this data needs to be
+accessable by the device on which the Operation is executed. The process is therefore often, that memory space needs
+to be allocated on the device and then in a later step, synced from the host to the device or from
+the device back to the host. Thanks to the <a href="./tensor/index.html">Tensor</a> we do not have to care about memory management
+between devices for the execution of Operations. Tensor tracks and automatically manages data and it&#39;s memory
+accross devices, which is often the host and the Device. But it can also be passed around to different Backends.
+Operations take as arguments Tensors and handle the synchronization and allocation for you.</p>
+
+<h2 id='examples' class='section-header'><a href='#examples'>Examples</a></h2>
+<p>This example requires the Collenchyma NN Plugin, for Neural Network related operations, to work.</p>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>collenchyma</span> <span class='kw'>as</span> <span class='ident'>co</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>collenchyma_nn</span> <span class='kw'>as</span> <span class='ident'>nn</span>;
+<span class='kw'>use</span> <span class='ident'>co</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
+<span class='kw'>use</span> <span class='ident'>nn</span>::<span class='op'>*</span>;
+
+<span class='kw'>fn</span> <span class='ident'>write_to_memory</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Copy</span><span class='op'>&gt;</span>(<span class='ident'>mem</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>MemoryType</span>, <span class='ident'>data</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>T</span>]) {
+    <span class='kw'>if</span> <span class='kw'>let</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>MemoryType</span>::<span class='ident'>Native</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>mem</span>) <span class='op'>=</span> <span class='ident'>mem</span> {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>mem_buffer</span> <span class='op'>=</span> <span class='ident'>mem</span>.<span class='ident'>as_mut_slice</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>();
+        <span class='kw'>for</span> (<span class='ident'>index</span>, <span class='ident'>datum</span>) <span class='kw'>in</span> <span class='ident'>data</span>.<span class='ident'>iter</span>().<span class='ident'>enumerate</span>() {
+            <span class='ident'>mem_buffer</span>[<span class='ident'>index</span>] <span class='op'>=</span> <span class='op'>*</span><span class='ident'>datum</span>;
+        }
+    }
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='comment'>// Initialize a CUDA Backend.</span>
+    <span class='kw'>let</span> <span class='ident'>backend</span> <span class='op'>=</span> <span class='ident'>Backend</span>::<span class='op'>&lt;</span><span class='ident'>Cuda</span><span class='op'>&gt;</span>::<span class='ident'>default</span>().<span class='ident'>unwrap</span>();
+    <span class='comment'>// Initialize two SharedTensors.</span>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>SharedTensor</span>::<span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;</span>::<span class='ident'>new</span>(<span class='ident'>backend</span>.<span class='ident'>device</span>(), <span class='kw-2'>&amp;</span>(<span class='number'>1</span>, <span class='number'>1</span>, <span class='number'>3</span>)).<span class='ident'>unwrap</span>();
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>SharedTensor</span>::<span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;</span>::<span class='ident'>new</span>(<span class='ident'>backend</span>.<span class='ident'>device</span>(), <span class='kw-2'>&amp;</span>(<span class='number'>1</span>, <span class='number'>1</span>, <span class='number'>3</span>)).<span class='ident'>unwrap</span>();
+    <span class='comment'>// Fill `x` with some data.</span>
+    <span class='kw'>let</span> <span class='ident'>payload</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>f32</span>] <span class='op'>=</span> <span class='kw-2'>&amp;</span>::<span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>repeat</span>(<span class='number'>1f32</span>).<span class='ident'>take</span>(<span class='ident'>x</span>.<span class='ident'>capacity</span>()).<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;&gt;</span>();
+    <span class='kw'>let</span> <span class='ident'>native</span> <span class='op'>=</span> <span class='ident'>Backend</span>::<span class='op'>&lt;</span><span class='ident'>Native</span><span class='op'>&gt;</span>::<span class='ident'>default</span>().<span class='ident'>unwrap</span>();
+    <span class='ident'>x</span>.<span class='ident'>add_device</span>(<span class='ident'>native</span>.<span class='ident'>device</span>()).<span class='ident'>unwrap</span>(); <span class='comment'>// Add native host memory</span>
+    <span class='ident'>x</span>.<span class='ident'>sync</span>(<span class='ident'>native</span>.<span class='ident'>device</span>()).<span class='ident'>unwrap</span>(); <span class='comment'>// Sync to native host memory</span>
+    <span class='ident'>write_to_memory</span>(<span class='ident'>x</span>.<span class='ident'>get_mut</span>(<span class='ident'>native</span>.<span class='ident'>device</span>()).<span class='ident'>unwrap</span>(), <span class='ident'>payload</span>); <span class='comment'>// Write to native host memory.</span>
+    <span class='ident'>x</span>.<span class='ident'>sync</span>(<span class='ident'>backend</span>.<span class='ident'>device</span>()).<span class='ident'>unwrap</span>(); <span class='comment'>// Sync the data to the CUDA device.</span>
+    <span class='comment'>// Run the sigmoid operation, provided by the NN Plugin, on your CUDA enabled GPU.</span>
+    <span class='ident'>backend</span>.<span class='ident'>sigmoid</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>x</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>result</span>).<span class='ident'>unwrap</span>();
+    <span class='comment'>// See the result.</span>
+    <span class='ident'>result</span>.<span class='ident'>add_device</span>(<span class='ident'>native</span>.<span class='ident'>device</span>()).<span class='ident'>unwrap</span>(); <span class='comment'>// Add native host memory</span>
+    <span class='ident'>result</span>.<span class='ident'>sync</span>(<span class='ident'>native</span>.<span class='ident'>device</span>()).<span class='ident'>unwrap</span>(); <span class='comment'>// Sync the result to host memory.</span>
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:?}&quot;</span>, <span class='ident'>result</span>.<span class='ident'>get</span>(<span class='ident'>native</span>.<span class='ident'>device</span>()).<span class='ident'>unwrap</span>().<span class='ident'>as_native</span>().<span class='ident'>unwrap</span>().<span class='ident'>as_slice</span>::<span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;</span>());
+}</pre>
+
+<h2 id='development' class='section-header'><a href='#development'>Development</a></h2>
+<p>At the moment Collenchyma itself will provide Rust APIs for the important frameworks - OpenCL
+and CUDA. One step we are looking out for is to seperate OpenCL and CUDA into their own crate.
+Something similar to <a href="https://github.com/tomaka/glium">Glium</a>.</p>
+
+<p>Every operation exposed via a Plugin and implemented on the backend, should take as the last argument an
+<code>Option&lt;OperationConfig&gt;</code> to specify custom parallelisation behaviour and tracking the operation via events.</p>
+
+<p>When initializing a new Backend from a BackendConfig you might not want to specify the Framework, which is currently
+mandatory. Leaving it blank, the Backend would try to use the most potent Framework given the underlying hardware,
+which would be probably in this order Cuda -&gt; OpenCL -&gt; Native. The setup might take longer, as every framework
+needs to be checked, and devices be loaded in order to identify the best setup. But this would allow, that you
+really could deploy a Collenchyma-backed application to almost any hardware - server, desktops, mobiles.</p>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use <a class='mod' href='../collenchyma/backend/index.html' title='collenchyma::backend'>backend</a>::*;</code></td></tr><tr><td><code>pub use device::{<a class='trait' href='../collenchyma/device/trait.IDevice.html' title='collenchyma::device::IDevice'>IDevice</a>, <a class='enum' href='../collenchyma/device/enum.DeviceType.html' title='collenchyma::device::DeviceType'>DeviceType</a>};</code></td></tr><tr><td><code>pub use hardware::{<a class='trait' href='../collenchyma/hardware/trait.IHardware.html' title='collenchyma::hardware::IHardware'>IHardware</a>, <a class='enum' href='../collenchyma/hardware/enum.HardwareType.html' title='collenchyma::hardware::HardwareType'>HardwareType</a>};</code></td></tr><tr><td><code>pub use framework::<a class='trait' href='../collenchyma/framework/trait.IFramework.html' title='collenchyma::framework::IFramework'>IFramework</a>;</code></td></tr><tr><td><code>pub use memory::{<a class='trait' href='../collenchyma/memory/trait.IMemory.html' title='collenchyma::memory::IMemory'>IMemory</a>, <a class='enum' href='../collenchyma/memory/enum.MemoryType.html' title='collenchyma::memory::MemoryType'>MemoryType</a>};</code></td></tr><tr><td><code>pub use tensor::{<a class='struct' href='../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>, <a class='type' href='../collenchyma/tensor/type.TensorDesc.html' title='collenchyma::tensor::TensorDesc'>TensorDesc</a>, <a class='trait' href='../collenchyma/tensor/trait.ITensorDesc.html' title='collenchyma::tensor::ITensorDesc'>ITensorDesc</a>, <a class='trait' href='../collenchyma/tensor/trait.IntoTensorDesc.html' title='collenchyma::tensor::IntoTensorDesc'>IntoTensorDesc</a>};</code></td></tr><tr><td><code>pub use frameworks::<a class='struct' href='../collenchyma/frameworks/native/struct.Native.html' title='collenchyma::frameworks::native::Native'>Native</a>;</code></td></tr><tr><td><code>pub use error::<a class='enum' href='../collenchyma/error/enum.Error.html' title='collenchyma::error::Error'>Error</a>;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='backend/index.html'
+                               title='collenchyma::backend'>backend</a></td>
+                        <td class='docblock short'>
+                             <p>Provides the interface for running parallel computations on one ore many devices.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='binary/index.html'
+                               title='collenchyma::binary'>binary</a></td>
+                        <td class='docblock short'>
+                             <p>Provides the generic functionality for a backend-specific implementation of a
+<a href="../libraries/index.html">library</a>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='device/index.html'
+                               title='collenchyma::device'>device</a></td>
+                        <td class='docblock short'>
+                             <p>Provides a representation for one or many ready to use hardwares.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='error/index.html'
+                               title='collenchyma::error'>error</a></td>
+                        <td class='docblock short'>
+                             <p>Defines the general set of error types in Collenchyma.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='framework/index.html'
+                               title='collenchyma::framework'>framework</a></td>
+                        <td class='docblock short'>
+                             <p>Provides the generic functionality of a hardware supporting frameworks such as native CPU, OpenCL,
+CUDA, etc..</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='frameworks/index.html'
+                               title='collenchyma::frameworks'>frameworks</a></td>
+                        <td class='docblock short'>
+                             <p>Exposes the specific Framework implementations.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='hardware/index.html'
+                               title='collenchyma::hardware'>hardware</a></td>
+                        <td class='docblock short'>
+                             <p>Provides a representation for a collection of available compute units e.g. CPUs or GPUs.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='memory/index.html'
+                               title='collenchyma::memory'>memory</a></td>
+                        <td class='docblock short'>
+                             <p>Provides a representation for memory across different frameworks.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='operation/index.html'
+                               title='collenchyma::operation'>operation</a></td>
+                        <td class='docblock short'>
+                             <p>Provides the generic functionality for backend-agnostic operations.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='plugin/index.html'
+                               title='collenchyma::plugin'>plugin</a></td>
+                        <td class='docblock short'>
+                             <p>Provides helpers for explicit implementations of Backend <a href="../operation/index.html">Operations</a>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='prelude/index.html'
+                               title='collenchyma::prelude'>prelude</a></td>
+                        <td class='docblock short'>
+                             <p>A module meant to be glob imported when using Collenchyma.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='tensor/index.html'
+                               title='collenchyma::tensor'>tensor</a></td>
+                        <td class='docblock short'>
+                             <p>Provides the functionality for memory management across devices.</p>
+
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "collenchyma";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

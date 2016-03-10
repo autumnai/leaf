@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["activation","Provides nonlinear activation methods."],["common","Provides common neural network layers."],["loss","Provides methods to calculate the loss (cost) of some output."],["utility","Provides various helpful layers, which might be not directly related to neural networks in general."]]});

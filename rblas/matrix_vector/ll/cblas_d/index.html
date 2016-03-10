@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `cblas_d` mod in crate `rblas`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, cblas_d">
+
+    <title>rblas::matrix_vector::ll::cblas_d - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../../index.html'>rblas</a>::<wbr><a href='../../index.html'>matrix_vector</a>::<wbr><a href='../index.html'>ll</a></p><script>window.sidebarCurrent = {name: 'cblas_d', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../../index.html'>rblas</a>::<wbr><a href='../../index.html'>matrix_vector</a>::<wbr><a href='../index.html'>ll</a>::<wbr><a class='mod' href=''>cblas_d</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-1097' class='srclink' href='../../../../src/rblas/matrix_vector/ll.rs.html#53-97' title='goto source code'>[src]</a></span></h1>
+<h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_d/fn.cblas_dgemv.html' title='rblas::matrix_vector::ll::cblas_d::cblas_dgemv'>cblas_dgemv</a> as gemv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_d/fn.cblas_dsymv.html' title='rblas::matrix_vector::ll::cblas_d::cblas_dsymv'>cblas_dsymv</a> as symv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_d/fn.cblas_dtrmv.html' title='rblas::matrix_vector::ll::cblas_d::cblas_dtrmv'>cblas_dtrmv</a> as trmv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_d/fn.cblas_dtrsv.html' title='rblas::matrix_vector::ll::cblas_d::cblas_dtrsv'>cblas_dtrsv</a> as trsv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_d/fn.cblas_dger.html' title='rblas::matrix_vector::ll::cblas_d::cblas_dger'>cblas_dger</a> as ger;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_d/fn.cblas_dsyr.html' title='rblas::matrix_vector::ll::cblas_d::cblas_dsyr'>cblas_dsyr</a> as syr;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_d/fn.cblas_dsyr2.html' title='rblas::matrix_vector::ll::cblas_d::cblas_dsyr2'>cblas_dsyr2</a> as syr2;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_d/fn.cblas_dspmv.html' title='rblas::matrix_vector::ll::cblas_d::cblas_dspmv'>cblas_dspmv</a> as spmv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_d/fn.cblas_dgbmv.html' title='rblas::matrix_vector::ll::cblas_d::cblas_dgbmv'>cblas_dgbmv</a> as gbmv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_d/fn.cblas_dsbmv.html' title='rblas::matrix_vector::ll::cblas_d::cblas_dsbmv'>cblas_dsbmv</a> as sbmv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_d/fn.cblas_dtbmv.html' title='rblas::matrix_vector::ll::cblas_d::cblas_dtbmv'>cblas_dtbmv</a> as tbmv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_d/fn.cblas_dtbsv.html' title='rblas::matrix_vector::ll::cblas_d::cblas_dtbsv'>cblas_dtbsv</a> as tbsv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_d/fn.cblas_dtpmv.html' title='rblas::matrix_vector::ll::cblas_d::cblas_dtpmv'>cblas_dtpmv</a> as tpmv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_d/fn.cblas_dtpsv.html' title='rblas::matrix_vector::ll::cblas_d::cblas_dtpsv'>cblas_dtpsv</a> as tpsv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_d/fn.cblas_dspr.html' title='rblas::matrix_vector::ll::cblas_d::cblas_dspr'>cblas_dspr</a> as spr;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_d/fn.cblas_dspr2.html' title='rblas::matrix_vector::ll::cblas_d::cblas_dspr2'>cblas_dspr2</a> as spr2;</code></td></tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dgbmv.html'
+                               title='rblas::matrix_vector::ll::cblas_d::cblas_dgbmv'>cblas_dgbmv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dgemv.html'
+                               title='rblas::matrix_vector::ll::cblas_d::cblas_dgemv'>cblas_dgemv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dger.html'
+                               title='rblas::matrix_vector::ll::cblas_d::cblas_dger'>cblas_dger</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dsbmv.html'
+                               title='rblas::matrix_vector::ll::cblas_d::cblas_dsbmv'>cblas_dsbmv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dspmv.html'
+                               title='rblas::matrix_vector::ll::cblas_d::cblas_dspmv'>cblas_dspmv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dspr.html'
+                               title='rblas::matrix_vector::ll::cblas_d::cblas_dspr'>cblas_dspr</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dspr2.html'
+                               title='rblas::matrix_vector::ll::cblas_d::cblas_dspr2'>cblas_dspr2</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dsymv.html'
+                               title='rblas::matrix_vector::ll::cblas_d::cblas_dsymv'>cblas_dsymv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dsyr.html'
+                               title='rblas::matrix_vector::ll::cblas_d::cblas_dsyr'>cblas_dsyr</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dsyr2.html'
+                               title='rblas::matrix_vector::ll::cblas_d::cblas_dsyr2'>cblas_dsyr2</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dtbmv.html'
+                               title='rblas::matrix_vector::ll::cblas_d::cblas_dtbmv'>cblas_dtbmv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dtbsv.html'
+                               title='rblas::matrix_vector::ll::cblas_d::cblas_dtbsv'>cblas_dtbsv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dtpmv.html'
+                               title='rblas::matrix_vector::ll::cblas_d::cblas_dtpmv'>cblas_dtpmv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dtpsv.html'
+                               title='rblas::matrix_vector::ll::cblas_d::cblas_dtpsv'>cblas_dtpsv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dtrmv.html'
+                               title='rblas::matrix_vector::ll::cblas_d::cblas_dtrmv'>cblas_dtrmv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dtrsv.html'
+                               title='rblas::matrix_vector::ll::cblas_d::cblas_dtrsv'>cblas_dtrsv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../../";
+        window.currentCrate = "rblas";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../jquery.js"></script>
+    <script src="../../../../main.js"></script>
+    
+    <script defer src="../../../../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Trans` enum in crate `rblas`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Trans">
+
+    <title>rblas::math::Trans - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>rblas</a>::<wbr><a href='index.html'>math</a></p><script>window.sidebarCurrent = {name: 'Trans', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content enum">
+<h1 class='fqn'><span class='in-band'>Enum <a href='../index.html'>rblas</a>::<wbr><a href='index.html'>math</a>::<wbr><a class='enum' href=''>Trans</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-3614' class='srclink' href='../../src/rblas/math/mod.rs.html#19-22' title='goto source code'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum Trans&lt;A&gt; {
+    T(A),
+    H(A),
+}</pre><h2 class='variants'>Variants</h2>
+<table><tr><td id='variant.T'><code>T</code></td><td></td></tr><tr><td id='variant.H'><code>H</code></td><td></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;'a, T&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Mul.html' title='core::ops::Mul'>Mul</a>&lt;&amp;'a <a class='trait' href='../../rblas/vector/trait.Vector.html' title='rblas::vector::Vector'>Vector</a>&lt;T&gt;&gt; for <a class='enum' href='../../rblas/math/enum.Trans.html' title='rblas::math::Trans'>Trans</a>&lt;&amp;'a <a class='trait' href='../../rblas/vector/trait.Vector.html' title='rblas::vector::Vector'>Vector</a>&lt;T&gt;&gt; <span class='where'>where T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a> + <a class='trait' href='../../rblas/vector/ops/trait.Copy.html' title='rblas::vector::ops::Copy'>Copy</a> + <a class='trait' href='../../rblas/vector/ops/trait.Dot.html' title='rblas::vector::ops::Dot'>Dot</a> + <a class='trait' href='../../rblas/vector/ops/trait.Dotc.html' title='rblas::vector::ops::Dotc'>Dotc</a></span></code></h3><div class='impl-items'><h4 id='assoc_type.Output' class='type'><code>type Output = T</code></h4>
+<h4 id='method.mul' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Mul.html#method.mul' class='fnname'>mul</a>(self, x: &amp;<a class='trait' href='../../rblas/vector/trait.Vector.html' title='rblas::vector::Vector'>Vector</a>&lt;T&gt;) -&gt; T</code></h4>
+</div><h3 class='impl'><code>impl&lt;'a, T&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Mul.html' title='core::ops::Mul'>Mul</a>&lt;&amp;'a <a class='trait' href='../../rblas/matrix/trait.Matrix.html' title='rblas::matrix::Matrix'>Matrix</a>&lt;T&gt;&gt; for <a class='enum' href='../../rblas/math/enum.Trans.html' title='rblas::math::Trans'>Trans</a>&lt;&amp;'a <a class='trait' href='../../rblas/matrix/trait.Matrix.html' title='rblas::matrix::Matrix'>Matrix</a>&lt;T&gt;&gt; <span class='where'>where T: <a class='trait' href='../../rblas/default/trait.Default.html' title='rblas::default::Default'>Default</a> + <a class='trait' href='../../rblas/matrix/ops/trait.Gemm.html' title='rblas::matrix::ops::Gemm'>Gemm</a></span></code></h3><div class='impl-items'><h4 id='assoc_type.Output-1' class='type'><code>type Output = <a class='struct' href='../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt;</code></h4>
+<h4 id='method.mul-1' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Mul.html#method.mul' class='fnname'>mul</a>(self, b: &amp;<a class='trait' href='../../rblas/matrix/trait.Matrix.html' title='rblas::matrix::Matrix'>Matrix</a>&lt;T&gt;) -&gt; <a class='struct' href='../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt;</code></h4>
+</div><h3 class='impl'><code>impl&lt;'a, T&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Mul.html' title='core::ops::Mul'>Mul</a>&lt;<a class='enum' href='../../rblas/math/enum.Trans.html' title='rblas::math::Trans'>Trans</a>&lt;&amp;'a <a class='trait' href='../../rblas/matrix/trait.Matrix.html' title='rblas::matrix::Matrix'>Matrix</a>&lt;T&gt;&gt;&gt; for <a class='enum' href='../../rblas/math/enum.Trans.html' title='rblas::math::Trans'>Trans</a>&lt;&amp;'a <a class='trait' href='../../rblas/matrix/trait.Matrix.html' title='rblas::matrix::Matrix'>Matrix</a>&lt;T&gt;&gt; <span class='where'>where T: <a class='trait' href='../../rblas/default/trait.Default.html' title='rblas::default::Default'>Default</a> + <a class='trait' href='../../rblas/matrix/ops/trait.Gemm.html' title='rblas::matrix::ops::Gemm'>Gemm</a></span></code></h3><div class='impl-items'><h4 id='assoc_type.Output-2' class='type'><code>type Output = <a class='struct' href='../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt;</code></h4>
+<h4 id='method.mul-2' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Mul.html#method.mul' class='fnname'>mul</a>(self, rhs: <a class='enum' href='../../rblas/math/enum.Trans.html' title='rblas::math::Trans'>Trans</a>&lt;&amp;<a class='trait' href='../../rblas/matrix/trait.Matrix.html' title='rblas::matrix::Matrix'>Matrix</a>&lt;T&gt;&gt;) -&gt; <a class='struct' href='../../rblas/math/mat/struct.Mat.html' title='rblas::math::mat::Mat'>Mat</a>&lt;T&gt;</code></h4>
+</div><h3 class='impl'><code>impl&lt;A&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Deref.html' title='core::ops::Deref'>Deref</a> for <a class='enum' href='../../rblas/math/enum.Trans.html' title='rblas::math::Trans'>Trans</a>&lt;A&gt;</code></h3><div class='impl-items'><h4 id='assoc_type.Target' class='type'><code>type Target = A</code></h4>
+<h4 id='method.deref' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Deref.html#method.deref' class='fnname'>deref</a>(&amp;self) -&gt; &amp;A</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "rblas";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

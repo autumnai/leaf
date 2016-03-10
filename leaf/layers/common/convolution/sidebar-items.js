@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Convolution","Convolution Layer"],["ConvolutionConfig","Specifies configuration parameters for a Convolution Layer."]]});

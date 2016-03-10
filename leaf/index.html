@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `leaf` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, leaf">
+
+    <title>leaf - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'></p><script>window.sidebarCurrent = {name: 'leaf', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>leaf</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-0' class='srclink' href='../src/leaf/lib.rs.html#1-125' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Leaf is a open, modular and clear-designed Machine Intelligence Framework providing
+state-of-the-art performance for distributed (Deep|Machine) Learning - sharing concepts from
+Tensorflow and Caffe.</p>
+
+<p>An important module in Leaf is the backend-agnostic, high-performance computation Framework
+<a href="https://github.com/autumnai/collenchyma">Collenchyma</a>, which combines performance and usability for Leaf Networks.
+This allows you to run and deploy Leaf Networks to servers, desktops or even mobiles
+using the full available computation power of GPUs or other CUDA/OpenCL supported
+devices for the learning of your Networks. And if your machine does not have a GPU or you do
+not want to install CUDA/OpenCL on your local machine, Leaf will gracefully fall back to
+your native host CPU.</p>
+
+<h2 id='architecture' class='section-header'><a href='#architecture'>Architecture</a></h2>
+<p>Leaf&#39;s Networks are a compositional model, representing a collection of connected
+<a href="./layers/index.html">layers</a>, making operations over numerical data.</p>
+
+<p>Layers, the building block of a Leaf Network, are small units, describing computation over
+numerical input data. Generally speaking Layers take input and produce an output, but
+essentially a Layer can describe any functionality e.g. logging as long as it obeys to the
+general behaviour specifications of a Layer. A Layer can be grouped in one of four
+Layer types which are closer defined at the <a href="./layers/index.html">Layers page</a>. Every
+layer serves a special purpose and can occur zero, one or many times inside a Network.</p>
+
+<p>Leaf uses <a href="https://github.com/autumnai/collenchyma">Collenchymas&#39;</a> SharedTensor, an N-dimensional array
+for a unified memory interface over the actual data for automatic synchronization between
+different devices (CUDA, OpenCL, host CPU). A SharedTensor stores the actual data flowing
+through the system and the weights required for some Layers.
+The data in a SharedTensor can be copied from backend to backend
+and can be used for computations on CUDA, OpenCL and native host CPU.
+It provides performance optimizations and automatically takes care of memory management and synchronization.</p>
+
+<p>A neural network can be created by combining container layers like the <code>Sequential</code> Layer.
+Those can be nested and allow for bigger neural networks to be constructed while still
+retaining the interface of a Layer.</p>
+
+<p>The learning and optimization of the Network happens at the [Solver][solver] and is decoupled
+from the network making the setup clean and flexible. One of the four layer types is a Loss
+Layer, which is used for the interaction of Network and Solver. The Network produces the loss
+and gradients, which the Solver uses to optimize the Network through parameter updates. Beside
+that, the Solver provides housekeeping and other evaluations of the Network. All operation
+on the Solver happen through Collenchyma, therefore can be executed on Cuda, OpenCL or native
+host CPU as well.</p>
+
+<p>Leaf provides a robust and modular design, which allows to express almost any numerical
+computation including SVMs, RNNs and other popular learning algorithms. We hope that Leaf can
+help future research and production development alike as it combines expressiveness,
+performance and usability.</p>
+
+<h2 id='philosophy' class='section-header'><a href='#philosophy'>Philosophy</a></h2>
+<p>We are strong believers in the technology of Machine Learning.</p>
+
+<p>We put our experience in software engineering into Leaf, to solve our own
+need for a modern, performant and easy-to-use Deep Learning Framework.
+These principles direct our decisions on Leaf and related projects.</p>
+
+<ul>
+<li><strong>Cutting Edge Performance</strong>:</br>
+For research and industry speed and efficency are curcial for
+state-of-the-art machine learning over massive data and networks.</li>
+<li><strong>Open and Expressive Architecture</strong>:</br>
+Designing an open architecture that follows best practices and concepts in
+Engineering such as modularity, flexibility and expressiveness is critical
+to stimulate future innovation.</li>
+<li><strong>Clear and Transparent Documentation</strong>:</br>
+A well-written documentation that addresses both concepts and
+implementations, empowers developers and researchers to contribute their
+unique experience to the project for the benefit of everyone.</li>
+</ul>
+
+<h2 id='development' class='section-header'><a href='#development'>Development</a></h2>
+<p>The implementation of various Layers is pretty scarce at the moment.<br/>
+There are around a dozen layers, which are really important and would
+increase the value and functionality of Leaf tremendously.<br/>
+Progress is tracked at<br/></p>
+
+<ul>
+<li><a href="https://github.com/autumnai/leaf/issues/18">Issue #18 for Loss Layers</a></li>
+<li><a href="https://github.com/autumnai/leaf/issues/19">Issue #19 for Activation Layers</a></li>
+<li><a href="https://github.com/autumnai/leaf/issues/20">Issue #20 for Common Layers</a></li>
+</ul>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='layer/index.html'
+                               title='leaf::layer'>layer</a></td>
+                        <td class='docblock short'>
+                             <p>Provides the generics and interfaces for the specific Layers.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='layers/index.html'
+                               title='leaf::layers'>layers</a></td>
+                        <td class='docblock short'>
+                             <p>Provides the fundamental units of computation in a Neural Network.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='solver/index.html'
+                               title='leaf::solver'>solver</a></td>
+                        <td class='docblock short'>
+                             <p>Provides the generics and interfaces for the specific Solvers.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='solvers/index.html'
+                               title='leaf::solvers'>solvers</a></td>
+                        <td class='docblock short'>
+                             <p>Provides the trainers for the Layers.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='util/index.html'
+                               title='leaf::util'>util</a></td>
+                        <td class='docblock short'>
+                             <p>Provides common utility functions</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='weight/index.html'
+                               title='leaf::weight'>weight</a></td>
+                        <td class='docblock short'>
+                             <p>Provides configuration of weights and their initialization.</p>
+
+                        </td>
+                    </tr>
+                </table><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='macro' href='macro.impl_ilayer_activation!.html'
+                               title='leaf::impl_ilayer_activation!'>impl_ilayer_activation!</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='macro' href='macro.impl_ilayer_common!.html'
+                               title='leaf::impl_ilayer_common!'>impl_ilayer_common!</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='macro' href='macro.impl_ilayer_loss!.html'
+                               title='leaf::impl_ilayer_loss!'>impl_ilayer_loss!</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='macro' href='macro.impl_isolver_sgd!.html'
+                               title='leaf::impl_isolver_sgd!'>impl_isolver_sgd!</a></td>
+                        <td class='docblock short'>
+                             <p>Implement <a href="./solver/trait.ISolver.html">ISolver</a> for <a href="./solvers/sgd/index.html">SGD solvers</a>.</p>
+
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "leaf";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

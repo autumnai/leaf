@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="Source to the Rust file `src/solvers/mod.rs`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang">
+
+    <title>mod.rs.html -- source</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content source"><pre class="line-numbers"><span id="1">  1</span>
+<span id="2">  2</span>
+<span id="3">  3</span>
+<span id="4">  4</span>
+<span id="5">  5</span>
+<span id="6">  6</span>
+<span id="7">  7</span>
+<span id="8">  8</span>
+<span id="9">  9</span>
+<span id="10"> 10</span>
+<span id="11"> 11</span>
+<span id="12"> 12</span>
+<span id="13"> 13</span>
+<span id="14"> 14</span>
+<span id="15"> 15</span>
+<span id="16"> 16</span>
+<span id="17"> 17</span>
+<span id="18"> 18</span>
+<span id="19"> 19</span>
+<span id="20"> 20</span>
+<span id="21"> 21</span>
+<span id="22"> 22</span>
+<span id="23"> 23</span>
+<span id="24"> 24</span>
+<span id="25"> 25</span>
+<span id="26"> 26</span>
+<span id="27"> 27</span>
+<span id="28"> 28</span>
+<span id="29"> 29</span>
+<span id="30"> 30</span>
+<span id="31"> 31</span>
+<span id="32"> 32</span>
+<span id="33"> 33</span>
+<span id="34"> 34</span>
+<span id="35"> 35</span>
+<span id="36"> 36</span>
+<span id="37"> 37</span>
+<span id="38"> 38</span>
+<span id="39"> 39</span>
+<span id="40"> 40</span>
+<span id="41"> 41</span>
+<span id="42"> 42</span>
+<span id="43"> 43</span>
+<span id="44"> 44</span>
+<span id="45"> 45</span>
+<span id="46"> 46</span>
+<span id="47"> 47</span>
+<span id="48"> 48</span>
+<span id="49"> 49</span>
+<span id="50"> 50</span>
+<span id="51"> 51</span>
+<span id="52"> 52</span>
+<span id="53"> 53</span>
+<span id="54"> 54</span>
+<span id="55"> 55</span>
+<span id="56"> 56</span>
+<span id="57"> 57</span>
+<span id="58"> 58</span>
+<span id="59"> 59</span>
+<span id="60"> 60</span>
+<span id="61"> 61</span>
+<span id="62"> 62</span>
+<span id="63"> 63</span>
+<span id="64"> 64</span>
+<span id="65"> 65</span>
+<span id="66"> 66</span>
+<span id="67"> 67</span>
+<span id="68"> 68</span>
+<span id="69"> 69</span>
+<span id="70"> 70</span>
+<span id="71"> 71</span>
+<span id="72"> 72</span>
+<span id="73"> 73</span>
+<span id="74"> 74</span>
+<span id="75"> 75</span>
+<span id="76"> 76</span>
+<span id="77"> 77</span>
+<span id="78"> 78</span>
+<span id="79"> 79</span>
+<span id="80"> 80</span>
+<span id="81"> 81</span>
+<span id="82"> 82</span>
+<span id="83"> 83</span>
+<span id="84"> 84</span>
+<span id="85"> 85</span>
+<span id="86"> 86</span>
+<span id="87"> 87</span>
+<span id="88"> 88</span>
+<span id="89"> 89</span>
+<span id="90"> 90</span>
+<span id="91"> 91</span>
+<span id="92"> 92</span>
+<span id="93"> 93</span>
+<span id="94"> 94</span>
+<span id="95"> 95</span>
+<span id="96"> 96</span>
+<span id="97"> 97</span>
+<span id="98"> 98</span>
+<span id="99"> 99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+</pre><pre class='rust '>
+<span class='doccomment'>//! Provides the trainers for the Layers.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! The optimal state of a neural network would be the one where</span>
+<span class='doccomment'>//! for any given input to the network, it would produce an output perfectly</span>
+<span class='doccomment'>//! matching the target function. In that state the loss function would have its</span>
+<span class='doccomment'>//! [global minimum][minimum].</span>
+<span class='doccomment'>//! This statement can also be reversed to *if we manage to minimize</span>
+<span class='doccomment'>//! the loss function of the network, we map the target function*.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! We can change the way a network works by adjusting its individual</span>
+<span class='doccomment'>//! [weights][weight]. So to optimize the network we want to adjust</span>
+<span class='doccomment'>//! the weights in a way that the loss function will be minimized.</span>
+<span class='doccomment'>//! If we want to know how to correctly adjust a single weight,</span>
+<span class='doccomment'>//! we have to get to know the effect of that weight</span>
+<span class='doccomment'>//! on the loss function (= the *gradient*).</span>
+<span class='doccomment'>//! This can be done via a method called [*backpropagation*][backprop].</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! There are different methods of how a Solver solves for the minimum of the</span>
+<span class='doccomment'>//! loss function. They mostly differ in two ways:</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! - How to execute the backpropagation to compute the gradient.</span>
+<span class='doccomment'>//! - How to comute the weight update from the gradient.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! [layer]: ../layer/index.html</span>
+<span class='doccomment'>//! [loss]: ../layers/loss/index.html</span>
+<span class='doccomment'>//! [weight]: https://en.wikipedia.org/wiki/Synaptic_weight</span>
+<span class='doccomment'>//! [minimum]: http://mathworld.wolfram.com/GlobalMinimum.html</span>
+<span class='doccomment'>//! [backprop]: https://en.wikipedia.org/wiki/Backpropagation</span>
+
+<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>unused_import_braces</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>sgd</span>::{<span class='ident'>Momentum</span>};
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>sgd</span>;
+
+<span class='kw'>use</span> <span class='ident'>co</span>::{<span class='ident'>IBackend</span>, <span class='ident'>MemoryType</span>, <span class='ident'>SharedTensor</span>};
+<span class='kw'>use</span> <span class='ident'>conn</span>::<span class='ident'>NN</span>;
+<span class='kw'>use</span> <span class='ident'>solver</span>::<span class='op'>*</span>;
+<span class='kw'>use</span> <span class='ident'>layer</span>::<span class='op'>*</span>;
+<span class='kw'>use</span> <span class='ident'>util</span>::<span class='op'>*</span>;
+
+<span class='kw'>trait</span> <span class='ident'>SGDSolver</span><span class='op'>&lt;</span><span class='ident'>SolverB</span>: <span class='ident'>IBackend</span> <span class='op'>+</span> <span class='ident'>SolverOps</span><span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;</span>, <span class='ident'>NetB</span>: <span class='ident'>IBackend</span> <span class='op'>+</span> <span class='ident'>LayerOps</span><span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;&gt;</span> : <span class='ident'>ISolver</span><span class='op'>&lt;</span><span class='ident'>SolverB</span>, <span class='ident'>NetB</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>compute_update_value</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>,
+                            <span class='ident'>config</span>: <span class='kw-2'>&amp;</span><span class='ident'>SolverConfig</span>,
+                            <span class='ident'>weight_blob</span>: <span class='kw-2'>&amp;</span><span class='ident'>ArcLock</span><span class='op'>&lt;</span><span class='ident'>SharedTensor</span><span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;&gt;</span>,
+                            <span class='ident'>history_blob_id</span>: <span class='ident'>usize</span>,
+                            <span class='ident'>global_lr</span>: <span class='kw-2'>&amp;</span><span class='ident'>f32</span>,
+                            <span class='ident'>blob_lr</span>: <span class='kw-2'>&amp;</span><span class='ident'>f32</span>);
+
+    <span class='doccomment'>/// [Clip gradients][1] when they exceed [SolverConfig.clip_gradients][2].</span>
+    <span class='doccomment'>/// [1]: http://arxiv.org/abs/1211.5063</span>
+    <span class='doccomment'>/// [2]: ../solver/struct.SolverConfig.html</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// [Gradient norm clipping][1] is a technique used when dealing with</span>
+    <span class='doccomment'>/// [Recurrent Neural Networks][3].</span>
+    <span class='doccomment'>/// When the [L2 norm][4] of the gradients exceeds a threshold it is &quot;clipped&quot;</span>
+    <span class='doccomment'>/// to that threshold. The naming can be misleading since the gradients are not</span>
+    <span class='doccomment'>/// actually clipped (as in cut off), but rescaled to the threshold.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// [3]: https://en.wikipedia.org/wiki/Recurrent_neural_network</span>
+    <span class='doccomment'>/// [4]: https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm</span>
+    <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>unused_must_use</span>)]</span>
+    <span class='kw'>fn</span> <span class='ident'>clip_gradients</span><span class='op'>&lt;</span><span class='ident'>B</span>: <span class='ident'>IBackend</span> <span class='op'>+</span> <span class='ident'>LayerOps</span><span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>config</span>: <span class='kw-2'>&amp;</span><span class='ident'>SolverConfig</span>, <span class='ident'>net</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Layer</span><span class='op'>&lt;</span><span class='ident'>B</span><span class='op'>&gt;</span>) {
+        <span class='comment'>// skip clipping gradients if SolverConfig.clip_gradients is set to None</span>
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>clip_threshold</span>) <span class='op'>=</span> <span class='ident'>config</span>.<span class='ident'>clip_gradients</span> {
+            <span class='kw'>let</span> <span class='ident'>native</span> <span class='op'>=</span> <span class='ident'>native_backend</span>();
+
+            <span class='kw'>let</span> <span class='ident'>net_gradients</span> <span class='op'>=</span> <span class='ident'>net</span>.<span class='ident'>learnable_weights_gradients</span>();
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sumsq_diff</span> <span class='op'>=</span> <span class='number'>0f32</span>;
+            <span class='kw'>let</span> <span class='ident'>backend</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>backend</span>();
+            <span class='kw'>for</span> <span class='ident'>net_gradient</span> <span class='kw'>in</span> <span class='ident'>net_gradients</span>.<span class='ident'>clone</span>() {
+                <span class='kw'>let</span> <span class='ident'>gradient</span> <span class='op'>=</span> <span class='ident'>net_gradient</span>.<span class='ident'>read</span>().<span class='ident'>unwrap</span>();
+                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>SharedTensor</span>::<span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;</span>::<span class='ident'>new</span>(<span class='ident'>IBackend</span>::<span class='ident'>device</span>(<span class='ident'>backend</span>), <span class='kw-2'>&amp;</span><span class='number'>1</span>).<span class='ident'>unwrap</span>();
+                <span class='comment'>// gradient.sumsq_diff(self.backend(), &amp;mut result);</span>
+                <span class='self'>self</span>.<span class='ident'>backend</span>().<span class='ident'>dot_plain</span>(<span class='kw-2'>&amp;</span><span class='ident'>gradient</span>, <span class='kw-2'>&amp;</span><span class='ident'>gradient</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>result</span>);
+
+                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>SharedTensor</span>::<span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;</span>::<span class='ident'>new</span>(<span class='ident'>IBackend</span>::<span class='ident'>device</span>(<span class='ident'>backend</span>), <span class='kw-2'>&amp;</span><span class='number'>1</span>).<span class='ident'>unwrap</span>();
+                <span class='kw'>match</span> <span class='ident'>result</span>.<span class='ident'>add_device</span>(<span class='ident'>native</span>.<span class='ident'>device</span>()) { _ <span class='op'>=&gt;</span> <span class='ident'>result</span>.<span class='ident'>sync</span>(<span class='ident'>native</span>.<span class='ident'>device</span>()).<span class='ident'>unwrap</span>() }
+                <span class='kw'>match</span>  <span class='ident'>result</span>.<span class='ident'>get</span>(<span class='ident'>native</span>.<span class='ident'>device</span>()).<span class='ident'>unwrap</span>() {
+                    <span class='kw-2'>&amp;</span><span class='ident'>MemoryType</span>::<span class='ident'>Native</span>(<span class='kw-2'>ref</span> <span class='ident'>sumsq_result</span>) <span class='op'>=&gt;</span> {
+                        <span class='kw'>let</span> <span class='ident'>sumsq_diff_slice</span> <span class='op'>=</span> <span class='ident'>sumsq_result</span>.<span class='ident'>as_slice</span>::<span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;</span>();
+                        <span class='ident'>sumsq_diff</span> <span class='op'>+=</span> <span class='ident'>sumsq_diff_slice</span>[<span class='number'>0</span>];
+                    },
+                    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>any</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;opencl&quot;</span>, <span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;cuda&quot;</span>))]</span>
+                    _ <span class='op'>=&gt;</span> {}
+                }
+            }
+            <span class='kw'>let</span> <span class='ident'>l2norm_diff</span> <span class='op'>=</span> <span class='ident'>sumsq_diff</span>.<span class='ident'>sqrt</span>();
+            <span class='kw'>if</span> <span class='ident'>l2norm_diff</span> <span class='op'>&gt;</span> <span class='ident'>clip_threshold</span> {
+                <span class='kw'>let</span> <span class='ident'>scale_factor</span> <span class='op'>=</span> <span class='ident'>clip_threshold</span> <span class='op'>/</span> <span class='ident'>l2norm_diff</span>;
+                <span class='macro'>info</span><span class='macro'>!</span>(<span class='string'>&quot;Gradient clipping: scaling down gradients (L2 norm {} &gt; {})
+                        by scale factor {}&quot;</span>,
+                      <span class='ident'>l2norm_diff</span>,
+                      <span class='ident'>clip_threshold</span>,
+                      <span class='ident'>scale_factor</span>);
+
+                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>scale_shared</span> <span class='op'>=</span> <span class='ident'>native_scalar</span>(<span class='ident'>scale_factor</span>);
+
+                <span class='kw'>for</span> <span class='ident'>weight_gradient</span> <span class='kw'>in</span> <span class='ident'>net_gradients</span> {
+                    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>gradient</span> <span class='op'>=</span> <span class='ident'>weight_gradient</span>.<span class='ident'>write</span>().<span class='ident'>unwrap</span>();
+                    <span class='ident'>backend</span>.<span class='ident'>scal</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>scale_shared</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>gradient</span>);
+                }
+            }
+        }
+    }
+
+    <span class='doccomment'>/// Scale the gradient to counteract the [SolverConfig.minibatch_size][1]</span>
+    <span class='doccomment'>/// [1]: ../solver/struct.SolverConfig.html</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// To counteract that we are accumulating the gradients over multiple samples,</span>
+    <span class='doccomment'>/// we need to scale the gradients down to the equivalent of a single sample.&lt;/br&gt;</span>
+    <span class='doccomment'>/// E.g. with a `minibatch_size` of 4 we need to scale the gradient by 0.25 (= 1/4).</span>
+    <span class='kw'>fn</span> <span class='ident'>normalize</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>config</span>: <span class='kw-2'>&amp;</span><span class='ident'>SolverConfig</span>, <span class='ident'>weight_blob</span>: <span class='kw-2'>&amp;</span><span class='ident'>ArcLock</span><span class='op'>&lt;</span><span class='ident'>SharedTensor</span><span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;&gt;</span>) {
+        <span class='kw'>if</span> <span class='ident'>config</span>.<span class='ident'>minibatch_size</span> <span class='op'>&gt;</span> <span class='number'>1</span> {
+            <span class='kw'>let</span> <span class='ident'>scale_factor</span> <span class='op'>=</span> <span class='number'>1f32</span> <span class='op'>/</span> <span class='ident'>config</span>.<span class='ident'>minibatch_size</span> <span class='kw'>as</span> <span class='ident'>f32</span>;
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>gradient</span> <span class='op'>=</span> <span class='ident'>weight_blob</span>.<span class='ident'>write</span>().<span class='ident'>unwrap</span>();
+            <span class='kw'>let</span> <span class='ident'>native</span> <span class='op'>=</span> <span class='ident'>native_backend</span>();
+
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>scale_factor_shared</span> <span class='op'>=</span> <span class='ident'>native_scalar</span>(<span class='ident'>scale_factor</span>);
+            <span class='comment'>// self.backend().scal_plain(&amp;scale_factor_shared, &amp;mut gradient).unwrap();</span>
+            <span class='self'>self</span>.<span class='ident'>backend</span>().<span class='ident'>scal</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>scale_factor_shared</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>gradient</span>).<span class='ident'>unwrap</span>();
+        }
+    }
+
+    <span class='doccomment'>/// [Regularize][1] the gradient according to the configured [RegularizationMethod][2].</span>
+    <span class='doccomment'>/// [1]: https://cs231n.github.io/neural-networks-2/#reg</span>
+    <span class='doccomment'>/// [2]: ../solver/enum.RegularizationMethod.html</span>
+    <span class='kw'>fn</span> <span class='ident'>regularize</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>config</span>: <span class='kw-2'>&amp;</span><span class='ident'>SolverConfig</span>, <span class='ident'>weight_gradient</span>: <span class='kw-2'>&amp;</span><span class='ident'>ArcLock</span><span class='op'>&lt;</span><span class='ident'>SharedTensor</span><span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;&gt;</span>, <span class='ident'>blob_weight_decay</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;</span>) {
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>global_weight_decay</span>) <span class='op'>=</span> <span class='ident'>config</span>.<span class='ident'>weight_decay</span> {
+            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>regularization_method</span>) <span class='op'>=</span> <span class='ident'>config</span>.<span class='ident'>regularization_method</span> {
+                <span class='kw'>match</span> <span class='ident'>blob_weight_decay</span> {
+                    <span class='prelude-val'>Some</span>(<span class='ident'>weight_decay_mult</span>) <span class='op'>=&gt;</span> {
+                        <span class='kw'>let</span> <span class='ident'>local_decay</span> <span class='op'>=</span> <span class='ident'>global_weight_decay</span> <span class='op'>*</span> <span class='ident'>weight_decay_mult</span>;
+                        <span class='kw'>match</span> <span class='ident'>regularization_method</span> {
+                            <span class='ident'>RegularizationMethod</span>::<span class='ident'>L2</span> <span class='op'>=&gt;</span> {
+                                <span class='kw'>let</span> <span class='ident'>native</span> <span class='op'>=</span> <span class='ident'>native_backend</span>();
+                                <span class='kw'>let</span> <span class='ident'>decay_shared</span> <span class='op'>=</span> <span class='ident'>native_scalar</span>(<span class='ident'>local_decay</span>);
+                                <span class='kw'>let</span> <span class='ident'>gradient</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>weight_gradient</span>.<span class='ident'>write</span>().<span class='ident'>unwrap</span>();
+                                <span class='comment'>// gradient.regularize_l2(self.backend(), &amp;decay_shared);</span>
+                                <span class='comment'>// backend.axpy_plain(&amp;decay_shared, &amp;self.data, &amp;mut self.diff).unwrap();</span>
+                                <span class='comment'>// TODO: solver</span>
+                                <span class='macro'>unimplemented</span><span class='macro'>!</span>();
+                            }
+                        }
+                    }
+                    <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
+                        <span class='macro'>error</span><span class='macro'>!</span>(<span class='string'>&quot;Weight decay multiplier for gradient missing.&quot;</span>);
+                    }
+                }
+            }
+        }
+    }
+}
+</pre>
+</section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "leaf";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

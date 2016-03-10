@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Layer` struct in crate `leaf`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Layer">
+
+    <title>leaf::layer::Layer - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>leaf</a>::<wbr><a href='index.html'>layer</a></p><script>window.sidebarCurrent = {name: 'Layer', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>leaf</a>::<wbr><a href='index.html'>layer</a>::<wbr><a class='struct' href=''>Layer</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-22' class='srclink' href='../../src/leaf/layer.rs.html#17-82' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Layer&lt;B: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a>&gt; {
+    pub name: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    pub config: <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='struct' href='../../leaf/layer/struct.LayerConfig.html' title='leaf::layer::LayerConfig'>LayerConfig</a>&gt;,
+    pub worker: <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../leaf/layer/trait.ILayer.html' title='leaf::layer::ILayer'>ILayer</a>&lt;B&gt;&gt;,
+    pub weights_data: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;&gt;,
+    pub weights_gradient: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;&gt;,
+    pub input_blobs_data: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;&gt;,
+    pub input_blobs_gradient: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;&gt;,
+    pub input_blob_names: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
+    pub output_blobs_data: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;&gt;,
+    pub output_blobs_gradient: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;&gt;,
+    pub blob_names: <a class='struct' href='https://doc.rust-lang.org/nightly/std/collections/hash/map/struct.HashMap.html' title='std::collections::hash::map::HashMap'>HashMap</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;, <a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;)</a>&gt;,
+    // some fields omitted
+}</pre><div class='docblock'><p>The generic Layer</p>
+</div><h2 class='fields'>Fields</h2>
+<table><tr class='stab '>
+                                  <td id='structfield.name'><code>name</code></td><td><div class='docblock'><p>Identifies the Network</p>
+
+<p>The name is mainly used for logging purposes.</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.config'><code>config</code></td><td><div class='docblock'><p>The configuration of the Layer</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.worker'><code>worker</code></td><td><div class='docblock'><p>The <a href="../layers/index.html">implementation</a> of the Layer.</p>
+
+<p>This is the part that does most of the work (<a href="./trait.ILayer.html#method.forward">forward</a>/<a href="./trait.ILayer.html#method.backward">backward</a>).</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.weights_data'><code>weights_data</code></td><td><div class='docblock'><p>The vector that stores shared references to the weights in the form of blobs.</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.weights_gradient'><code>weights_gradient</code></td><td><div class='docblock'><p>The vector that stores shared references to the weights in the form of blobs.</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.input_blobs_data'><code>input_blobs_data</code></td><td><div class='docblock'><p>References to all the input blobs of the layer.</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.input_blobs_gradient'><code>input_blobs_gradient</code></td><td><div class='docblock'><p>References to all the input blobs of the layer.</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.input_blob_names'><code>input_blob_names</code></td><td><div class='docblock'><p>Names for all the input blobs of the layer.</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.output_blobs_data'><code>output_blobs_data</code></td><td><div class='docblock'><p>References to all the output blobs of the layer.</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.output_blobs_gradient'><code>output_blobs_gradient</code></td><td><div class='docblock'><p>References to all the output blobs of the layer.</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.blob_names'><code>blob_names</code></td><td><div class='docblock'><p>All the blobs of the layer that can be addressed by name.</p>
+
+<p>Does not contain anonymous blobs.</p>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;B: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a>&gt; <a class='struct' href='../../leaf/layer/struct.Layer.html' title='leaf::layer::Layer'>Layer</a>&lt;B&gt;</code></h3><div class='impl-items'><h4 id='method.connect' class='method'><code>fn <a href='#method.connect' class='fnname'>connect</a>(&amp;mut self, registry: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/std/collections/hash/map/struct.HashMap.html' title='std::collections::hash::map::HashMap'>HashMap</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;, <a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;)</a>&gt;, weight_registry: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/std/collections/hash/map/struct.HashMap.html' title='std::collections::hash::map::HashMap'>HashMap</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;, <a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;, <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;, <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;)</a>&gt;)</code></h4>
+<div class='docblock'><p>Connect the layer to another layers and set up tensors for intermediate results and weights.</p>
+
+<p>Connects to the outputs provided by other layers via the <code>registry</code>.
+Adds output blobs to the layer and then adds them to the <code>registry</code>, so the next
+layers can connect them as their inputs.
+In the end it initializes the underlying <a href="./trait.ILayer.html">layer implementation</a>.</p>
+
+<p>Called during initialization of containter layers.</p>
+</div><h4 id='method.init_backprop' class='method'><code>fn <a href='#method.init_backprop' class='fnname'>init_backprop</a>(&amp;mut self, blobs_under_loss: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/std/collections/hash/set/struct.HashSet.html' title='std::collections::hash::set::HashSet'>HashSet</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;, blobs_skip_backp: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/std/collections/hash/set/struct.HashSet.html' title='std::collections::hash::set::HashSet'>HashSet</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;)</code></h4>
+<div class='docblock'><p>Initializes layer for <a href="https://en.wikipedia.org/wiki/Backpropagation">backpropagation</a></p>
+
+<p>Go through all the blobs of a layer to determine which blobs contribute to the
+loss of the next layer. We can skip backward computation for blobs that don&#39;t contribute
+to the loss.
+If all of the blobs skip backpropagation we set a flag to skip backpropagation
+of the whole layer.</p>
+</div><h4 id='method.init_force_backward' class='method'><code>fn <a href='#method.init_force_backward' class='fnname'>init_force_backward</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Set <a href="https://en.wikipedia.org/wiki/Backpropagation">backpropagation</a> flags to force this layer to backpropagate.</p>
+
+<p>Is executed during Network initalization if [NetworkConfig][2].force_backward is true.
+Forcing backpropagation is useful for debugging.</p>
+</div><h4 id='method.forward' class='method'><code>fn <a href='#method.forward' class='fnname'>forward</a>(&amp;mut self, inputs: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;&gt;</code></h4>
+<div class='docblock'><p>Uses the underlying layer implementation to compute a forward step.</p>
+
+<p>See <a href="./trait.ILayer.html#method.forward">ILayer.forward</a></p>
+</div><h4 id='method.backward' class='method'><code>fn <a href='#method.backward' class='fnname'>backward</a>(&amp;mut self, output_gradients: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;&gt;</code></h4>
+<div class='docblock'><p>Uses the underlying layer implementation to compute a backward step.</p>
+
+<p>See <a href="./trait.ILayer.html#method.backward">ILayer.backward</a></p>
+</div><h4 id='method.backward_input' class='method'><code>fn <a href='#method.backward_input' class='fnname'>backward_input</a>(&amp;mut self, output_gradients: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;&gt;</code></h4>
+<div class='docblock'><p>Calculate the gradient w.r.t. input.</p>
+
+<p>This method is mostly used when doing backpropagation.</p>
+</div><h4 id='method.backward_parameters' class='method'><code>fn <a href='#method.backward_parameters' class='fnname'>backward_parameters</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Calculate the gradient w.r.t. parameters.</p>
+
+<p>&quot;Parameters&quot; here refers to weights and also possibly bias, depending on the layer.</p>
+
+<p>This method is mostly used when doing backpropagation.</p>
+</div><h4 id='method.synchronize' class='method'><code>fn <a href='#method.synchronize' class='fnname'>synchronize</a>(&amp;self)</code></h4>
+<div class='docblock'><p>Synchronize the layers backend.</p>
+</div><h4 id='method.update_weights' class='method'><code>fn <a href='#method.update_weights' class='fnname'>update_weights</a>&lt;SolverB: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a> + <a class='trait' href='../../leaf/util/trait.SolverOps.html' title='leaf::util::SolverOps'>SolverOps</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;(&amp;mut self, backend: &amp;SolverB)</code></h4>
+<div class='docblock'><p>Updates the <a href="https://en.wikipedia.org/wiki/Synaptic_weight">weights</a> with the weight update computed by the <a href="../solver/struct.Solver.html">Solver</a>.</p>
+
+<p>Updating the weights is the last step of computing a <a href="../solver/struct.Solver.html">Solver</a> minibatch.
+The update value is computed in previous steps according to the <a href="../solver/enum.LRPolicy.html">learning rate policy</a></p>
+</div><h4 id='method.clear_weights_gradients' class='method'><code>fn <a href='#method.clear_weights_gradients' class='fnname'>clear_weights_gradients</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Clears the <a href="https://en.wikipedia.org/wiki/Synaptic_weight">weights</a> gradients and zero-inits them.</p>
+
+<p>The gradients for the weights accumulate over the backpropagation steps of
+a <a href="../solver/struct.Solver.html">Solver</a> minibatch and are cleared between each minibatch
+to start over with a clean slate.</p>
+</div><h4 id='method.set_weight_propagate_down' class='method'><code>fn <a href='#method.set_weight_propagate_down' class='fnname'>set_weight_propagate_down</a>(&amp;mut self, weight_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, value: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>)</code></h4>
+<div class='docblock'><p>Sets whether the layer should compute gradients w.r.t. a
+weight at a particular index given by <code>weight_id</code>.</p>
+
+<p>See [<code>weight_propagate_down</code>][1]
+./struct.Layer.html</p>
+</div><h4 id='method.is_using_in_place' class='method'><code>fn <a href='#method.is_using_in_place' class='fnname'>is_using_in_place</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns <code>true</code> when the layer is using in-place computation.</p>
+
+<p>For a layer to use in-place computation it needs to support it via <code>compute_in_place</code>
+and the names of the first input and output tensor have to match.</p>
+</div><h4 id='method.input_blob_names' class='method'><code>fn <a href='#method.input_blob_names' class='fnname'>input_blob_names</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a></code></h4>
+<div class='docblock'><p>Returns the names of all the input blobs.</p>
+</div><h4 id='method.loss' class='method'><code>fn <a href='#method.loss' class='fnname'>loss</a>(&amp;self, weight_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;</code></h4>
+<div class='docblock'><p>Returns the <a href="http://caffe.berkeleyvision.org/tutorial/loss.html">loss weight</a> associated with the weight blob
+with id <code>weight_id</code>.</p>
+</div><h4 id='method.learnable_weights_data' class='method'><code>fn <a href='#method.learnable_weights_data' class='fnname'>learnable_weights_data</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;&gt;</code></h4>
+<div class='docblock'><p>Returns all the learnable weights in the layer.</p>
+
+<p>If the layer is a container layer it will return all the weights of the
+layers inside it.</p>
+</div><h4 id='method.learnable_weights_gradients' class='method'><code>fn <a href='#method.learnable_weights_gradients' class='fnname'>learnable_weights_gradients</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='type' href='../../leaf/util/type.ArcLock.html' title='leaf::util::ArcLock'>ArcLock</a>&lt;<a class='struct' href='../../collenchyma/tensor/struct.SharedTensor.html' title='collenchyma::tensor::SharedTensor'>SharedTensor</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;&gt;</code></h4>
+<div class='docblock'><p>Returns the gradients for all the learnable weights in the layer.</p>
+
+<p>If the layer is a container layer it will return all the gradients of the
+layers inside it.</p>
+</div><h4 id='method.learnable_weights_lr' class='method'><code>fn <a href='#method.learnable_weights_lr' class='fnname'>learnable_weights_lr</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt;</code></h4>
+<div class='docblock'><p>Returns the learning rate for all the learnable weights in the layer.</p>
+
+<p>If the layer is a container layer it will return all learning rates of the
+layers inside it.</p>
+</div></div><h3 class='impl'><code>impl&lt;B: <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a> + <a class='trait' href='../../leaf/util/trait.LayerOps.html' title='leaf::util::LayerOps'>LayerOps</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt; + 'static&gt; <a class='struct' href='../../leaf/layer/struct.Layer.html' title='leaf::layer::Layer'>Layer</a>&lt;B&gt;</code></h3><div class='impl-items'><h4 id='method.from_config' class='method'><code>fn <a href='#method.from_config' class='fnname'>from_config</a>(backend: <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html' title='alloc::rc::Rc'>Rc</a>&lt;B&gt;, config: &amp;<a class='struct' href='../../leaf/layer/struct.LayerConfig.html' title='leaf::layer::LayerConfig'>LayerConfig</a>) -&gt; <a class='struct' href='../../leaf/layer/struct.Layer.html' title='leaf::layer::Layer'>Layer</a>&lt;B&gt;</code></h4>
+<div class='docblock'><p>Creates a new Layer from a <a href="./struct.LayerConfig.html">LayerConfig</a>.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl&lt;B: <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> + <a class='trait' href='../../collenchyma/backend/trait.IBackend.html' title='collenchyma::backend::IBackend'>IBackend</a>&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../../leaf/layer/struct.Layer.html' title='leaf::layer::Layer'>Layer</a>&lt;B&gt;</code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "leaf";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

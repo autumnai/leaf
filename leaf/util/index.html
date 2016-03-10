@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `util` mod in crate `leaf`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, util">
+
+    <title>leaf::util - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>leaf</a></p><script>window.sidebarCurrent = {name: 'util', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>leaf</a>::<wbr><a class='mod' href=''>util</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-2556' class='srclink' href='../../src/leaf/util.rs.html#1-121' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Provides common utility functions</p>
+</div><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='trait' href='trait.Axpby.html'
+                               title='leaf::util::Axpby'>Axpby</a></td>
+                        <td class='docblock short'>
+                             <p>Extends IBlas with Axpby</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='trait' href='trait.LayerOps.html'
+                               title='leaf::util::LayerOps'>LayerOps</a></td>
+                        <td class='docblock short'>
+                             <p>Encapsulates all traits used in Layers.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='trait' href='trait.SolverOps.html'
+                               title='leaf::util::SolverOps'>SolverOps</a></td>
+                        <td class='docblock short'>
+                             <p>Encapsulates all traits required by Solvers.</p>
+
+                        </td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cast_vec_usize_to_i32.html'
+                               title='leaf::util::cast_vec_usize_to_i32'>cast_vec_usize_to_i32</a></td>
+                        <td class='docblock short'>
+                             <p>Casts a Vec<usize> to as Vec<i32></p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.native_backend.html'
+                               title='leaf::util::native_backend'>native_backend</a></td>
+                        <td class='docblock short'>
+                             <p>Create a simple native backend.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.native_scalar.html'
+                               title='leaf::util::native_scalar'>native_scalar</a></td>
+                        <td class='docblock short'>
+                             <p>Create a Collenchyma SharedTensor for a scalar value.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.write_batch_sample.html'
+                               title='leaf::util::write_batch_sample'>write_batch_sample</a></td>
+                        <td class='docblock short'>
+                             <p>Write the <code>i</code>th sample of a batch into a SharedTensor.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.write_to_memory.html'
+                               title='leaf::util::write_to_memory'>write_to_memory</a></td>
+                        <td class='docblock short'>
+                             <p>Write into a native Collenchyma Memory.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.write_to_memory_offset.html'
+                               title='leaf::util::write_to_memory_offset'>write_to_memory_offset</a></td>
+                        <td class='docblock short'>
+                             <p>Write into a native Collenchyma Memory with a offset.</p>
+
+                        </td>
+                    </tr>
+                </table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='type' href='type.ArcLock.html'
+                               title='leaf::util::ArcLock'>ArcLock</a></td>
+                        <td class='docblock short'>
+                             <p>Shared Lock used for our tensors</p>
+
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "leaf";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

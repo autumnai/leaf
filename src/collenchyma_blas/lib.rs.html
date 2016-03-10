@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="Source to the Rust file `/home/travis/.cargo/registry/src/github.com-88ac128001ac3a9a/collenchyma-blas-0.2.0/src/lib.rs`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang">
+
+    <title>lib.rs.html -- source</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content source"><pre class="line-numbers"><span id="1"> 1</span>
+<span id="2"> 2</span>
+<span id="3"> 3</span>
+<span id="4"> 4</span>
+<span id="5"> 5</span>
+<span id="6"> 6</span>
+<span id="7"> 7</span>
+<span id="8"> 8</span>
+<span id="9"> 9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+</pre><pre class='rust '>
+<span class='doccomment'>//! Provides backend-agnostic BLAS operations for [Collenchyma][collenchyma].</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! BLAS (Basic Linear Algebra Subprograms) is a specification that prescribes a set of low-level</span>
+<span class='doccomment'>//! routines for performing common linear algebra operations such as vector addition, scalar</span>
+<span class='doccomment'>//! multiplication, dot products, linear combinations, and matrix multiplication. They are the de</span>
+<span class='doccomment'>//! facto standard low-level routines for linear algebra libraries; the routines have bindings for</span>
+<span class='doccomment'>//! both C and Fortran. Although the BLAS specification is general, BLAS implementations are often</span>
+<span class='doccomment'>//! optimized for speed on a particular machine, so using them can bring substantial performance</span>
+<span class='doccomment'>//! benefits. BLAS implementations will take advantage of special floating point hardware such as</span>
+<span class='doccomment'>//! vector registers or SIMD instructions.&lt;br/&gt;</span>
+<span class='doccomment'>//! [Source][blas-source]</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! ## Overview</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! A Collenchyma Plugin describes the functionality through three types of traits.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! * __PluginTrait__ -&gt; IBlas&lt;br/&gt;</span>
+<span class='doccomment'>//! This trait provides &#39;provided methods&#39;, which already specify the exact, backend-agnostic</span>
+<span class='doccomment'>//! behavior of an Operation. These come in two forms `operation()` and `operation_plain()`,</span>
+<span class='doccomment'>//! where the first takes care of full memory management and the later one just provides the computation</span>
+<span class='doccomment'>//! without any memory management. In some scenarios you would like to use the plain operation for faster</span>
+<span class='doccomment'>//! exection.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! * __BinaryTrait__ -&gt; IBlasBinary&lt;br&gt;</span>
+<span class='doccomment'>//! The binary trait provides the actual and potentially initialized Functions, which are able to compute</span>
+<span class='doccomment'>//! the Operations (as they implement the OperationTrait).</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! * __OperationTrait__ -&gt; e.g. IOperationDot&lt;br/&gt;</span>
+<span class='doccomment'>//! The PluginTrait can provide &#39;provided methods&#39;, thanks to the OperationTrait. The OperationTrait,</span>
+<span class='doccomment'>//! has one required method `compute` which every Framework Function will implement on it&#39;s own way.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! Beside these traits a Collenchyma Plugin might also use macros for faster</span>
+<span class='doccomment'>//! implementation for various Collenchyma Frameworks such as CUDA, OpenCL or common host CPU.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! Beside these generic functionality through traits, a Plugin also extends the Collenchyma Backend</span>
+<span class='doccomment'>//! with implementations of the generic functionality for the Collenchyma Frameworks.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! For more information, give the [Collenchyma docs][collenchyma-docs] a visit.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! [collenchyma]: https://github.com/autumnai/collenchyma</span>
+<span class='doccomment'>//! [collenchyma-docs]: http://autumnai.github.io/collenchyma</span>
+<span class='doccomment'>//! [blas-source]: https://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>lint</span>, <span class='ident'>feature</span>(<span class='ident'>plugin</span>))]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>lint</span>, <span class='ident'>plugin</span>(<span class='ident'>clippy</span>))]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>deny</span>(<span class='ident'>missing_docs</span>,
+        <span class='ident'>missing_debug_implementations</span>, <span class='ident'>missing_copy_implementations</span>,
+        <span class='ident'>trivial_casts</span>, <span class='ident'>trivial_numeric_casts</span>,
+        <span class='ident'>unused_import_braces</span>, <span class='ident'>unused_qualifications</span>)]</span>
+
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>lazy_static</span>;
+
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>collenchyma</span>;
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;native&quot;</span>)]</span>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>rblas</span>;
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;cuda&quot;</span>)]</span>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>cublas</span>;
+
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>plugin</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>binary</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>operation</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>transpose</span>;
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span>
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>helper</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>frameworks</span>;
+</pre>
+</section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "collenchyma_blas";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

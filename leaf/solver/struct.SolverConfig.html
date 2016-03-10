@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `SolverConfig` struct in crate `leaf`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, SolverConfig">
+
+    <title>leaf::solver::SolverConfig - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>leaf</a>::<wbr><a href='index.html'>solver</a></p><script>window.sidebarCurrent = {name: 'SolverConfig', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>leaf</a>::<wbr><a href='index.html'>solver</a>::<wbr><a class='struct' href=''>SolverConfig</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-2148' class='srclink' href='../../src/leaf/solver/mod.rs.html#141-218' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct SolverConfig {
+    pub name: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    pub network: <a class='struct' href='../../leaf/layer/struct.LayerConfig.html' title='leaf::layer::LayerConfig'>LayerConfig</a>,
+    pub objective: <a class='struct' href='../../leaf/layer/struct.LayerConfig.html' title='leaf::layer::LayerConfig'>LayerConfig</a>,
+    pub solver: <a class='enum' href='../../leaf/solver/enum.SolverKind.html' title='leaf::solver::SolverKind'>SolverKind</a>,
+    pub minibatch_size: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>,
+    pub lr_policy: <a class='enum' href='../../leaf/solver/enum.LRPolicy.html' title='leaf::solver::LRPolicy'>LRPolicy</a>,
+    pub base_lr: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>,
+    pub gamma: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>,
+    pub stepsize: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>,
+    pub clip_gradients: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;,
+    pub weight_decay: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;,
+    pub regularization_method: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../../leaf/solver/enum.RegularizationMethod.html' title='leaf::solver::RegularizationMethod'>RegularizationMethod</a>&gt;,
+    pub momentum: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>,
+}</pre><div class='docblock'><p>Configuration for a Solver</p>
+</div><h2 class='fields'>Fields</h2>
+<table><tr class='stab '>
+                                  <td id='structfield.name'><code>name</code></td><td><div class='docblock'><p>Name of the solver.</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.network'><code>network</code></td><td><div class='docblock'><p>The <a href="../layer/struct.LayerConfig.html">LayerConfig</a> that is used to initialize the network.</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.objective'><code>objective</code></td><td><div class='docblock'><p>The <a href="../layer/struct.LayerConfig.html">LayerConfig</a> that is used to initialize the objective.</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.solver'><code>solver</code></td><td><div class='docblock'><p>The <a href="../solvers/index.html">Solver implementation</a> to be used.</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.minibatch_size'><code>minibatch_size</code></td><td><div class='docblock'><p>Accumulate gradients over <code>minibatch_size</code> instances.</p>
+
+<p>Default: 1</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.lr_policy'><code>lr_policy</code></td><td><div class='docblock'><p>The learning rate policy to be used.</p>
+
+<p>Default: Fixed</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.base_lr'><code>base_lr</code></td><td><div class='docblock'><p>The base learning rate.</p>
+
+<p>Default: 0.01</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.gamma'><code>gamma</code></td><td><div class='docblock'><p>gamma as used in the calculation of most learning rate policies.</p>
+
+<p>Default: 0.1</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.stepsize'><code>stepsize</code></td><td><div class='docblock'><p>The stepsize used in Step and Sigmoid learning policies.</p>
+
+<p>Default: 10</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.clip_gradients'><code>clip_gradients</code></td><td><div class='docblock'><p>The threshold for clipping gradients.</p>
+
+<p>Gradient values will be scaled to their <a href="https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm">L2 norm</a> of length <code>clip_gradients</code>
+if their L2 norm is larger than <code>clip_gradients</code>.
+If set to <code>None</code> gradients will not be clipped.</p>
+
+<p>Default: None</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.weight_decay'><code>weight_decay</code></td><td><div class='docblock'><p>The global <a href="http://www.alglib.net/dataanalysis/improvinggeneralization.php#header3">weight decay</a> multiplier for <a href="https://cs231n.github.io/neural-networks-2/#reg">regularization</a>.</p>
+
+<p>Regularization can prevent <a href="https://cs231n.github.io/neural-networks-2/#reg">overfitting</a>.</p>
+
+<p>If set to <code>None</code> no regularization will be performed.</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.regularization_method'><code>regularization_method</code></td><td><div class='docblock'><p>The method of <a href="https://cs231n.github.io/neural-networks-2/#reg">regularization</a> to use.</p>
+
+<p>There are different methods for regularization.
+The two most common ones are <a href="https://cs231n.github.io/neural-networks-2/#reg">L1 regularization</a> and <a href="https://cs231n.github.io/neural-networks-2/#reg">L2 regularization</a>.</p>
+
+<p>See <a href="./enum.RegularizationMethod.html">RegularizationMethod</a> for all implemented methods.</p>
+
+<p>Currently only L2 regularization is implemented.
+See <a href="https://github.com/autumnai/leaf/issues/23">Issue #23</a>.</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.momentum'><code>momentum</code></td><td><div class='docblock'><p>The <a href="https://en.wikipedia.org/wiki/Stochastic_gradient_descent#Momentum">momentum</a> multiplier for <a href="../solvers/sgd/index.html">SGD solvers</a>.</p>
+
+<p>For more information see <a href="../solvers/sgd/momentum/index.html">SGD with momentum</a></p>
+
+<p>The value should always be between 0 and 1 and dictates how much of the previous
+gradient update will be added to the current one.</p>
+
+<p>Default: 0</p>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../leaf/solver/struct.SolverConfig.html' title='leaf::solver::SolverConfig'>SolverConfig</a></code></h3><div class='impl-items'><h4 id='method.get_learning_rate' class='method'><code>fn <a href='#method.get_learning_rate' class='fnname'>get_learning_rate</a>(&amp;self, iter: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a></code></h4>
+<div class='docblock'><p>Return the learning rate for a supplied iteration.</p>
+
+<p>The way the learning rate is calculated depends on the configured <a href="./enum.LRPolicy.html">LRPolicy</a>.</p>
+
+<p>Used by the <a href="./struct.Solver.html">Solver</a> to calculate the learning rate for the current iteration.
+The calculated learning rate has a different effect on training dependent on what
+<a href="../solvers/index.html">type of Solver</a> you are using.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/default/trait.Default.html' title='core::default::Default'>Default</a> for <a class='struct' href='../../leaf/solver/struct.SolverConfig.html' title='leaf::solver::SolverConfig'>SolverConfig</a></code></h3><div class='impl-items'><h4 id='method.default' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/default/trait.Default.html#method.default' class='fnname'>default</a>() -&gt; <a class='struct' href='../../leaf/solver/struct.SolverConfig.html' title='leaf::solver::SolverConfig'>SolverConfig</a></code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../leaf/solver/struct.SolverConfig.html' title='leaf::solver::SolverConfig'>SolverConfig</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../leaf/solver/struct.SolverConfig.html' title='leaf::solver::SolverConfig'>SolverConfig</a></code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../../leaf/solver/struct.SolverConfig.html' title='leaf::solver::SolverConfig'>SolverConfig</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "leaf";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

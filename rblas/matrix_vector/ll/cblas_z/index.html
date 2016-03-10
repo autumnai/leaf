@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `cblas_z` mod in crate `rblas`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, cblas_z">
+
+    <title>rblas::matrix_vector::ll::cblas_z - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../../index.html'>rblas</a>::<wbr><a href='../../index.html'>matrix_vector</a>::<wbr><a href='../index.html'>ll</a></p><script>window.sidebarCurrent = {name: 'cblas_z', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../../index.html'>rblas</a>::<wbr><a href='../../index.html'>matrix_vector</a>::<wbr><a href='../index.html'>ll</a>::<wbr><a class='mod' href=''>cblas_z</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-1506' class='srclink' href='../../../../src/rblas/matrix_vector/ll.rs.html#149-197' title='goto source code'>[src]</a></span></h1>
+<h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_zgemv.html' title='rblas::matrix_vector::ll::cblas_z::cblas_zgemv'>cblas_zgemv</a> as gemv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_zsymv.html' title='rblas::matrix_vector::ll::cblas_z::cblas_zsymv'>cblas_zsymv</a> as symv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_zhemv.html' title='rblas::matrix_vector::ll::cblas_z::cblas_zhemv'>cblas_zhemv</a> as hemv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_ztrmv.html' title='rblas::matrix_vector::ll::cblas_z::cblas_ztrmv'>cblas_ztrmv</a> as trmv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_ztrsv.html' title='rblas::matrix_vector::ll::cblas_z::cblas_ztrsv'>cblas_ztrsv</a> as trsv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_zgeru.html' title='rblas::matrix_vector::ll::cblas_z::cblas_zgeru'>cblas_zgeru</a> as geru;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_zgerc.html' title='rblas::matrix_vector::ll::cblas_z::cblas_zgerc'>cblas_zgerc</a> as gerc;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_zher.html' title='rblas::matrix_vector::ll::cblas_z::cblas_zher'>cblas_zher</a> as her;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_zher2.html' title='rblas::matrix_vector::ll::cblas_z::cblas_zher2'>cblas_zher2</a> as her2;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_zgbmv.html' title='rblas::matrix_vector::ll::cblas_z::cblas_zgbmv'>cblas_zgbmv</a> as gbmv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_zhbmv.html' title='rblas::matrix_vector::ll::cblas_z::cblas_zhbmv'>cblas_zhbmv</a> as hbmv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_ztbmv.html' title='rblas::matrix_vector::ll::cblas_z::cblas_ztbmv'>cblas_ztbmv</a> as tbmv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_ztbsv.html' title='rblas::matrix_vector::ll::cblas_z::cblas_ztbsv'>cblas_ztbsv</a> as tbsv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_zhpmv.html' title='rblas::matrix_vector::ll::cblas_z::cblas_zhpmv'>cblas_zhpmv</a> as hpmv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_ztpmv.html' title='rblas::matrix_vector::ll::cblas_z::cblas_ztpmv'>cblas_ztpmv</a> as tpmv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_ztpsv.html' title='rblas::matrix_vector::ll::cblas_z::cblas_ztpsv'>cblas_ztpsv</a> as tpsv;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_zhpr.html' title='rblas::matrix_vector::ll::cblas_z::cblas_zhpr'>cblas_zhpr</a> as hpr;</code></td></tr><tr><td><code>pub use self::<a class='fn' href='../../../../rblas/matrix_vector/ll/cblas_z/fn.cblas_zhpr2.html' title='rblas::matrix_vector::ll::cblas_z::cblas_zhpr2'>cblas_zhpr2</a> as hpr2;</code></td></tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_zgbmv.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_zgbmv'>cblas_zgbmv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_zgemv.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_zgemv'>cblas_zgemv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_zgerc.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_zgerc'>cblas_zgerc</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_zgeru.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_zgeru'>cblas_zgeru</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_zhbmv.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_zhbmv'>cblas_zhbmv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_zhemv.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_zhemv'>cblas_zhemv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_zher.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_zher'>cblas_zher</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_zher2.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_zher2'>cblas_zher2</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_zhpmv.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_zhpmv'>cblas_zhpmv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_zhpr.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_zhpr'>cblas_zhpr</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_zhpr2.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_zhpr2'>cblas_zhpr2</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_zsymv.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_zsymv'>cblas_zsymv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_ztbmv.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_ztbmv'>cblas_ztbmv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_ztbsv.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_ztbsv'>cblas_ztbsv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_ztpmv.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_ztpmv'>cblas_ztpmv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_ztpsv.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_ztpsv'>cblas_ztpsv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_ztrmv.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_ztrmv'>cblas_ztrmv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_ztrsv.html'
+                               title='rblas::matrix_vector::ll::cblas_z::cblas_ztrsv'>cblas_ztrsv</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../../";
+        window.currentCrate = "rblas";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../jquery.js"></script>
+    <script src="../../../../main.js"></script>
+    
+    <script defer src="../../../../search-index.js"></script>
+</body>
+</html>
