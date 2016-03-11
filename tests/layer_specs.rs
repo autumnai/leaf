@@ -16,18 +16,34 @@ mod layer_spec {
     }
 
     #[cfg(feature="cuda")]
+    fn cuda_backend() -> Rc<Backend<Cuda>> {
+        Rc::new(Backend::<Cuda>::default().unwrap())
+    }
+
+    #[cfg(all(feature="native", feature="cuda"))]
+    mod native_cuda {
+        use leaf::layer::*;
+        use leaf::layers::*;
+        use super::{native_backend, cuda_backend};
+
+        #[test]
+        fn create_layer_with_either() {
+            let cfg = super::new_layer_config();
+            Layer::from_config(native_backend(), &cfg);
+
+            let cfg = super::new_layer_config();
+            Layer::from_config(cuda_backend(), &cfg);
+        }
+    }
+
+    #[cfg(feature="cuda")]
     mod cuda {
-        use std::rc::Rc;
         use std::sync::{Arc, RwLock};
         use co::prelude::*;
         use leaf::layer::*;
         use leaf::layers::*;
         use leaf::util::write_to_memory;
-        use super::native_backend;
-
-        fn cuda_backend() -> Rc<Backend<Cuda>> {
-            Rc::new(Backend::<Cuda>::default().unwrap())
-        }
+        use super::{native_backend, cuda_backend};
 
         #[test]
         fn new_layer() {

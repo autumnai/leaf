@@ -14,8 +14,8 @@ keywords = ["deep-learning", "neural-networks", "machine-learning", "framework"]
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-collenchyma = { version = "0.0.8", default-features = false }
-collenchyma-blas = { version = "0.2.0", default-features = false }
+collenchyma = { version = "0.0.8", default-features = false, features = ["native"] } # native feature to read/write data into tensors
+collenchyma-blas = { version = "0.2.0", default-features = false, features = ["native"] } # only compiles with native feature
 collenchyma-nn = { version = "0.3.2", default-features = false }
 
 log = "0.3.2"
@@ -30,8 +30,8 @@ timeit = "0.1.2"
 env_logger = "0.3"
 
 [features]
-default = ["native", "cuda", "opencl"]
-native = ["collenchyma/native", "collenchyma-blas/native", "collenchyma-nn/native"]
+default = ["native"]
+native = ["collenchyma-blas/native", "collenchyma-nn/native"]
 cuda = ["collenchyma/cuda", "collenchyma-blas/cuda", "collenchyma-nn/cuda"]
 opencl = ["collenchyma/opencl", "collenchyma-blas/opencl", "collenchyma-nn/opencl"]
 

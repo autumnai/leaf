@@ -46,28 +46,28 @@
 /// [1]: ./layer/trait.ILayer.html
 /// [2]: ./layers/activation/index.html
 
-#[allow(unused_import_braces)]
 pub use self::activation::{
     ReLU,
     Sigmoid,
 };
 
-#[allow(unused_import_braces)]
+#[cfg(all(feature="cuda", not(feature="native")))]
 pub use self::common::{
     Convolution, ConvolutionConfig,
+    Pooling, PoolingConfig, PoolingMode,
+};
+
+pub use self::common::{
     Linear, LinearConfig,
     LogSoftmax,
-    Pooling, PoolingConfig, PoolingMode,
     Sequential, SequentialConfig,
     Softmax,
 };
 
-#[allow(unused_import_braces)]
 pub use self::loss::{
     NegativeLogLikelihood, NegativeLogLikelihoodConfig,
 };
 
-#[allow(unused_import_braces)]
 pub use self::utility::{
     Flatten,
     Reshape, ReshapeConfig,

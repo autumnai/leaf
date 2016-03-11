@@ -687,9 +687,11 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
     /// [3]: ../layers/index.html
     fn worker_from_config(backend: Rc<B>, config: &LayerConfig) -> Box<ILayer<B>> {
         match config.layer_type.clone() {
+            #[cfg(all(feature="cuda", not(feature="native")))]
             LayerType::Convolution(layer_config) => Box::new(Convolution::from_config(&layer_config)),
             LayerType::Linear(layer_config) => Box::new(Linear::from_config(&layer_config)),
             LayerType::LogSoftmax => Box::new(LogSoftmax::default()),
+            #[cfg(all(feature="cuda", not(feature="native")))]
             LayerType::Pooling(layer_config) => Box::new(Pooling::from_config(&layer_config)),
             LayerType::Sequential(layer_config) => Box::new(Sequential::from_config(backend, &layer_config)),
             LayerType::Softmax => Box::new(Softmax::default()),
@@ -1103,12 +1105,14 @@ pub struct LayerConfig {
 pub enum LayerType {
     // Common layers
     /// Convolution Layer
+    #[cfg(all(feature="cuda", not(feature="native")))]
     Convolution(ConvolutionConfig),
     /// Linear Layer
     Linear(LinearConfig),
     /// LogSoftmax Layer
     LogSoftmax,
     /// Pooling Layer
+    #[cfg(all(feature="cuda", not(feature="native")))]
     Pooling(PoolingConfig),
     /// Sequential Layer
     Sequential(SequentialConfig),
@@ -1131,14 +1135,22 @@ impl LayerType {
     /// Returns wether the LayerType supports in-place operations.
     pub fn supports_in_place(&self) -> bool {
         match *self {
+            #[cfg(all(feature="cuda", not(feature="native")))]
             LayerType::Convolution(_) => false,
             LayerType::Linear(_) => false,
             LayerType::LogSoftmax => false,
+            #[cfg(all(feature="cuda", not(feature="native")))]
             LayerType::Pooling(_) => false,
             LayerType::Sequential(_) => false,
             LayerType::Softmax => false,
+            #[cfg(all(feature="cuda", not(feature="native")))]
             LayerType::ReLU => true,
+            #[cfg(feature="native")]
+            LayerType::ReLU => false,
+            #[cfg(all(feature="cuda", not(feature="native")))]
             LayerType::Sigmoid => true,
+            #[cfg(feature="native")]
+            LayerType::Sigmoid => false,
             LayerType::NegativeLogLikelihood(_) => false,
             LayerType::Reshape(_) => true,
         }

@@ -106,22 +106,29 @@ pub trait SolverOps<F> : LayerOps<F> + Axpby<F> + Dot<F> + Copy<F> {}
 impl<T: LayerOps<f32> + Axpby<f32> + Dot<f32> + Copy<f32>> SolverOps<f32> for T {}
 
 /// Encapsulates all traits used in Layers.
+#[cfg(all(feature="cuda", not(feature="native")))]
 pub trait LayerOps<F> : conn::Convolution<F>
                       + conn::Pooling<F>
                       + conn::Relu<F> + conn::ReluPointwise<F>
                       + conn::Sigmoid<F> + conn::SigmoidPointwise<F>
                       + conn::Softmax<F> + conn::LogSoftmax<F>
                       + Gemm<F> {}
+#[cfg(feature="native")]
+/// Encapsulates all traits used in Layers.
+pub trait LayerOps<F> : conn::Relu<F>
+                      + conn::Sigmoid<F>
+                      + conn::Softmax<F> + conn::LogSoftmax<F>
+                      + Gemm<F> {}
 
+#[cfg(all(feature="cuda", not(feature="native")))]
 impl<T: conn::Convolution<f32>
       + conn::Pooling<f32>
       + conn::Relu<f32> + conn::ReluPointwise<f32>
       + conn::Sigmoid<f32> + conn::SigmoidPointwise<f32>
       + conn::Softmax<f32> + conn::LogSoftmax<f32>
       + Gemm<f32>> LayerOps<f32> for T {}
-
-// pub trait LayerOps<F> : conn::Relu<F> + conn::Sigmoid<F> + conn::Softmax<F> + conn::LogSoftmax<F>
-//                              + Gemm<F> {}
-//
-// impl<T: conn::Relu<f32> + conn::Sigmoid<f32> + conn::Softmax<f32> + conn::LogSoftmax<f32>
-//       + Gemm<f32>> LayerOps<f32> for T {}
+#[cfg(feature="native")]
+impl<T: conn::Relu<f32>
+      + conn::Sigmoid<f32>
+      + conn::Softmax<f32> + conn::LogSoftmax<f32>
+      + Gemm<f32>> LayerOps<f32> for T {}
