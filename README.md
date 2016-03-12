@@ -17,12 +17,12 @@ the fastest Machine Intelligence Frameworks in the world.
 
 > See more Deep Neural Networks benchmarks on [Deep Learning Benchmarks][deep-learning-benchmarks-website].
 
-Leaf is portable. Run it on CPUs, GPUs, FPGAs on machines with an OS or on
+Leaf is portable. Run it on CPUs, GPUs, and FPGAs, on machines with an OS, or on
 machines without one. Run it with OpenCL or CUDA. Credit goes to
 [Collenchyma][collenchyma] and Rust.
 
 Leaf is part of the [Autumn][autumn] Machine Intelligence Platform, which is
-working on making AI algorithms 100x more computational efficient. Bringing
+working on making AI algorithms 100x more computationally efficient. Bringing
 real-time, offline AI to smartphones and embedded devices.
 
 We see Leaf as the core of constructing high-performance machine intelligence
@@ -55,14 +55,14 @@ For more info refer to,
 If you are new to Rust you can install it as detailed [here][rust_download],
 and we recommend taking a look at the [official Getting Started Guide][rust_getting_started].
 
-If you're using Cargo, just add Leaf to your `Cargo.toml`:
+If you are using Cargo, just add Leaf to your `Cargo.toml`:
 
 ```toml
 [dependencies]
 leaf = "0.2.0"
 ```
 
-If you're using [Cargo Edit][cargo-edit], you can
+If you are using [Cargo Edit][cargo-edit], you can
 call:
 
 ```bash
@@ -90,7 +90,7 @@ opencl  = ["leaf/opencl"]
 ## Examples
 
 We are providing a [Leaf examples repository][leaf-examples], where we and
-others publish executable machine learning models build with Leaf. It features
+others publish executable machine learning models built with Leaf. It features
 a CLI for easy usage and has a detailed guide in the [project
 README.md][leaf-examples].
 
@@ -107,7 +107,7 @@ cargo run --release --example benchmarks
 
 ## Ecosystem / Extensions
 
-We design Leaf and the other crates of the [Autumn Platform][autumn] as modular
+We design Leaf and the other crates of the [Autumn Platform][autumn] to be as modular
 and extensible as possible. More helpful crates you can use with Leaf:
 
 - [**Cuticula**][cuticula]: Preprocessing Framework for Machine Learning
@@ -118,9 +118,9 @@ and extensible as possible. More helpful crates you can use with Leaf:
 
 ## Support / Contact
 
-- With a bit of luck you find us online on the #rust-machine-learing IRC at irc.mozilla.org,
+- With a bit of luck you can find us online on the #rust-machine-learing IRC at irc.mozilla.org,
 - but we are always approachable on [Gitter/Leaf][gitter-leaf]
-- For bugs and feature request, you can create a [Github issue][leaf-issue]
+- For bugs and feature requests, you can create a [Github issue][leaf-issue]
 - And for more private matters, send us a mail straight to our inbox developers@autumnai.com.
 - Refer to [Autumn][autumn] for more information
 
@@ -130,7 +130,7 @@ and extensible as possible. More helpful crates you can use with Leaf:
 
 Want to contribute? Awesome! We have [instructions to help you get started][contributing].
 
-Leaf has a near real-time collaboration culture and happens here on Github and
+Leaf has a near real-time collaboration culture that happens here on Github and
 on the [Leaf Gitter Channel][gitter-leaf].
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0
@@ -156,7 +156,7 @@ You can find the release history at the [CHANGELOG.md][changelog]. We are using 
 
 The current hardware just recently became strong enough to support real-world
 usage of machine intelligence e.g. super-human image recognition, self-driving
-cars, etc.. For taking advantage of the computational power of the underlying
+cars, etc.. To take advantage of the computational power of the underlying
 hardware from GPUs to clusters you need a low-level language that allows for
 control of memory. But to make machine intelligence widely accessible you want
 to have a high-level comfortable abstraction over the underlying hardware.
@@ -184,8 +184,8 @@ developers alike.
 We believe strongly in machine intelligence and think that it will have a major
 impact on future innovations, products and our society. At Autumn, we experienced
 a lack of common and well engineered tools for machine learning and therefore
-started to create a modular toolbox for machine learning in Rust. We hope, that
-with making our work open source, we will speed-up research and development of
+started to create a modular toolbox for machine learning in Rust. We hope that
+by making our work open source, we will speed-up research and development of
 production-ready applications and make their work easier as well.
 
 #### _Who is Autumn?_
