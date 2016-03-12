@@ -56,7 +56,7 @@
 //! These principles direct our decisions on Leaf and related projects.
 //!
 //! * __Cutting Edge Performance__:</br>
-//! For research and industry speed and efficency are curcial for
+//! For research and industry speed and efficency are crucial for
 //! state-of-the-art machine learning over massive data and networks.
 //! * __Open and Expressive Architecture__:</br>
 //! Designing an open architecture that follows best practices and concepts in
