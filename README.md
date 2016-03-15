@@ -86,6 +86,8 @@ cuda    = ["leaf/cuda"]
 opencl  = ["leaf/opencl"]
 ```
 
+> More information on the use of feature flags in Leaf can be found in [FEATURE-FLAGS.md](./FEATURE-FLAGS.md)
+
 
 ## Examples
 
@@ -100,7 +102,7 @@ the install guide, clone this repoistory and then run
 
 ```bash
 # The examples currently require CUDA support.
-cargo run --release --example benchmarks
+cargo run --release --no-default-features --features cuda --example benchmarks alexnet
 ```
 
 [leaf-examples]: https://github.com/autumnai/leaf-examples
