@@ -14,7 +14,7 @@ keywords = ["deep-learning", "neural-networks", "machine-learning", "framework"]
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-collenchyma = { version = "0.0.8", default-features = false, features = ["native"] } # native feature to read/write data into tensors
+collenchyma = { version = "0.0.9", default-features = false, features = ["native"] } # native feature to read/write data into tensors
 collenchyma-blas = { version = "0.2.0", default-features = false, features = ["native"] } # only compiles with native feature
 collenchyma-nn = { version = "0.3.2", default-features = false }
 

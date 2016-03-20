@@ -72,8 +72,8 @@ mod cuda {
     fn bench_mnsit_forward_1(b: &mut Bencher) {
         let mut cfg = SequentialConfig::default();
         // set up input
-        cfg.add_input("in", &vec![1, 30, 30]);
-        cfg.add_input("label", &vec![1, 1, 10]);
+        cfg.add_input("in", &[1, 30, 30]);
+        cfg.add_input("label", &[1, 1, 10]);
         // set up sigmoid
         let mut sig_cfg = LayerConfig::new("sig", LayerType::Sigmoid);
         sig_cfg.add_input("in");
@@ -96,7 +96,7 @@ mod cuda {
             backend.clone(), &LayerConfig::new("network", LayerType::Sequential(cfg)));
 
         let _ = timeit_loops!(10, {
-            let inp = SharedTensor::<f32>::new(backend.device(), &vec![1, 30, 30]).unwrap();
+            let inp = SharedTensor::<f32>::new(backend.device(), &[1, 30, 30]).unwrap();
             let inp_lock = Arc::new(RwLock::new(inp));
 
             network.forward(&[inp_lock]);
@@ -120,7 +120,7 @@ mod cuda {
     fn alexnet_forward(b: &mut Bencher) {
         let mut cfg = SequentialConfig::default();
         // Layer: data
-        cfg.add_input("data", &vec![128, 3, 224, 224]);
+        cfg.add_input("data", &[128, 3, 224, 224]);
         // Layer: conv1
         let conv1_layer_cfg = ConvolutionConfig {
             num_output: 64,
@@ -260,7 +260,7 @@ mod cuda {
 
         let func = || {
             let forward_time = timeit_loops!(1, {
-                let inp = SharedTensor::<f32>::new(backend.device(), &vec![128, 3, 112, 112]).unwrap();
+                let inp = SharedTensor::<f32>::new(backend.device(), &[128, 3, 112, 112]).unwrap();
 
                 let inp_lock = Arc::new(RwLock::new(inp));
                 network.forward(&[inp_lock]);
@@ -277,7 +277,7 @@ mod cuda {
         // let _ = env_logger::init();
         let mut cfg = SequentialConfig::default();
         // Layer: data
-        cfg.add_input("data", &vec![128, 3, 112, 112]);
+        cfg.add_input("data", &[128, 3, 112, 112]);
         // Layer: conv1
         let conv1_layer_cfg = ConvolutionConfig {
             num_output: 32,
@@ -416,7 +416,7 @@ mod cuda {
             backend.clone(), &LayerConfig::new("network", LayerType::Sequential(cfg)));
 
         let mut func = || {
-            let inp = SharedTensor::<f32>::new(backend.device(), &vec![128, 3, 112, 112]).unwrap();
+            let inp = SharedTensor::<f32>::new(backend.device(), &[128, 3, 112, 112]).unwrap();
 
             let inp_lock = Arc::new(RwLock::new(inp));
             network.forward(&[inp_lock]);

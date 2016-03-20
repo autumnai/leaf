@@ -203,8 +203,8 @@ impl<B: IBackend> Layer<B> {
             }
 
             let backend: Rc<IBackend<F=B::F>> = self.backend.clone();
-            blob_data = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &vec![1,1,1]).unwrap())); // [1,1,1] for CUDA
-            blob_gradient = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &vec![1,1,1]).unwrap())); // [1,1,1] for CUDA
+            blob_data = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &[1,1,1]).unwrap())); // [1,1,1] for CUDA
+            blob_gradient = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &[1,1,1]).unwrap())); // [1,1,1] for CUDA
         }
         self.output_blob_names.push(blob_name.clone());
         self.output_blobs_data.push(blob_data.clone());
@@ -227,8 +227,8 @@ impl<B: IBackend> Layer<B> {
         info!("{} -> {}", self.name, blob_name);
 
         let backend: Rc<IBackend<F=B::F>> = self.backend.clone();
-        let output_data = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &vec![1,1,1]).unwrap())); // [1,1,1] for CUDA
-        let output_gradient = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &vec![1,1,1]).unwrap())); // [1,1,1] for CUDA
+        let output_data = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &[1,1,1]).unwrap())); // [1,1,1] for CUDA
+        let output_gradient = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &[1,1,1]).unwrap())); // [1,1,1] for CUDA
         self.output_blobs_data.push(output_data);
         self.output_blobs_gradient.push(output_gradient);
     }
@@ -460,7 +460,7 @@ impl<B: IBackend> Layer<B> {
 
         let forward_time = timeit_loops!(1, {
             if self.is_using_in_place() {
-                self.worker.forward(&self.backend, &vec![], &self.weights_data, &mut self.output_blobs_data);
+                self.worker.forward(&self.backend, &[], &self.weights_data, &mut self.output_blobs_data);
             } else {
                 self.worker.forward(&self.backend, &self.input_blobs_data, &self.weights_data, &mut self.output_blobs_data);
             }
@@ -498,8 +498,8 @@ impl<B: IBackend> Layer<B> {
         if self.is_using_in_place() {
             self.worker.backward_input(&self.backend,
                                  &self.weights_data,
-                                 &vec![],
-                                 &vec![],
+                                 &[],
+                                 &[],
                                  &self.input_blobs_data,
                                  &mut self.input_blobs_gradient)
         } else {
