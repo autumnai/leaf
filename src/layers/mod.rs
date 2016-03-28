@@ -49,6 +49,7 @@
 pub use self::activation::{
     ReLU,
     Sigmoid,
+    TanH,
 };
 
 #[cfg(all(feature="cuda", not(feature="native")))]

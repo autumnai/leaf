@@ -697,6 +697,7 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
             LayerType::Softmax => Box::new(Softmax::default()),
             LayerType::ReLU => Box::new(ReLU),
             LayerType::Sigmoid => Box::new(Sigmoid),
+            LayerType::TanH => Box::new(TanH),
             LayerType::NegativeLogLikelihood(layer_config) => Box::new(NegativeLogLikelihood::from_config(&layer_config)),
             LayerType::Reshape(layer_config) => Box::new(Reshape::from_config(&layer_config)),
         }
@@ -1123,6 +1124,8 @@ pub enum LayerType {
     ReLU,
     /// Sigmoid Layer
     Sigmoid,
+    /// TanH Layer
+    TanH,
     // Loss layers
     /// NegativeLogLikelihood Layer
     NegativeLogLikelihood(NegativeLogLikelihoodConfig),
@@ -1151,6 +1154,10 @@ impl LayerType {
             LayerType::Sigmoid => true,
             #[cfg(feature="native")]
             LayerType::Sigmoid => false,
+            #[cfg(all(feature="cuda", not(feature="native")))]
+            LayerType::TanH => true,
+            #[cfg(feature="native")]
+            LayerType::TanH => false,
             LayerType::NegativeLogLikelihood(_) => false,
             LayerType::Reshape(_) => true,
         }

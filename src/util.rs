@@ -111,12 +111,14 @@ pub trait LayerOps<F> : conn::Convolution<F>
                       + conn::Pooling<F>
                       + conn::Relu<F> + conn::ReluPointwise<F>
                       + conn::Sigmoid<F> + conn::SigmoidPointwise<F>
+                      + conn::Tanh<F> + conn::TanhPointwise<F>
                       + conn::Softmax<F> + conn::LogSoftmax<F>
                       + Gemm<F> {}
 #[cfg(feature="native")]
 /// Encapsulates all traits used in Layers.
 pub trait LayerOps<F> : conn::Relu<F>
                       + conn::Sigmoid<F>
+                      + conn::Tanh<F>
                       + conn::Softmax<F> + conn::LogSoftmax<F>
                       + Gemm<F> {}
 
@@ -125,10 +127,12 @@ impl<T: conn::Convolution<f32>
       + conn::Pooling<f32>
       + conn::Relu<f32> + conn::ReluPointwise<f32>
       + conn::Sigmoid<f32> + conn::SigmoidPointwise<f32>
+      + conn::Tanh<f32> + conn::TanhPointwise<f32>
       + conn::Softmax<f32> + conn::LogSoftmax<f32>
       + Gemm<f32>> LayerOps<f32> for T {}
 #[cfg(feature="native")]
 impl<T: conn::Relu<f32>
       + conn::Sigmoid<f32>
+      + conn::Tanh<f32>
       + conn::Softmax<f32> + conn::LogSoftmax<f32>
       + Gemm<f32>> LayerOps<f32> for T {}
