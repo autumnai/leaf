@@ -47,7 +47,7 @@
         </script>
 
         <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li><a href="./leaf.html" class="active"><strong>1.</strong> Leaf</a></li><li><a href="./layers.html"><strong>2.</strong> Layers</a></li><li><ul class="section"><li><a href="./building-model.html"><strong>2.1.</strong> Layers equal Model</a></li><li><a href="./model-lifecycle.html"><strong>2.2.</strong> The Model Lifecycle</a></li><li><a href="./create-new-layer.html"><strong>2.3.</strong> Create a new Layer</a></li></ul></li><li><a href="./solvers.html"><strong>3.</strong> Solvers</a></li></ul>
+            <ul class="chapter"><li><a href="./leaf.html" class="active"><strong>1.</strong> Leaf</a></li><li><a href="./layers.html"><strong>2.</strong> Layers</a></li><li><ul class="section"><li><a href="./building-networks.html"><strong>2.1.</strong> Network from Layers</a></li><li><a href="./model-lifecycle.html"><strong>2.2.</strong> The Model Lifecycle</a></li><li><a href="./create-new-layer.html"><strong>2.3.</strong> Create a new Layer</a></li></ul></li><li><a href="./solvers.html"><strong>3.</strong> Solvers</a></li><li><ul class="section"><li><a href="./model-training.html"><strong>3.1.</strong> Model Training</a></li><li><a href="./multi-device-model-training.html"><strong>3.2.</strong> Multi-Device Model Training</a></li><li><a href="./distributed-model-training.html"><strong>3.3.</strong> Distributed Model Training</a></li></ul></li><li><a href="./backend.html"><strong>4.</strong> Backend</a></li><li><a href="./deep-learning-glossary.html"><strong>5.</strong> Glossary</a></li></ul>
         </div>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -68,6 +68,41 @@
 
                 <div id="content" class="content">
                     <h1>Leaf</h1>
+<p>This short book will teach you about <a href="https://github.com/autumnai/leaf">Leaf</a>, the Machine Intelligence Framework
+engineered by software developers, not scientists. It was inspired by the
+brilliant people behind TensorFlow, Torch,
+Caffe, Rust and numerous research papers and brings modularity, performance and
+portability to Deep Learning. Leaf has a very simple API, <a href="./layers.html">Layers</a> and
+<a href="./solvers.html">Solvers</a>, and is one of the fastest Machine Intelligence Frameworks
+available.</p>
+<blockquote>
+<p><strong>Assumption</strong><br />
+The Leaf Book requires a basic understanding of the fundamental concepts
+of Machine and Deep Learning. Recommended resources are</p>
+<ul>
+<li><a href="http://neuralnetworksanddeeplearning.com/">Neural Networks and Deep Learning</a></li>
+<li><a href="http://cs231n.github.io/">Stanford Course on (Convolutional) Neural Networks</a></li>
+<li><a href="http://www.andreykurenkov.com/writing/a-brief-history-of-neural-nets-and-deep-learning/">A 'brief' history of Deep Learning</a></li>
+<li><a href="./glossary.html">The Glossary</a></li>
+</ul>
+</blockquote>
+<p>Deep Learning is really easy. Construct a network by chaining layers and then train the
+network by feeding it examples. That is why Leaf's entire API
+consists of only two concepts: <a href="./layers.html">Layers</a> and <a href="./solvers.html">Solvers</a>. Layers to
+construct almost any kind of network. Deep Networks and even classical, stochastic based
+algorithms/networks. And Solvers for training and execution of the network.
+That is already the entire API for Machine Learning with Leaf.</p>
+<h2>API Documentation</h2>
+<p>Alongside this book you can also read the <a href="http://autumnai.github.io/leaf/">Rust API documentation</a> if
+you would like to use Leaf as a crate or write a new library on top of it and
+need a more low-level overview.</p>
+<h2>License</h2>
+<p>Leaf is licensed under either of</p>
+<ul>
+<li><a href="https://github.com/autumnai/leaf/blob/master/LICENSE-APACHE">Apache License v2.0</a> or,</li>
+<li><a href="https://github.com/autumnai/leaf/blob/master/LICENSE-MIT">MIT license</a></li>
+</ul>
+<p>at your option.</p>
 
                 </div>
 
