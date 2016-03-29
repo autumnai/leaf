@@ -203,8 +203,8 @@ impl<B: IBackend> Layer<B> {
             }
 
             let backend: Rc<IBackend<F=B::F>> = self.backend.clone();
-            blob_data = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &vec![1,1,1]).unwrap())); // [1,1,1] for CUDA
-            blob_gradient = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &vec![1,1,1]).unwrap())); // [1,1,1] for CUDA
+            blob_data = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &[1,1,1]).unwrap())); // [1,1,1] for CUDA
+            blob_gradient = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &[1,1,1]).unwrap())); // [1,1,1] for CUDA
         }
         self.output_blob_names.push(blob_name.clone());
         self.output_blobs_data.push(blob_data.clone());
@@ -227,8 +227,8 @@ impl<B: IBackend> Layer<B> {
         info!("{} -> {}", self.name, blob_name);
 
         let backend: Rc<IBackend<F=B::F>> = self.backend.clone();
-        let output_data = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &vec![1,1,1]).unwrap())); // [1,1,1] for CUDA
-        let output_gradient = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &vec![1,1,1]).unwrap())); // [1,1,1] for CUDA
+        let output_data = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &[1,1,1]).unwrap())); // [1,1,1] for CUDA
+        let output_gradient = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &[1,1,1]).unwrap())); // [1,1,1] for CUDA
         self.output_blobs_data.push(output_data);
         self.output_blobs_gradient.push(output_gradient);
     }
@@ -460,7 +460,7 @@ impl<B: IBackend> Layer<B> {
 
         let forward_time = timeit_loops!(1, {
             if self.is_using_in_place() {
-                self.worker.forward(&self.backend, &vec![], &self.weights_data, &mut self.output_blobs_data);
+                self.worker.forward(&self.backend, &[], &self.weights_data, &mut self.output_blobs_data);
             } else {
                 self.worker.forward(&self.backend, &self.input_blobs_data, &self.weights_data, &mut self.output_blobs_data);
             }
@@ -498,8 +498,8 @@ impl<B: IBackend> Layer<B> {
         if self.is_using_in_place() {
             self.worker.backward_input(&self.backend,
                                  &self.weights_data,
-                                 &vec![],
-                                 &vec![],
+                                 &[],
+                                 &[],
                                  &self.input_blobs_data,
                                  &mut self.input_blobs_gradient)
         } else {
@@ -756,15 +756,15 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
                output_data: &mut [ArcLock<SharedTensor<f32>>]) {
         // aquire all the locks
         let inp: Vec<_> = input_data.iter().map(|b| b.read().unwrap()).collect();
-        let input_data_: Vec<&SharedTensor<f32>> = inp.iter().enumerate().map(|(_, val)| &**val).collect();
+        let input_data_: Vec<&SharedTensor<f32>> = inp.iter().map(|val| &**val).collect();
 
         let wgts: Vec<_> = weights_data.iter().map(|w| w.read().unwrap()).collect();
-        let weights_data_: Vec<&SharedTensor<f32>> = wgts.iter().enumerate().map(|(_, val)| &**val).collect();
+        let weights_data_: Vec<&SharedTensor<f32>> = wgts.iter().map(|val| &**val).collect();
 
         let out_ref = output_data.iter().cloned().collect::<Vec<_>>();
         let mut out = &mut out_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
         let mut output_w = &mut out.iter_mut().map(|a| a).collect::<Vec<_>>();
-        let mut output_data_: Vec<&mut SharedTensor<f32>> = output_w.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
+        let mut output_data_: Vec<&mut SharedTensor<f32>> = output_w.iter_mut().map(|val| &mut ***val).collect();
 
         self.compute_output(backend, &weights_data_, &input_data_, &mut output_data_);
     }
@@ -785,17 +785,17 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
                 input_data: &[ArcLock<SharedTensor<f32>>],
                 input_gradients: &mut [ArcLock<SharedTensor<f32>>]) {
         let wgts_data: Vec<_> = weights_data.iter().map(|b| b.read().unwrap()).collect();
-        let weights_data_: Vec<&SharedTensor<f32>> = wgts_data.iter().enumerate().map(|(_, val)| &**val).collect();
+        let weights_data_: Vec<&SharedTensor<f32>> = wgts_data.iter().map(|val| &**val).collect();
         let out_data: Vec<_> = output_data.iter().map(|b| b.read().unwrap()).collect();
-        let output_data_: Vec<&SharedTensor<f32>> = out_data.iter().enumerate().map(|(_, val)| &**val).collect();
+        let output_data_: Vec<&SharedTensor<f32>> = out_data.iter().map(|val| &**val).collect();
         let out_gradient: Vec<_> = output_gradients.iter().map(|b| b.read().unwrap()).collect();
-        let output_gradients_: Vec<&SharedTensor<f32>> = out_gradient.iter().enumerate().map(|(_, val)| &**val).collect();
+        let output_gradients_: Vec<&SharedTensor<f32>> = out_gradient.iter().map(|val| &**val).collect();
         let inp_data: Vec<_> = input_data.iter().map(|b| b.read().unwrap()).collect();
-        let input_data_: Vec<&SharedTensor<f32>> = inp_data.iter().enumerate().map(|(_, val)| &**val).collect();
+        let input_data_: Vec<&SharedTensor<f32>> = inp_data.iter().map(|val| &**val).collect();
         let btm_gradient_ref = input_gradients.iter().cloned().collect::<Vec<_>>();
         let mut btm_gradient = &mut btm_gradient_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
         let mut input_gradient = &mut btm_gradient.iter_mut().map(|a| a).collect::<Vec<_>>();
-        let mut input_gradients_: Vec<&mut SharedTensor<f32>> = input_gradient.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
+        let mut input_gradients_: Vec<&mut SharedTensor<f32>> = input_gradient.iter_mut().map(|val| &mut ***val).collect();
 
         self.compute_input_gradient(backend, &weights_data_, &output_data_, &output_gradients_, &input_data_, &mut input_gradients_);
     }
@@ -815,15 +815,15 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
                 input_data: &[ArcLock<SharedTensor<f32>>],
                 weights_gradients: &mut [ArcLock<SharedTensor<f32>>]) {
         let out_data: Vec<_> = output_data.iter().map(|b| b.read().unwrap()).collect();
-        let output_data_: Vec<&SharedTensor<f32>> = out_data.iter().enumerate().map(|(_, val)| &**val).collect();
+        let output_data_: Vec<&SharedTensor<f32>> = out_data.iter().map(|val| &**val).collect();
         let out_gradients: Vec<_> = output_gradients.iter().map(|b| b.read().unwrap()).collect();
-        let output_gradients_: Vec<&SharedTensor<f32>> = out_gradients.iter().enumerate().map(|(_, val)| &**val).collect();
+        let output_gradients_: Vec<&SharedTensor<f32>> = out_gradients.iter().map(|val| &**val).collect();
         let inp_data: Vec<_> = input_data.iter().map(|b| b.read().unwrap()).collect();
-        let input_data_: Vec<&SharedTensor<f32>> = inp_data.iter().enumerate().map(|(_, val)| &**val).collect();
+        let input_data_: Vec<&SharedTensor<f32>> = inp_data.iter().map(|val| &**val).collect();
         let wgt_gradient_ref = weights_gradients.iter().cloned().collect::<Vec<_>>();
         let mut wgt_gradient = &mut wgt_gradient_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
         let mut weights_gradient = &mut wgt_gradient.iter_mut().map(|a| a).collect::<Vec<_>>();
-        let mut weights_gradients_: Vec<&mut SharedTensor<f32>> = weights_gradient.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
+        let mut weights_gradients_: Vec<&mut SharedTensor<f32>> = weights_gradient.iter_mut().map(|val| &mut ***val).collect();
 
         self.compute_parameters_gradient(backend, &output_data_, &output_gradients_, &input_data_, &mut weights_gradients_);
     }

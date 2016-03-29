@@ -120,7 +120,7 @@ fn bench_alexnet() {
 #[cfg(all(feature="cuda", not(feature="native")))]
 fn bench_alexnet() {
     let mut cfg = SequentialConfig::default();
-    cfg.add_input("data", &vec![128, 3, 224, 224]);
+    cfg.add_input("data", &[128, 3, 224, 224]);
 
     let conv1_layer_cfg = ConvolutionConfig { num_output: 64, filter_shape: vec![11], padding: vec![2], stride: vec![4] };
     cfg.add_layer(LayerConfig::new("conv1", conv1_layer_cfg));
@@ -160,7 +160,7 @@ fn bench_alexnet() {
         let func = || {
             let forward_time = timeit_loops!(1, {
                 {
-                    let inp = SharedTensor::<f32>::new(backend.device(), &vec![128, 3, 224, 224]).unwrap();
+                    let inp = SharedTensor::<f32>::new(backend.device(), &[128, 3, 224, 224]).unwrap();
 
                     let inp_lock = Arc::new(RwLock::new(inp));
                     network.forward(&[inp_lock.clone()]);
@@ -202,7 +202,7 @@ fn bench_overfeat() {
 #[cfg(all(feature="cuda", not(feature="native")))]
 fn bench_overfeat() {
     let mut cfg = SequentialConfig::default();
-    cfg.add_input("data", &vec![128, 3, 231, 231]);
+    cfg.add_input("data", &[128, 3, 231, 231]);
 
     let conv1_layer_cfg = ConvolutionConfig { num_output: 96, filter_shape: vec![11], padding: vec![0], stride: vec![4] };
     cfg.add_layer(LayerConfig::new("conv1", conv1_layer_cfg));
@@ -242,7 +242,7 @@ fn bench_overfeat() {
         let func = || {
             let forward_time = timeit_loops!(1, {
                 {
-                    let inp = SharedTensor::<f32>::new(backend.device(), &vec![128, 3, 231, 231]).unwrap();
+                    let inp = SharedTensor::<f32>::new(backend.device(), &[128, 3, 231, 231]).unwrap();
 
                     let inp_lock = Arc::new(RwLock::new(inp));
                     network.forward(&[inp_lock.clone()]);
@@ -284,7 +284,7 @@ fn bench_vgg_a() {
 #[cfg(all(feature="cuda", not(feature="native")))]
 fn bench_vgg_a() {
     let mut cfg = SequentialConfig::default();
-    cfg.add_input("data", &vec![64, 3, 224, 224]);
+    cfg.add_input("data", &[64, 3, 224, 224]);
 
     let conv1_layer_cfg = ConvolutionConfig { num_output: 64, filter_shape: vec![3], padding: vec![1], stride: vec![1] };
     cfg.add_layer(LayerConfig::new("conv1", conv1_layer_cfg));
@@ -339,7 +339,7 @@ fn bench_vgg_a() {
         let func = || {
             let forward_time = timeit_loops!(1, {
                 {
-                    let inp = SharedTensor::<f32>::new(backend.device(), &vec![64, 3, 224, 224]).unwrap();
+                    let inp = SharedTensor::<f32>::new(backend.device(), &[64, 3, 224, 224]).unwrap();
 
                     let inp_lock = Arc::new(RwLock::new(inp));
                     network.forward(&[inp_lock.clone()]);

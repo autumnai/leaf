@@ -60,7 +60,7 @@ mod layer_spec {
         #[test]
         fn can_create_single_layer_sequential_layer() {
             let mut model = SequentialConfig::default();
-            model.add_input("data", &vec![28, 28]);
+            model.add_input("data", &[28, 28]);
             model.add_layer(LayerConfig::new("sigmoid", LayerType::Sigmoid));
 
             Layer::from_config(cuda_backend(), &LayerConfig::new("model", LayerType::Sequential(model)));
@@ -69,7 +69,7 @@ mod layer_spec {
         #[test]
         fn can_create_simple_network_sequential_layer() {
             let mut model = SequentialConfig::default();
-            model.add_input("data", &vec![1, 784]);
+            model.add_input("data", &[1, 784]);
             model.add_layer(LayerConfig::new("linear1", LinearConfig { output_size: 1568 }));
             model.add_layer(LayerConfig::new("sigmoid", LayerType::Sigmoid));
             model.add_layer(LayerConfig::new("linear2", LinearConfig { output_size: 10 }));
@@ -83,12 +83,12 @@ mod layer_spec {
             let cuda_backend = cuda_backend();
 
             let mut normal_model = SequentialConfig::default();
-            normal_model.add_input("data", &vec![3]);
+            normal_model.add_input("data", &[3]);
             normal_model.add_layer(LayerConfig::new("sigmoid", LayerType::Sigmoid));
             let mut normal_network = Layer::from_config(cuda_backend.clone(), &LayerConfig::new("normal_model", LayerType::Sequential(normal_model)));
 
             let mut reshape_model = SequentialConfig::default();
-            reshape_model.add_input("data", &vec![3]);
+            reshape_model.add_input("data", &[3]);
             reshape_model.add_layer(LayerConfig::new("reshape", ReshapeConfig { shape: vec![1, 1, 3] }));
             reshape_model.add_layer(LayerConfig::new("sigmoid", LayerType::Sigmoid));
             let mut reshape_network = Layer::from_config(cuda_backend.clone(), &LayerConfig::new("reshape_model", LayerType::Sequential(reshape_model)));

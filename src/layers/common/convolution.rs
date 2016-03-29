@@ -252,12 +252,12 @@ mod tests {
             stride: vec![4],
         };
         let layer = Convolution::<Backend<Cuda>>::from_config(&cfg);
-        let num_spatial_dims = layer.num_spatial_dims(&vec![1, 3, 224, 224]);
+        let num_spatial_dims = layer.num_spatial_dims(&[1, 3, 224, 224]);
         assert_eq!(2, num_spatial_dims);
         assert_eq!(vec![11, 11], layer.spatial_filter_dims(2));
         assert_eq!(vec![2, 2], layer.padding_dims(2));
         assert_eq!(vec![4, 4], layer.stride_dims(2));
-        assert_eq!(vec![64, 3, 11, 11], layer.calculate_filter_shape(&vec![1, 3, 224, 224]));
-        assert_eq!(vec![1, 64, 55, 55], layer.calculate_output_shape(&vec![1, 3, 224, 224]));
+        assert_eq!(vec![64, 3, 11, 11], layer.calculate_filter_shape(&[1, 3, 224, 224]));
+        assert_eq!(vec![1, 64, 55, 55], layer.calculate_output_shape(&[1, 3, 224, 224]));
     }
 }

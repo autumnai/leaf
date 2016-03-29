@@ -43,7 +43,7 @@ impl<B: IBackend + LayerOps<f32> + 'static> Sequential<B> {
     pub fn from_config(backend: Rc<B>, config: &SequentialConfig) -> Sequential<B> {
         let mut layer = Self::empty();
 
-        layer.init_layers(backend, &config.clone());
+        layer.init_layers(backend, config);
 
         layer
     }

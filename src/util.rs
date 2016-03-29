@@ -59,7 +59,7 @@ pub fn write_batch_sample<T: NumCast + ::std::marker::Copy>(tensor: &mut SharedT
 /// Create a Collenchyma SharedTensor for a scalar value.
 pub fn native_scalar<T: NumCast + ::std::marker::Copy>(scalar: T) -> SharedTensor<T> {
     let native = native_backend();
-    let mut shared_scalar = SharedTensor::<T>::new(native.device(), &vec![1]).unwrap();
+    let mut shared_scalar = SharedTensor::<T>::new(native.device(), &1).unwrap();
     write_to_memory(shared_scalar.get_mut(native.device()).unwrap(), &[scalar]);
 
     shared_scalar

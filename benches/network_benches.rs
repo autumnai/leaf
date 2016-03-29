@@ -14,13 +14,7 @@ mod cuda {
     use std::sync::{Arc, RwLock};
     use leaf::layers::*;
     use leaf::layer::*;
-    use leaf::network::*;
     use std::rc::Rc;
-
-    #[cfg(feature = "native")]
-    fn native_backend() -> Rc<Backend<Native>> {
-        Rc::new(Backend::<Native>::default().unwrap())
-    }
 
     #[cfg(feature = "cuda")]
     fn cuda_backend() -> Rc<Backend<Cuda>> {
@@ -76,10 +70,10 @@ mod cuda {
     #[ignore]
     #[cfg(feature = "cuda")]
     fn bench_mnsit_forward_1(b: &mut Bencher) {
-        let mut cfg = NetworkConfig::default();
+        let mut cfg = SequentialConfig::default();
         // set up input
-        cfg.add_input("in", &vec![1, 30, 30]);
-        cfg.add_input("label", &vec![1, 1, 10]);
+        cfg.add_input("in", &[1, 30, 30]);
+        cfg.add_input("label", &[1, 1, 10]);
         // set up sigmoid
         let mut sig_cfg = LayerConfig::new("sig", LayerType::Sigmoid);
         sig_cfg.add_input("in");
@@ -98,18 +92,14 @@ mod cuda {
         // cfg.add_layer(loss_cfg);
 
         let backend = cuda_backend();
-        let native_backend = native_backend();
-        let mut network = Network::from_config(backend.clone(), &cfg);
-        let loss = &mut 0f32;
+        let mut network = Layer::from_config(
+            backend.clone(), &LayerConfig::new("network", LayerType::Sequential(cfg)));
 
         let _ = timeit_loops!(10, {
-            let inp = SharedTensor::<f32>::new(backend.device(), &vec![1, 30, 30]).unwrap();
-            let label = SharedTensor::<f32>::new(native_backend.device(), &vec![1, 1, 10]).unwrap();
-
+            let inp = SharedTensor::<f32>::new(backend.device(), &[1, 30, 30]).unwrap();
             let inp_lock = Arc::new(RwLock::new(inp));
-            let label_lock = Arc::new(RwLock::new(label));
 
-            network.forward(&[inp_lock, label_lock], loss);
+            network.forward(&[inp_lock]);
         });
         // b.iter(|| {
         //     for _ in 0..1 {
@@ -128,9 +118,9 @@ mod cuda {
     // #[ignore]
     #[cfg(feature = "cuda")]
     fn alexnet_forward(b: &mut Bencher) {
-        let mut cfg = NetworkConfig::default();
+        let mut cfg = SequentialConfig::default();
         // Layer: data
-        cfg.add_input("data", &vec![128, 3, 224, 224]);
+        cfg.add_input("data", &[128, 3, 224, 224]);
         // Layer: conv1
         let conv1_layer_cfg = ConvolutionConfig {
             num_output: 64,
@@ -265,15 +255,15 @@ mod cuda {
 
         let backend = cuda_backend();
         // let native_backend = native_backend();
-        let mut network = Network::from_config(backend.clone(), &cfg);
+        let mut network = Layer::from_config(
+            backend.clone(), &LayerConfig::new("network", LayerType::Sequential(cfg)));
 
         let func = || {
             let forward_time = timeit_loops!(1, {
-                let loss = &mut 0f32;
-                let inp = SharedTensor::<f32>::new(backend.device(), &vec![128, 3, 112, 112]).unwrap();
+                let inp = SharedTensor::<f32>::new(backend.device(), &[128, 3, 112, 112]).unwrap();
 
                 let inp_lock = Arc::new(RwLock::new(inp));
-                network.forward(&[inp_lock], loss);
+                network.forward(&[inp_lock]);
             });
             println!("Forward step: {}", forward_time);
         };
@@ -285,9 +275,9 @@ mod cuda {
     #[cfg(feature = "cuda")]
     fn small_alexnet_forward(b: &mut Bencher) {
         // let _ = env_logger::init();
-        let mut cfg = NetworkConfig::default();
+        let mut cfg = SequentialConfig::default();
         // Layer: data
-        cfg.add_input("data", &vec![128, 3, 112, 112]);
+        cfg.add_input("data", &[128, 3, 112, 112]);
         // Layer: conv1
         let conv1_layer_cfg = ConvolutionConfig {
             num_output: 32,
@@ -422,14 +412,14 @@ mod cuda {
 
         let backend = cuda_backend();
         // let native_backend = native_backend();
-        let mut network = Network::from_config(backend.clone(), &cfg);
+        let mut network = Layer::from_config(
+            backend.clone(), &LayerConfig::new("network", LayerType::Sequential(cfg)));
 
         let mut func = || {
-            let loss = &mut 0f32;
-            let inp = SharedTensor::<f32>::new(backend.device(), &vec![128, 3, 112, 112]).unwrap();
+            let inp = SharedTensor::<f32>::new(backend.device(), &[128, 3, 112, 112]).unwrap();
 
             let inp_lock = Arc::new(RwLock::new(inp));
-            network.forward(&[inp_lock], loss);
+            network.forward(&[inp_lock]);
         };
         { func(); bench_profile(b, func, 10); }
     }
