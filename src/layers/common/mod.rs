@@ -16,7 +16,6 @@ pub use self::linear::{Linear, LinearConfig};
 pub use self::log_softmax::LogSoftmax;
 #[cfg(all(feature="cuda", not(feature="native")))]
 pub use self::pooling::{Pooling, PoolingConfig, PoolingMode};
-pub use self::sequential::{Sequential, SequentialConfig};
 pub use self::softmax::Softmax;
 
 #[cfg(all(feature="cuda", not(feature="native")))]
@@ -25,7 +24,6 @@ pub mod linear;
 pub mod log_softmax;
 #[cfg(all(feature="cuda", not(feature="native")))]
 pub mod pooling;
-pub mod sequential;
 pub mod softmax;
 
 /// Provides common utilities for Layers that utilize a filter with stride and padding.
