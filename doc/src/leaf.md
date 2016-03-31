@@ -25,7 +25,7 @@ available.
 > * [Neural Networks and Deep Learning](http://neuralnetworksanddeeplearning.com/)
 > * [Stanford Course on (Convolutional) Neural Networks](http://cs231n.github.io/)
 > * [A 'brief' history of Deep Learning](http://www.andreykurenkov.com/writing/a-brief-history-of-neural-nets-and-deep-learning/)
-> * [The Glossary](./glossary.html)
+> * [The Glossary](./deep-learning-glossary.html)
 
 Deep Learning is really easy. Construct a network by chaining layers and then train the
 network by feeding it examples. That is why Leaf's entire API

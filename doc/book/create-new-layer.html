@@ -47,7 +47,7 @@
         </script>
 
         <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li><a href="./leaf.html"><strong>1.</strong> Leaf</a></li><li><a href="./layers.html"><strong>2.</strong> Layers</a></li><li><ul class="section"><li><a href="./layer-lifecycle.html"><strong>2.1.</strong> Layer Lifecycle</a></li><li><a href="./building-networks.html"><strong>2.2.</strong> Create a Network</a></li><li><a href="./create-new-layer.html" class="active"><strong>2.3.</strong> Create a new Layer</a></li></ul></li><li><a href="./solvers.html"><strong>3.</strong> Solvers</a></li><li><ul class="section"><li><a href="./model-training.html"><strong>3.1.</strong> Model Training</a></li><li><a href="./multi-device-model-training.html"><strong>3.2.</strong> Multi-Device Model Training</a></li><li><a href="./distributed-model-training.html"><strong>3.3.</strong> Distributed Model Training</a></li></ul></li><li><a href="./backend.html"><strong>4.</strong> Backend</a></li><li><a href="./deep-learning-glossary.html"><strong>5.</strong> Glossary</a></li><li class="spacer"></li><li><a href="http://autumnai.github.io/leaf/leaf/index.html"><strong>6.</strong> Rust API Documentation</a></li></ul>
+            <ul class="chapter"><li><a href="./leaf.html"><strong>1.</strong> Leaf</a></li><li><a href="./layers.html"><strong>2.</strong> Layers</a></li><li><ul class="section"><li><a href="./layer-lifecycle.html"><strong>2.1.</strong> Layer Lifecycle</a></li><li><a href="./building-networks.html"><strong>2.2.</strong> Create a Network</a></li><li><a href="./create-new-layer.html" class="active"><strong>2.3.</strong> Create a new Layer</a></li></ul></li><li><a href="./solvers.html"><strong>3.</strong> Solvers</a></li><li><ul class="section"><li><a href="./optimize-layers.html"><strong>3.1.</strong> Optimize Layers</a></li><li><a href="./multi-device-optimization.html"><strong>3.2.</strong> Multi-Device Optimization</a></li><li><a href="./distributed-optimization.html"><strong>3.3.</strong> Distributed Optimization</a></li></ul></li><li><a href="./backend.html"><strong>4.</strong> Backend</a></li><li><a href="./deep-learning-glossary.html"><strong>5.</strong> Glossary</a></li><li class="spacer"></li><li><a href="http://autumnai.github.io/leaf/leaf/index.html"><strong>6.</strong> Rust API Documentation</a></li></ul>
         </div>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -68,6 +68,49 @@
 
                 <div id="content" class="content">
                     <h1>Create a new Layer</h1>
+<p>A layer in Leaf can implement any behavior as long as it takes an input and
+produces an output. There are a lot of layers, that would prove valuable but,
+are not yet implemented. This chapter shows how straight forward it is to add
+a new layer to Leaf.</p>
+<p>A not exclusive list of steps to take in order to implement a new layer.
+The Rust compiler is also very helpful with pointing out the necessary steps for
+implementing a new layer struct. It might be helpful to copy a file of an
+already existing layer and start from there.</p>
+<ol>
+<li>
+<p>Decide to which of the <a href="./layers.html#What%20can%20Layers%20do?">five types</a>
+the new layer belongs. This decides under which directory to put the layer
+implementation in the Leaf project.</p>
+</li>
+<li>
+<p>Create the <code>Layer</code> worker struct.</p>
+</li>
+<li>
+<p>Expose the <code>Layer</code> worker struct in the <code>mod.rs</code> of the layer type directory.</p>
+</li>
+<li>
+<p>Expose the <code>Layer</code> worker struct in the <code>mod.rs</code> of the <code>/layers</code> directory.</p>
+</li>
+<li>
+<p>Implement <code>ILayer</code> and its trait boundaries for the new <code>Layer</code> worker struct.</p>
+</li>
+<li>
+<p>Add the new layer to the <code>LayerType</code> in <code>layer.rs</code> and add the matching
+for <code>.support_in_place</code> and <code>.worker_from_config</code>.</p>
+</li>
+<li>
+<p>If the new layer relies on a collenchyma operation, also add the collenchyma
+trait boundary.</p>
+</li>
+<li>
+<p>Add documentation and serialization to the new layer.</p>
+</li>
+<li>
+<p>(optional) Depending on how complex the layer is, you might also add tests and more
+advanced implementations for its <code>.from_config</code>, <code>.reshape</code> or other helper
+methods.</p>
+</li>
+</ol>
 
                 </div>
 

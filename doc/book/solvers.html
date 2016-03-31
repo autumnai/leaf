@@ -47,7 +47,7 @@
         </script>
 
         <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li><a href="./leaf.html"><strong>1.</strong> Leaf</a></li><li><a href="./layers.html"><strong>2.</strong> Layers</a></li><li><ul class="section"><li><a href="./layer-lifecycle.html"><strong>2.1.</strong> Layer Lifecycle</a></li><li><a href="./building-networks.html"><strong>2.2.</strong> Create a Network</a></li><li><a href="./create-new-layer.html"><strong>2.3.</strong> Create a new Layer</a></li></ul></li><li><a href="./solvers.html" class="active"><strong>3.</strong> Solvers</a></li><li><ul class="section"><li><a href="./model-training.html"><strong>3.1.</strong> Model Training</a></li><li><a href="./multi-device-model-training.html"><strong>3.2.</strong> Multi-Device Model Training</a></li><li><a href="./distributed-model-training.html"><strong>3.3.</strong> Distributed Model Training</a></li></ul></li><li><a href="./backend.html"><strong>4.</strong> Backend</a></li><li><a href="./deep-learning-glossary.html"><strong>5.</strong> Glossary</a></li><li class="spacer"></li><li><a href="http://autumnai.github.io/leaf/leaf/index.html"><strong>6.</strong> Rust API Documentation</a></li></ul>
+            <ul class="chapter"><li><a href="./leaf.html"><strong>1.</strong> Leaf</a></li><li><a href="./layers.html"><strong>2.</strong> Layers</a></li><li><ul class="section"><li><a href="./layer-lifecycle.html"><strong>2.1.</strong> Layer Lifecycle</a></li><li><a href="./building-networks.html"><strong>2.2.</strong> Create a Network</a></li><li><a href="./create-new-layer.html"><strong>2.3.</strong> Create a new Layer</a></li></ul></li><li><a href="./solvers.html" class="active"><strong>3.</strong> Solvers</a></li><li><ul class="section"><li><a href="./optimize-layers.html"><strong>3.1.</strong> Optimize Layers</a></li><li><a href="./multi-device-optimization.html"><strong>3.2.</strong> Multi-Device Optimization</a></li><li><a href="./distributed-optimization.html"><strong>3.3.</strong> Distributed Optimization</a></li></ul></li><li><a href="./backend.html"><strong>4.</strong> Backend</a></li><li><a href="./deep-learning-glossary.html"><strong>5.</strong> Glossary</a></li><li class="spacer"></li><li><a href="http://autumnai.github.io/leaf/leaf/index.html"><strong>6.</strong> Rust API Documentation</a></li></ul>
         </div>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -68,6 +68,24 @@
 
                 <div id="content" class="content">
                     <h1>Solvers</h1>
+<p>Solvers optimize the layer with a given objective. This might happen
+by updating the weights of the layer, which is the usual practice for
+Neural Networks but is not limited to this kind of learning.</p>
+<p>A solver can have different learning (solving) policies. With Neural Networks it
+is common to use a Stochastic Gradient Descent based approach
+like Adagrad, whereas for a classical regression the solving might be
+done via a maximum likelihood estimation.</p>
+<p>Similar to <code>Layer</code>s, we can construct a <a href="https://github.com/autumnai/leaf/blob/master/src/solver/mod.rs"><code>Solver</code> (<em>/src/solver/mod.rs</em>)</a>
+from a <a href="https://github.com/autumnai/leaf/blob/master/src/solver/mod.rs"><code>SolverConfig</code> (<em>/src/solver/mod.rs</em>)</a>.
+When passing this <code>SolverConfig</code> (e.g. an Adagrad <code>SolverConfig</code>) to the
+<code>Solver::from_config</code> method, a <code>Solver</code> with the behavior
+of the config is returned.</p>
+<p>The most characteristic feature of the <code>SolverConfig</code> is its <code>network</code>
+and <code>objective</code> fields. These two fields expect one <code>LayerConfig</code> each. When
+passing the <code>SolverConfig</code> to the <code>Solver::from_config</code> method, the
+<code>LayerConfig</code>s for <code>network</code> and <code>objective</code> are turned into <code>Layer</code>s and
+provided as fields to the returned, <code>Solver</code>.</p>
+<p>The now initialized <code>Solver</code> can be feed with data to optimize the <code>network</code>.</p>
 
                 </div>
 
@@ -79,7 +97,7 @@
                 
 
                 
-                    <a href="./model-training.html" class="mobile-nav-chapters next">
+                    <a href="./optimize-layers.html" class="mobile-nav-chapters next">
                         <i class="fa fa-angle-right"></i>
                     </a>
                 
@@ -93,7 +111,7 @@
             
 
             
-                <a href="./model-training.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                <a href="./optimize-layers.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
                     <i class="fa fa-angle-right"></i>
                 </a>
             
