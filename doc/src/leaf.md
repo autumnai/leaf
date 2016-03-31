@@ -8,6 +8,16 @@ portability to Deep Learning. Leaf has a very simple API, [Layers][layers] and
 [Solvers][solvers], and is one of the fastest Machine Intelligence Frameworks
 available.
 
+<br/>
+
+<div align="center">
+  <iframe src="https://ghbtns.com/github-btn.html?user=autumnai&repo=leaf&type=star&count=true" frameborder="0" scrolling="0" width="120px" height="20px"></iframe>
+  <a href="https://twitter.com/autumn_eng" class="twitter-follow-button" data-show-count="false">Follow @autumn_eng</a>
+  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+</div>
+
+<br/>
+
 > **Assumption**  
 > The Leaf Book requires a basic understanding of the fundamental concepts
 > of Machine and Deep Learning. Recommended resources are
@@ -44,6 +54,3 @@ Leaf is licensed under either of
 * [MIT license](https://github.com/autumnai/leaf/blob/master/LICENSE-MIT)
 
 at your option.
-
-
-

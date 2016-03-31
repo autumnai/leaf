@@ -67,7 +67,72 @@
                 </div>
 
                 <div id="content" class="content">
-                    <h1>Network from Layers</h1>
+                    <h1>Create a Network</h1>
+<p>In the previous chapters, we learned that everything is a layer. Even the network
+itself is a layer and therefore behaves like any other layer which means,
+that it could be used to create even bigger networks. This is possible, because
+a <code>Layer</code> can implement any behavior as long as it takes an input and produces
+an output. In <a href="./layer-lifecycle.html">2.1 Layer Lifecycle</a>
+we have seen, that only one <code>LayerConfig</code> can be used to turn it via
+<code>Layer::from_config</code> into an actual <code>Layer</code>. But as Deep Learning relies on
+chaining multiple layers together, we need a <code>Layer</code>, who implements this
+behavior for us. Enter the container layers.</p>
+<h3>Networks via the <code>Sequential</code> layer</h3>
+<p>A <code>Sequential</code> is a layer of the container layer category. The config of a
+container layer, e.g. <code>SequentialConfig</code> has a special method called,
+<code>.add_layer</code> which takes one <code>LayerConfig</code> and adds it to an ordered list in the
+<code>SequentialConfig</code>.</p>
+<p>When turning a <code>SequentialConfig</code> into a <code>Layer</code> by passing the config to
+<code>Layer::from_config</code>, the behavior of the Sequential is to initialize all the
+layers which were added via <code>.add_layer</code> and connect the layers with each other.
+This means, the output of one layer becomes the input of the next layer in the
+list. The input of a <code>Layer</code> with a sequential worker, becomes the input of the
+first layer in the sequential worker, the sequential worker then takes care
+of passing the input through all the layers and the output of the last layer
+then becomes the output of the <code>Layer</code> with the sequential worker. Therefore
+a sequential <code>Layer</code> fulfills the requirements of a <code>Layer</code>.</p>
+<pre><code class="language-rust">// short form for: &amp;LayerConfig::new(&quot;net&quot;, LayerType::Sequential(cfg))
+let mut net_cfg = SequentialConfig::default();
+
+net_cfg.add_input(&quot;data&quot;, &amp;vec![batch_size, 28, 28]);
+net_cfg.add_layer(LayerConfig::new(&quot;reshape&quot;, ReshapeConfig::of_shape(&amp;vec![batch_size, 1, 28, 28])));
+net_cfg.add_layer(LayerConfig::new(&quot;conv&quot;, ConvolutionConfig { num_output: 20, filter_shape: vec![5], stride: vec![1], padding: vec![0] }));
+net_cfg.add_layer(LayerConfig::new(&quot;pooling&quot;, PoolingConfig { mode: PoolingMode::Max, filter_shape: vec![2], stride: vec![2], padding: vec![0] }));
+net_cfg.add_layer(LayerConfig::new(&quot;linear1&quot;, LinearConfig { output_size: 500 }));
+net_cfg.add_layer(LayerConfig::new(&quot;sigmoid&quot;, LayerType::Sigmoid));
+net_cfg.add_layer(LayerConfig::new(&quot;linear2&quot;, LinearConfig { output_size: 10 }));
+net_cfg.add_layer(LayerConfig::new(&quot;log_softmax&quot;, LayerType::LogSoftmax));
+
+// set up the sequential layer aka. a deep, convolutional network
+let mut net = Layer::from_config(backend.clone(), &amp;net_cfg);
+</code></pre>
+<p>As a sequential layer is like any other layer, we can use sequential layers as
+building blocks for larger networks. Important building blocks of a network can
+be grouped into a sequential layer and published as a crate for others to use.</p>
+<pre><code class="language-rust">// short form for: &amp;LayerConfig::new(&quot;net&quot;, LayerType::Sequential(cfg))
+let mut conv_net = SequentialConfig::default();
+
+conv_net.add_input(&quot;data&quot;, &amp;vec![batch_size, 28, 28]);
+conv_net.add_layer(LayerConfig::new(&quot;reshape&quot;, ReshapeConfig::of_shape(&amp;vec![batch_size, 1, 28, 28])));
+conv_net.add_layer(LayerConfig::new(&quot;conv&quot;, ConvolutionConfig { num_output: 20, filter_shape: vec![5], stride: vec![1], padding: vec![0] }));
+conv_net.add_layer(LayerConfig::new(&quot;pooling&quot;, PoolingConfig { mode: PoolingMode::Max, filter_shape: vec![2], stride: vec![2], padding: vec![0] }));
+conv_net.add_layer(LayerConfig::new(&quot;linear1&quot;, LinearConfig { output_size: 500 }));
+conv_net.add_layer(LayerConfig::new(&quot;sigmoid&quot;, LayerType::Sigmoid));
+conv_net.add_layer(LayerConfig::new(&quot;linear2&quot;, LinearConfig { output_size: 10 }));
+
+let mut net_cfg = SequentialConfig::default();
+
+net_cfg.add_layer(conv_net);
+net_cfg.add_layer(LayerConfig::new(&quot;linear&quot;, LinearConfig { output_size: 500 }));
+net_cfg.add_layer(LayerConfig::new(&quot;log_softmax&quot;, LayerType::LogSoftmax));
+
+// set up the 'big' network
+let mut net = Layer::from_config(backend.clone(), &amp;net_cfg);
+</code></pre>
+<h3>Networks via other container layers</h3>
+<p>So far, there is only the sequential layer, but other container layers, with
+slightly different behaviors are conceivable. For example a parallel or
+concat layer in addition to the sequential layer.</p>
 
                 </div>
 
