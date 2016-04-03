@@ -1,14 +1,15 @@
 # Create a new Layer
 
 A layer in Leaf can implement any behavior as long as it takes an input and
-produces an output. There are a lot of layers, that would prove valuable but,
-are not yet implemented. This chapter shows how straight forward it is to add
-a new layer to Leaf.
+produces an output. As Leaf is new, there are still many valuable layers that
+are not yet implemented. This is why this chapter shows how you can add new
+layers to Leaf.
 
-A not exclusive list of steps to take in order to implement a new layer.
-The Rust compiler is also very helpful with pointing out the necessary steps for
-implementing a new layer struct. It might be helpful to copy a file of an
-already existing layer and start from there.
+A not exclusive list of steps to take in order to implement a new layer:
+
+> The Rust compiler is also very helpful with pointing out the necessary steps
+> for implementing a new layer struct. It might be beneficial to start the
+> implementation of a new layer from a copied file of an already existing layer.
 
 1. Decide to which of the [five types](./layers.html#What&#32;can&#32;Layers&#32;do?)
 the new layer belongs. This decides under which directory to put the layer

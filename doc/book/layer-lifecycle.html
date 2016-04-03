@@ -69,14 +69,14 @@
                 <div id="content" class="content">
                     <h1>Layer Lifecycle</h1>
 <p>In <a href="./layers.html">2. Layers</a> we have already seen a little bit about how to
-construct a <code>Layer</code> from a <code>LayerConfig</code>. In this chapter we take
-a closer look on what happens inside Leaf when initializing a <code>Layer</code>, when
-running the <code>forward</code> of a <code>Layer</code> and when running the <code>backward</code>. In the
+construct a <code>Layer</code> from a <code>LayerConfig</code>. In this chapter, we take
+a closer look at what happens inside Leaf when initializing a <code>Layer</code> when
+running the <code>.forward</code> of a <code>Layer</code> and when running the <code>.backward</code>. In the
 next chapter <a href="./building-networks.html">2.2 Create a Network</a> we then
 apply our knowledge to construct deep networks via the container layer.</p>
-<p>Initialization (<code>from_config</code>), <code>forward</code> and <code>backward</code> are the three most
-important methods of a <code>Layer</code> and describe basically the entire API. Now we
-take a closer look on what happens inside Leaf, when these methods are called.</p>
+<p>Initialization (<code>::from_config</code>), <code>.forward</code> and <code>.backward</code> are the three most
+important methods of a <code>Layer</code> and describe basically the entire API. Let's
+take a closer look at what happens inside Leaf, when these methods are called.</p>
 <h3>Initialization</h3>
 <p>A layer is constructed from a <code>LayerConfig</code> via the <code>Layer::from_config</code>
 method, which returns a fully initialized <code>Layer</code>.</p>
@@ -105,30 +105,30 @@ initializing the worker struct, allocating memory for weights and so on.</p>
 care of initializing all the <code>LayerConfig</code>s it contains (which were added via its
 <code>.add_layer</code> method) and connecting them in
 the order they were provided to the <code>LayerConfig</code> of the container.</p>
-<p>Every <code>forward</code> or <code>backward</code> call that is now made to the returned <code>Layer</code> is send to
-the worker.</p>
+<p>Every <code>.forward</code> or <code>.backward</code> call that is now made to the returned <code>Layer</code> is
+sent to the worker.</p>
 <h3>Forward</h3>
 <p>The <code>forward</code> method of a <code>Layer</code> sends the input through the constructed
 network and returns the output of the network's final layer.</p>
-<p>The <code>forward</code> method does three things:</p>
+<p>The <code>.forward</code> method does three things:</p>
 <ol>
 <li>Reshape the input data if necessary</li>
 <li>Sync the input/weights to the device were the computation happens. This step
 removes the worker layer from the obligation to care about memory synchronization.</li>
 <li>Call the <code>forward</code> method of the worker layer.</li>
 </ol>
-<p>In case the worker layer is a container layer, the <code>forward</code> method of the
-container layer takes care of calling the <code>forwad</code> methods of its managed
+<p>In case, the worker layer is a container layer, the <code>.forward</code> method of the
+container layer takes care of calling the <code>.forward</code> methods of its managed
 layers in the right order.</p>
 <h3>Backward</h3>
-<p>The <code>backward</code> of a <code>Layer</code> works quite similar to its <code>forward</code>. Although it
-does not need to reshape the input. The <code>backward</code> computes
+<p>The <code>.backward</code> of a <code>Layer</code> works quite similar to its <code>.forward</code>. Although it
+does not need to reshape the input. The <code>.backward</code> computes
 the gradient with respect to the input and the gradient w.r.t. the parameters but
 only returns the gradient w.r.t the input as only that is needed to compute the
 gradient of the entire network via the chain rule.</p>
-<p>In case the worker layer is a container layer, the <code>backward</code> method of the
-container layer takes care of calling the <code>backward_input</code> and <code>backward_parameter</code>
-methods of its managed layers in the right order.</p>
+<p>In case the worker layer is a container layer, the <code>.backward</code> method of the
+container layer takes care of calling the <code>.backward_input</code> and
+<code>.backward_parameter</code> methods of its managed layers in the right order.</p>
 
                 </div>
 

@@ -68,6 +68,21 @@
 
                 <div id="content" class="content">
                     <h1>Backend</h1>
+<p>Via the concept of a backend we can abstract over the platform we will execute
+or optimize a network on. The construction of a backend is trivial. The backend
+is passed to the <code>Solver</code>, (one backend for <code>network</code> and one for the
+<code>objectve</code>). The Solver than executes all operations on the provided backend.</p>
+<pre><code class="language-rust">let backend = ::std::rc::Rc::new(Backend::&lt;Cuda&gt;::default().unwrap());
+
+// set up solver
+let mut solver_cfg = SolverConfig { minibatch_size: batch_size, base_lr: learning_rate, momentum: momentum, .. SolverConfig::default() };
+solver_cfg.network = LayerConfig::new(&quot;network&quot;, net_cfg);
+solver_cfg.objective = LayerConfig::new(&quot;classifier&quot;, classifier_cfg);
+let mut solver = Solver::from_config(backend.clone(), backend.clone(), &amp;solver_cfg);
+</code></pre>
+<p>The backend is a concept of
+<a href="https://github.com/autumnai/collenchyma">Collenchyma</a>, to which you can refer
+for now, until this chapter becomes more fleshed out.</p>
 
                 </div>
 

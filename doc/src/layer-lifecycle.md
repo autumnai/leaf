@@ -1,15 +1,15 @@
 # Layer Lifecycle
 
 In [2. Layers](./layers.html) we have already seen a little bit about how to
-construct a `Layer` from a `LayerConfig`. In this chapter we take
-a closer look on what happens inside Leaf when initializing a `Layer`, when
-running the `forward` of a `Layer` and when running the `backward`. In the
+construct a `Layer` from a `LayerConfig`. In this chapter, we take
+a closer look at what happens inside Leaf when initializing a `Layer` when
+running the `.forward` of a `Layer` and when running the `.backward`. In the
 next chapter [2.2 Create a Network](./building-networks.html) we then
 apply our knowledge to construct deep networks via the container layer.
 
-Initialization (`from_config`), `forward` and `backward` are the three most
-important methods of a `Layer` and describe basically the entire API. Now we
-take a closer look on what happens inside Leaf, when these methods are called.
+Initialization (`::from_config`), `.forward` and `.backward` are the three most
+important methods of a `Layer` and describe basically the entire API. Let's
+take a closer look at what happens inside Leaf, when these methods are called.
 
 ### Initialization
 
@@ -48,33 +48,33 @@ care of initializing all the `LayerConfig`s it contains (which were added via it
 `.add_layer` method) and connecting them in
 the order they were provided to the `LayerConfig` of the container.
 
-Every `forward` or `backward` call that is now made to the returned `Layer` is send to
-the worker.
+Every `.forward` or `.backward` call that is now made to the returned `Layer` is
+sent to the worker.
 
 ### Forward
 
 The `forward` method of a `Layer` sends the input through the constructed
 network and returns the output of the network's final layer.
 
-The `forward` method does three things:
+The `.forward` method does three things:
 
 1. Reshape the input data if necessary
 2. Sync the input/weights to the device were the computation happens. This step
 removes the worker layer from the obligation to care about memory synchronization.
 3. Call the `forward` method of the worker layer.
 
-In case the worker layer is a container layer, the `forward` method of the
-container layer takes care of calling the `forwad` methods of its managed
+In case, the worker layer is a container layer, the `.forward` method of the
+container layer takes care of calling the `.forward` methods of its managed
 layers in the right order.
 
 ### Backward
 
-The `backward` of a `Layer` works quite similar to its `forward`. Although it
-does not need to reshape the input. The `backward` computes
+The `.backward` of a `Layer` works quite similar to its `.forward`. Although it
+does not need to reshape the input. The `.backward` computes
 the gradient with respect to the input and the gradient w.r.t. the parameters but
 only returns the gradient w.r.t the input as only that is needed to compute the
 gradient of the entire network via the chain rule.
 
-In case the worker layer is a container layer, the `backward` method of the
-container layer takes care of calling the `backward_input` and `backward_parameter`
-methods of its managed layers in the right order.
+In case the worker layer is a container layer, the `.backward` method of the
+container layer takes care of calling the `.backward_input` and
+`.backward_parameter` methods of its managed layers in the right order.

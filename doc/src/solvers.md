@@ -4,7 +4,7 @@ Solvers optimize the layer with a given objective. This might happen
 by updating the weights of the layer, which is the usual practice for
 Neural Networks but is not limited to this kind of learning.
 
-A solver can have different learning (solving) policies. With Neural Networks it
+A solver can have different learning (solving) policies. With Neural Networks, it
 is common to use a Stochastic Gradient Descent based approach
 like Adagrad, whereas for a classical regression the solving might be
 done via a maximum likelihood estimation.
@@ -18,8 +18,16 @@ of the config is returned.
 The most characteristic feature of the `SolverConfig` is its `network`
 and `objective` fields. These two fields expect one `LayerConfig` each. When
 passing the `SolverConfig` to the `Solver::from_config` method, the
-`LayerConfig`s for `network` and `objective` are turned into `Layer`s and
-provided as fields to the returned, `Solver`.
+`LayerConfig` of the `network` and `objective` fields are turned into
+an initialized `Layer` and provided to the returned, `Solver`.
+
+```rust
+// set up a Solver
+let mut solver_cfg = SolverConfig { minibatch_size: batch_size, base_lr: learning_rate, momentum: momentum, .. SolverConfig::default() };
+solver_cfg.network = LayerConfig::new("network", net_cfg);
+solver_cfg.objective = LayerConfig::new("classifier", classifier_cfg);
+let mut solver = Solver::from_config(backend.clone(), backend.clone(), &solver_cfg);
+```
 
 The now initialized `Solver` can be feed with data to optimize the `network`.
 

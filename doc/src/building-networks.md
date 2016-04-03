@@ -1,31 +1,38 @@
 # Create a Network
 
-In the previous chapters, we learned that everything is a layer. Even the network
-itself is a layer and therefore behaves like any other layer which means,
-that it could be used to create even bigger networks. This is possible, because
+In the previous chapters, we learned that in Leaf everything is build by
+layers and that the constructed thing is again a layer, which means it can
+function as a new building block for something bigger. This is possible, because
 a `Layer` can implement any behavior as long as it takes an input and produces
-an output. In [2.1 Layer Lifecycle](./layer-lifecycle.html)
+an output.
+
+In [2.1 Layer Lifecycle](./layer-lifecycle.html)
 we have seen, that only one `LayerConfig` can be used to turn it via
 `Layer::from_config` into an actual `Layer`. But as Deep Learning relies on
 chaining multiple layers together, we need a `Layer`, who implements this
-behavior for us. Enter the container layers.
+behavior for us.
+
+Enter the container layers.
 
 ### Networks via the `Sequential` layer
 
-A `Sequential` is a layer of the container layer category. The config of a
-container layer, e.g. `SequentialConfig` has a special method called,
+A `Sequential` Layer is a layer of type container layer. The config of a
+container layer has a special method called,
 `.add_layer` which takes one `LayerConfig` and adds it to an ordered list in the
 `SequentialConfig`.
 
 When turning a `SequentialConfig` into a `Layer` by passing the config to
-`Layer::from_config`, the behavior of the Sequential is to initialize all the
+`Layer::from_config`, the behavior of the `Sequential` is to initialize all the
 layers which were added via `.add_layer` and connect the layers with each other.
 This means, the output of one layer becomes the input of the next layer in the
-list. The input of a `Layer` with a sequential worker, becomes the input of the
+list.
+
+The input of a sequential `Layer` becomes the input of the
 first layer in the sequential worker, the sequential worker then takes care
 of passing the input through all the layers and the output of the last layer
 then becomes the output of the `Layer` with the sequential worker. Therefore
-a sequential `Layer` fulfills the requirements of a `Layer`.
+a sequential `Layer` fulfills the requirements of a `Layer` - take an input,
+return an output.
 
 ```rust
 // short form for: &LayerConfig::new("net", LayerType::Sequential(cfg))
@@ -75,3 +82,6 @@ let mut net = Layer::from_config(backend.clone(), &net_cfg);
 So far, there is only the sequential layer, but other container layers, with
 slightly different behaviors are conceivable. For example a parallel or
 concat layer in addition to the sequential layer.
+
+How to 'train' or optimize the constructed network is topic of chapter [3.
+Solvers](./solvers.html)
