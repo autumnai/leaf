@@ -31,6 +31,8 @@ macro_rules! impl_ilayer_activation {
 
 pub use self::relu::ReLU;
 pub use self::sigmoid::Sigmoid;
+pub use self::tanh::TanH;
 
 pub mod relu;
 pub mod sigmoid;
+pub mod tanh;
