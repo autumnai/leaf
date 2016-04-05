@@ -70,8 +70,6 @@ impl<SolverB: IBackend + SolverOps<f32> + 'static, B: IBackend + LayerOps<f32> +
 
     /// Train the network with one minibatch
     pub fn train_minibatch(&mut self, mb_data: ArcLock<SharedTensor<f32>>, mb_target: ArcLock<SharedTensor<f32>>) -> ArcLock<SharedTensor<f32>> {
-        self.net.clear_weights_gradients();
-
         // forward through network and classifier
         let network_out = self.net.forward(&[mb_data])[0].clone();
         let _ = self.objective.forward(&[network_out.clone(), mb_target]);
