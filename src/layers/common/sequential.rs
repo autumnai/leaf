@@ -6,9 +6,11 @@ use std::sync::{Arc, RwLock};
 use co::{IBackend, SharedTensor};
 use layer::*;
 use util::{ArcLock, LayerOps};
+use leaf_capnp::sequential_config as capnp_config;
+use leaf_capnp::shaped_input as capnp_shaped_input;
+use capnp_util::*;
 
-#[derive(Debug)]
-/// Sequential Layer
+#[derive(Debug)] /// Sequential Layer
 pub struct Sequential<B: IBackend + LayerOps<f32>> {
     layers: Vec<RefCell<Layer<B>>>,
 
@@ -225,6 +227,11 @@ impl<B: IBackend + LayerOps<f32> + 'static> ILayer<B> for Sequential<B> {
         Some(gradients)
     }
 
+    fn learnable_weights_names(&self) -> Option<Vec<String>> {
+        let names = self.layers.iter().flat_map(|layer| layer.borrow().learnable_weights_names()).collect();
+        Some(names)
+    }
+
     fn resize_shared_workspace(&mut self, backend: Rc<B>, workspace: Option<ArcLock<SharedTensor<u8>>>) -> Option<ArcLock<SharedTensor<u8>>> {
         debug!("Resizing shared workspace {:?}", workspace.is_some());
         let mut shared_workspace = workspace;
@@ -377,6 +384,41 @@ impl SequentialConfig {
     /// Add a input to the network.
     pub fn add_input(&mut self, input_name: &str, shape: &[usize]) {
         self.inputs.push((input_name.to_owned(), shape.to_owned()));
+    }
+
+    /// Write a input into a capnp message.
+    fn write_capnp_shaped_input(&self, builder: &mut capnp_shaped_input::Builder, i: usize) {
+        let input = self.inputs.get(i).unwrap();
+        let ref name = input.0;
+        let ref shape = input.1;
+        builder.set_name(name);
+        let mut dimensions = builder.borrow().init_shape(shape.len() as u32);
+        for (i, dim) in shape.iter().enumerate() {
+            dimensions.set(i as u32, *dim as u64);
+        }
+    }
+}
+
+impl<'a> CapnpWrite<'a> for SequentialConfig {
+    type Builder = capnp_config::Builder<'a>;
+
+    /// Write the SequentialConfig into a capnp message.
+    fn write_capnp(&self, builder: &mut Self::Builder) {
+        {
+            let mut layers = builder.borrow().init_layers(self.layers.len() as u32);
+            for (i, layer) in self.layers.iter().enumerate() {
+                let mut layer_config = layers.borrow().get(i as u32);
+                layer.write_capnp(&mut layer_config);
+            }
+        }
+        {
+            let mut inputs = builder.borrow().init_inputs(self.inputs.len() as u32);
+            for (i, _) in self.inputs.iter().enumerate() {
+                let mut shaped_input = inputs.borrow().get(i as u32);
+                self.write_capnp_shaped_input(&mut shaped_input, i);
+            }
+        }
+        builder.set_force_backward(self.force_backward);
     }
 }
 

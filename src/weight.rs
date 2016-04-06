@@ -3,6 +3,8 @@ use rand;
 use rand::distributions::{IndependentSample, Range};
 use co::{ITensorDesc, SharedTensor};
 use util::native_backend;
+use leaf_capnp::weight_config as capnp_config;
+use capnp_util::*;
 
 #[derive(Debug, Clone)]
 /// Specifies training configuration for a weight blob.
@@ -104,6 +106,16 @@ impl WeightConfig {
             Some(val) => val,
             None => 1.0f32,
         }
+    }
+}
+
+impl<'a> CapnpWrite<'a> for WeightConfig {
+    type Builder = capnp_config::Builder<'a>;
+
+    /// Write the WeightConfig into a capnp message.
+    fn write_capnp(&self, builder: &mut Self::Builder) {
+        // TODO: incomplete since WeightConfig isn't really used internally in Leaf at the moment.
+        builder.borrow().set_name(&self.name);
     }
 }
 

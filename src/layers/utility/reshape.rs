@@ -18,6 +18,8 @@
 use co::{IBackend, SharedTensor};
 use layer::*;
 use util::ArcLock;
+use leaf_capnp::reshape_config as capnp_config;
+use capnp_util::*;
 
 #[derive(Debug, Clone)]
 /// Reshape Utility Layer
@@ -93,6 +95,18 @@ impl ReshapeConfig {
     pub fn of_shape(shape: &[usize]) -> ReshapeConfig {
         ReshapeConfig {
             shape: shape.to_owned()
+        }
+    }
+}
+
+impl<'a> CapnpWrite<'a> for ReshapeConfig {
+    type Builder = capnp_config::Builder<'a>;
+
+    /// Write the ReshapeConfig into a capnp message.
+    fn write_capnp(&self, builder: &mut Self::Builder) {
+        let mut shape = builder.borrow().init_shape(self.shape.len() as u32);
+        for (i, dim) in self.shape.iter().enumerate() {
+            shape.set(i as u32, *dim as u64);
         }
     }
 }

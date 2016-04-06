@@ -9,8 +9,15 @@ use util::{ArcLock, native_backend, LayerOps};
 use std::fmt;
 use std::cmp;
 use std::collections::{HashMap, HashSet};
+use std::fs::File;
+use std::io;
+use std::path::Path;
 use std::rc::Rc;
 use std::sync::{Arc, RwLock};
+use leaf_capnp::layer as capnp_layer;
+use leaf_capnp::layer_config as capnp_layer_config;
+use leaf_capnp::layer_config::layer_type as capnp_layer_type;
+use capnp_util::*;
 
 #[derive(Debug)]
 /// The generic Layer
@@ -247,7 +254,7 @@ impl<B: IBackend> Layer<B> {
             let display_name = if !weight_name.is_empty() {
                 weight_name.clone()
             } else {
-                format!("{}", weight_id)
+                format!("{}-{}", self.name, weight_id)
             };
             self.weights_display_names.push(display_name.clone());
             // create name for registry
@@ -573,6 +580,23 @@ impl<B: IBackend> Layer<B> {
         }
     }
 
+    /// Serialize the Layer and it's weights to a Cap'n Proto file at the specified path.
+    ///
+    /// You can find the capnp schema [here](../../../../capnp/leaf.capnp).
+    pub fn save<P: AsRef<Path>>(&mut self, path: P) -> io::Result<()> {
+        let path = path.as_ref();
+        let ref mut out = try!(File::create(path));
+
+        let mut message = ::capnp::message::Builder::new_default();
+        {
+            let mut layer = message.init_root::<capnp_layer::Builder>();
+            self.write_capnp(&mut layer);
+        }
+        ::capnp::serialize_packed::write_message(out, &message).unwrap();
+
+        Ok(())
+    }
+
     /// Sets whether the layer should compute gradients w.r.t. a
     /// weight at a particular index given by `weight_id`.
     ///
@@ -627,6 +651,15 @@ impl<B: IBackend> Layer<B> {
         else { self.weights_gradient.clone() }
     }
 
+    /// Returns the names of all the learnable weights in the layer.
+    ///
+    /// If the layer is a container layer it will return all the names of the
+    /// layers inside it.
+    pub fn learnable_weights_names(&self) -> Vec<String> {
+        if let Some(names) = self.worker.learnable_weights_names() { names }
+        else { self.weights_display_names.clone() }
+    }
+
     /// Returns the learning rate for all the learnable weights in the layer.
     ///
     /// If the layer is a container layer it will return all learning rates of the
@@ -636,6 +669,48 @@ impl<B: IBackend> Layer<B> {
         // else { self.weights_lr.clone() }
         else {
             self.learnable_weights_data().iter().map(|_| Some(1f32)).collect::<Vec<_>>() }
+    }
+}
+
+impl<'a, B: IBackend> CapnpWrite<'a> for Layer<B> {
+    type Builder = capnp_layer::Builder<'a>;
+
+    /// Write the Layer into a capnp message.
+    fn write_capnp(&self, builder: &mut Self::Builder) {
+        builder.set_name(&self.name);
+        {
+            let mut layer_config = builder.borrow().init_config();
+            self.config.write_capnp(&mut layer_config);
+        }
+        {
+            let native_backend = Backend::<Native>::default().unwrap();
+            let mut weights = builder.borrow().init_weights_data(self.learnable_weights_names().len() as u32);
+            let names = self.learnable_weights_names();
+            let weights_data = self.learnable_weights_data();
+
+            for (i, (name, weight)) in names.iter().zip(weights_data).enumerate() {
+                let mut capnp_weight = weights.borrow().get(i as u32);
+                capnp_weight.set_name(name);
+
+                let mut weight_lock = weight.write().unwrap();
+                weight_lock.sync(native_backend.device()).unwrap();
+
+                let mut tensor = capnp_weight.init_tensor();
+                {
+                    let mut tensor_shape = tensor.borrow().init_shape(weight_lock.desc().len() as u32);
+                    for (i, dim) in weight_lock.desc().iter().enumerate() {
+                        tensor_shape.set(i as u32, *dim as u64);
+                    }
+                }
+                {
+                    let native_slice = weight_lock.get(native_backend.device()).unwrap().as_native().unwrap().as_slice::<f32>();
+                    let mut tensor_data = tensor.borrow().init_data(native_slice.len() as u32);
+                    for (i, datum) in native_slice.iter().enumerate() {
+                        tensor_data.set(i as u32, *datum);
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -697,7 +772,6 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
             LayerType::Softmax => Box::new(Softmax::default()),
             LayerType::ReLU => Box::new(ReLU),
             LayerType::Sigmoid => Box::new(Sigmoid),
-            LayerType::TanH => Box::new(TanH),
             LayerType::NegativeLogLikelihood(layer_config) => Box::new(NegativeLogLikelihood::from_config(&layer_config)),
             LayerType::Reshape(layer_config) => Box::new(Reshape::from_config(&layer_config)),
         }
@@ -757,15 +831,15 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
                output_data: &mut [ArcLock<SharedTensor<f32>>]) {
         // aquire all the locks
         let inp: Vec<_> = input_data.iter().map(|b| b.read().unwrap()).collect();
-        let input_data_: Vec<&SharedTensor<f32>> = inp.iter().map(|val| &**val).collect();
+        let input_data_: Vec<&SharedTensor<f32>> = inp.iter().enumerate().map(|(_, val)| &**val).collect();
 
         let wgts: Vec<_> = weights_data.iter().map(|w| w.read().unwrap()).collect();
-        let weights_data_: Vec<&SharedTensor<f32>> = wgts.iter().map(|val| &**val).collect();
+        let weights_data_: Vec<&SharedTensor<f32>> = wgts.iter().enumerate().map(|(_, val)| &**val).collect();
 
         let out_ref = output_data.iter().cloned().collect::<Vec<_>>();
         let mut out = &mut out_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
         let mut output_w = &mut out.iter_mut().map(|a| a).collect::<Vec<_>>();
-        let mut output_data_: Vec<&mut SharedTensor<f32>> = output_w.iter_mut().map(|val| &mut ***val).collect();
+        let mut output_data_: Vec<&mut SharedTensor<f32>> = output_w.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
 
         self.compute_output(backend, &weights_data_, &input_data_, &mut output_data_);
     }
@@ -786,17 +860,17 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
                 input_data: &[ArcLock<SharedTensor<f32>>],
                 input_gradients: &mut [ArcLock<SharedTensor<f32>>]) {
         let wgts_data: Vec<_> = weights_data.iter().map(|b| b.read().unwrap()).collect();
-        let weights_data_: Vec<&SharedTensor<f32>> = wgts_data.iter().map(|val| &**val).collect();
+        let weights_data_: Vec<&SharedTensor<f32>> = wgts_data.iter().enumerate().map(|(_, val)| &**val).collect();
         let out_data: Vec<_> = output_data.iter().map(|b| b.read().unwrap()).collect();
-        let output_data_: Vec<&SharedTensor<f32>> = out_data.iter().map(|val| &**val).collect();
+        let output_data_: Vec<&SharedTensor<f32>> = out_data.iter().enumerate().map(|(_, val)| &**val).collect();
         let out_gradient: Vec<_> = output_gradients.iter().map(|b| b.read().unwrap()).collect();
-        let output_gradients_: Vec<&SharedTensor<f32>> = out_gradient.iter().map(|val| &**val).collect();
+        let output_gradients_: Vec<&SharedTensor<f32>> = out_gradient.iter().enumerate().map(|(_, val)| &**val).collect();
         let inp_data: Vec<_> = input_data.iter().map(|b| b.read().unwrap()).collect();
-        let input_data_: Vec<&SharedTensor<f32>> = inp_data.iter().map(|val| &**val).collect();
+        let input_data_: Vec<&SharedTensor<f32>> = inp_data.iter().enumerate().map(|(_, val)| &**val).collect();
         let btm_gradient_ref = input_gradients.iter().cloned().collect::<Vec<_>>();
         let mut btm_gradient = &mut btm_gradient_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
         let mut input_gradient = &mut btm_gradient.iter_mut().map(|a| a).collect::<Vec<_>>();
-        let mut input_gradients_: Vec<&mut SharedTensor<f32>> = input_gradient.iter_mut().map(|val| &mut ***val).collect();
+        let mut input_gradients_: Vec<&mut SharedTensor<f32>> = input_gradient.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
 
         self.compute_input_gradient(backend, &weights_data_, &output_data_, &output_gradients_, &input_data_, &mut input_gradients_);
     }
@@ -816,15 +890,15 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
                 input_data: &[ArcLock<SharedTensor<f32>>],
                 weights_gradients: &mut [ArcLock<SharedTensor<f32>>]) {
         let out_data: Vec<_> = output_data.iter().map(|b| b.read().unwrap()).collect();
-        let output_data_: Vec<&SharedTensor<f32>> = out_data.iter().map(|val| &**val).collect();
+        let output_data_: Vec<&SharedTensor<f32>> = out_data.iter().enumerate().map(|(_, val)| &**val).collect();
         let out_gradients: Vec<_> = output_gradients.iter().map(|b| b.read().unwrap()).collect();
-        let output_gradients_: Vec<&SharedTensor<f32>> = out_gradients.iter().map(|val| &**val).collect();
+        let output_gradients_: Vec<&SharedTensor<f32>> = out_gradients.iter().enumerate().map(|(_, val)| &**val).collect();
         let inp_data: Vec<_> = input_data.iter().map(|b| b.read().unwrap()).collect();
-        let input_data_: Vec<&SharedTensor<f32>> = inp_data.iter().map(|val| &**val).collect();
+        let input_data_: Vec<&SharedTensor<f32>> = inp_data.iter().enumerate().map(|(_, val)| &**val).collect();
         let wgt_gradient_ref = weights_gradients.iter().cloned().collect::<Vec<_>>();
         let mut wgt_gradient = &mut wgt_gradient_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
         let mut weights_gradient = &mut wgt_gradient.iter_mut().map(|a| a).collect::<Vec<_>>();
-        let mut weights_gradients_: Vec<&mut SharedTensor<f32>> = weights_gradient.iter_mut().map(|val| &mut ***val).collect();
+        let mut weights_gradients_: Vec<&mut SharedTensor<f32>> = weights_gradient.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
 
         self.compute_parameters_gradient(backend, &output_data_, &output_gradients_, &input_data_, &mut weights_gradients_);
     }
@@ -1030,6 +1104,14 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
         None
     }
 
+    /// Return the names of the learnable weights inside the layer.
+    ///
+    /// This should only be overridden by container layers,
+    /// where the weights are not easily exposable.
+    fn learnable_weights_names(&self) -> Option<Vec<String>> {
+        None
+    }
+
     /// Return the learning rates for the learnable weights inside the layer.
     ///
     /// This should only be overridden by container layers,
@@ -1124,8 +1206,6 @@ pub enum LayerType {
     ReLU,
     /// Sigmoid Layer
     Sigmoid,
-    /// TanH Layer
-    TanH,
     // Loss layers
     /// NegativeLogLikelihood Layer
     NegativeLogLikelihood(NegativeLogLikelihoodConfig),
@@ -1154,12 +1234,37 @@ impl LayerType {
             LayerType::Sigmoid => true,
             #[cfg(feature="native")]
             LayerType::Sigmoid => false,
-            #[cfg(all(feature="cuda", not(feature="native")))]
-            LayerType::TanH => true,
-            #[cfg(feature="native")]
-            LayerType::TanH => false,
             LayerType::NegativeLogLikelihood(_) => false,
             LayerType::Reshape(_) => true,
+        }
+    }
+
+}
+
+impl<'a> CapnpWrite<'a> for LayerType {
+    type Builder = capnp_layer_type::Builder<'a>;
+
+    /// Write the LayerType into a capnp message.
+    fn write_capnp(&self, builder: &mut Self::Builder) {
+        match self {
+            #[cfg(all(feature="cuda", not(feature="native")))]
+            &LayerType::Convolution(ref cfg) => { let ref mut config = builder.borrow().init_convolution(); cfg.write_capnp(config); },
+            &LayerType::Linear(ref cfg) => { let ref mut config = builder.borrow().init_linear(); cfg.write_capnp(config); },
+            &LayerType::LogSoftmax => { builder.set_log_softmax(()) },
+            #[cfg(all(feature="cuda", not(feature="native")))]
+            &LayerType::Pooling(ref cfg) => { let ref mut config = builder.borrow().init_pooling(); cfg.write_capnp(config); },
+            &LayerType::Sequential(ref cfg) => { let ref mut config = builder.borrow().init_sequential(); cfg.write_capnp(config); },
+            &LayerType::Softmax => { builder.set_softmax(()) },
+            #[cfg(all(feature="cuda", not(feature="native")))]
+            &LayerType::ReLU => { builder.set_relu(()) },
+            #[cfg(feature="native")]
+            &LayerType::ReLU => { builder.set_relu(()) },
+            #[cfg(all(feature="cuda", not(feature="native")))]
+            &LayerType::Sigmoid => { builder.set_sigmoid(()) },
+            #[cfg(feature="native")]
+            &LayerType::Sigmoid => { builder.set_sigmoid(()) },
+            &LayerType::NegativeLogLikelihood(ref cfg) => { let ref mut config = builder.borrow().init_negative_log_likelihood(); cfg.write_capnp(config); },
+            &LayerType::Reshape(ref cfg) => { let ref mut config = builder.borrow().init_reshape(); cfg.write_capnp(config); },
         }
     }
 }
@@ -1231,6 +1336,40 @@ impl LayerConfig {
             Ok(())
         } else {
             Err("propagate_down config must be specified either 0 or inputs_len times")
+        }
+    }
+
+    /// Write the LayerConfig into a capnp message.
+    pub fn write_capnp(&self, builder: &mut capnp_layer_config::Builder) {
+        builder.set_name(&self.name);
+        {
+            let mut layer_type = builder.borrow().init_layer_type();
+            self.layer_type.write_capnp(&mut layer_type);
+        }
+        {
+            let mut outputs = builder.borrow().init_outputs(self.outputs.len() as u32);
+            for (i, output) in self.outputs.iter().enumerate() {
+                outputs.set(i as u32, &output);
+            }
+        }
+        {
+            let mut inputs = builder.borrow().init_inputs(self.inputs.len() as u32);
+            for (i, input) in self.inputs.iter().enumerate() {
+                inputs.set(i as u32, &input);
+            }
+        }
+        {
+            let mut params = builder.borrow().init_params(self.params.len() as u32);
+            for (i, param) in self.params.iter().enumerate() {
+                let ref mut capnp_param = params.borrow().get(i as u32);
+                param.write_capnp(capnp_param);
+            }
+        }
+        {
+            let mut propagate_down = builder.borrow().init_propagate_down(self.propagate_down.len() as u32);
+            for (i, input) in self.propagate_down.iter().enumerate() {
+                propagate_down.set(i as u32, *input);
+            }
         }
     }
 }

@@ -26,6 +26,8 @@ use coblas::plugin::*;
 use layer::*;
 use util::{ArcLock, native_scalar, LayerOps};
 use weight::FillerType;
+use leaf_capnp::linear_config as capnp_config;
+use capnp_util::*;
 
 #[derive(Debug)]
 /// Linear Layer
@@ -182,6 +184,15 @@ impl ::std::default::Default for Linear {
 pub struct LinearConfig {
     /// The number of output values
     pub output_size: usize,
+}
+
+impl<'a> CapnpWrite<'a> for LinearConfig {
+    type Builder = capnp_config::Builder<'a>;
+
+    /// Write the LinearConfig into a capnp message.
+    fn write_capnp(&self, builder: &mut Self::Builder) {
+        builder.borrow().set_output_size(self.output_size as u64);
+    }
 }
 
 impl Into<LayerType> for LinearConfig {
