@@ -422,6 +422,40 @@ impl<'a> CapnpWrite<'a> for SequentialConfig {
     }
 }
 
+impl<'a> CapnpRead<'a> for SequentialConfig {
+    type Reader = capnp_config::Reader<'a>;
+
+    fn read_capnp(reader: Self::Reader) -> Self {
+        let read_layers = reader.get_layers().unwrap();
+        let mut layers = Vec::new();
+        for i in 0..read_layers.len() {
+            layers.push(LayerConfig::read_capnp(read_layers.get(i)))
+        }
+
+        let read_inputs = reader.get_inputs().unwrap();
+        let mut inputs = Vec::new();
+        for i in 0..read_inputs.len() {
+            let input = read_inputs.get(i);
+
+            let name = input.get_name().unwrap().to_owned();
+            let mut shape = Vec::new();
+            let read_shape = input.get_shape().unwrap();
+            for j in 0..read_shape.len() {
+                shape.push(read_shape.get(j) as usize)
+            }
+
+            inputs.push((name, shape))
+        }
+        let force_backward = reader.get_force_backward();
+
+        SequentialConfig {
+            layers: layers,
+            inputs: inputs,
+            force_backward: force_backward,
+        }
+    }
+}
+
 impl Into<LayerType> for SequentialConfig {
     fn into(self) -> LayerType {
         LayerType::Sequential(self)

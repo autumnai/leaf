@@ -119,6 +119,19 @@ impl<'a> CapnpWrite<'a> for WeightConfig {
     }
 }
 
+impl<'a> CapnpRead<'a> for WeightConfig {
+    type Reader = capnp_config::Reader<'a>;
+
+    fn read_capnp(reader: Self::Reader) -> Self {
+        // TODO: incomplete since WeightConfig isn't really used internally in Leaf at the moment.
+        let name = reader.get_name().unwrap().to_owned();
+        WeightConfig {
+            name: name,
+            ..Self::default()
+        }
+    }
+}
+
 #[derive(Debug, Copy, Clone)]
 /// Enum for specifing the shared weights behaviour
 pub enum DimCheckMode {

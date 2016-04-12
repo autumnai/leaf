@@ -264,6 +264,37 @@ impl<'a> CapnpWrite<'a> for ConvolutionConfig {
     }
 }
 
+impl<'a> CapnpRead<'a> for ConvolutionConfig {
+    type Reader = capnp_config::Reader<'a>;
+
+    fn read_capnp(reader: Self::Reader) -> Self {
+        let num_output = reader.get_num_output() as usize;
+
+        let read_filter_shape = reader.get_filter_shape().unwrap();
+        let mut filter_shape = Vec::new();
+        for i in 0..read_filter_shape.len() {
+            filter_shape.push(read_filter_shape.get(i) as usize)
+        }
+        let read_stride = reader.get_stride().unwrap();
+        let mut stride = Vec::new();
+        for i in 0..read_stride.len() {
+            stride.push(read_stride.get(i) as usize)
+        }
+        let read_padding = reader.get_padding().unwrap();
+        let mut padding = Vec::new();
+        for i in 0..read_padding.len() {
+            padding.push(read_padding.get(i) as usize)
+        }
+
+        ConvolutionConfig {
+            num_output: num_output,
+            filter_shape: filter_shape,
+            stride: stride,
+            padding: padding,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use co::*;

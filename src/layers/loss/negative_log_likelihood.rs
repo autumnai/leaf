@@ -134,6 +134,18 @@ impl<'a> CapnpWrite<'a> for NegativeLogLikelihoodConfig {
     }
 }
 
+impl<'a> CapnpRead<'a> for NegativeLogLikelihoodConfig {
+    type Reader = capnp_config::Reader<'a>;
+
+    fn read_capnp(reader: Self::Reader) -> Self {
+        let num_classes = reader.get_num_classes() as usize;
+
+        NegativeLogLikelihoodConfig {
+            num_classes: num_classes
+        }
+    }
+}
+
 impl Into<LayerType> for NegativeLogLikelihoodConfig {
     fn into(self) -> LayerType {
         LayerType::NegativeLogLikelihood(self)

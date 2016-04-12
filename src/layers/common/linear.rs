@@ -195,6 +195,18 @@ impl<'a> CapnpWrite<'a> for LinearConfig {
     }
 }
 
+impl<'a> CapnpRead<'a> for LinearConfig {
+    type Reader = capnp_config::Reader<'a>;
+
+    fn read_capnp(reader: Self::Reader) -> Self {
+        let output_size = reader.get_output_size() as usize;
+
+        LinearConfig {
+            output_size: output_size
+        }
+    }
+}
+
 impl Into<LayerType> for LinearConfig {
     fn into(self) -> LayerType {
         LayerType::Linear(self)

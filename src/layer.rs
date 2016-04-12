@@ -10,7 +10,7 @@ use std::fmt;
 use std::cmp;
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
-use std::io;
+use std::io::{self, BufReader};
 use std::path::Path;
 use std::rc::Rc;
 use std::sync::{Arc, RwLock};
@@ -455,7 +455,7 @@ impl<B: IBackend> Layer<B> {
             // reshape input tensor to the reshaped shape
             let old_shape = self.input_blobs_data[input_i].read().unwrap().desc().clone();
             if old_shape.size() != reshaped_shape.size() {
-                panic!("The provided input does not have the expected shape");
+                panic!("The provided input does not have the expected shape of {:?}", reshaped_shape);
             }
             self.input_blobs_data[input_i].write().unwrap().reshape(&reshaped_shape).unwrap();
         }
@@ -583,6 +583,39 @@ impl<B: IBackend> Layer<B> {
     /// Serialize the Layer and it's weights to a Cap'n Proto file at the specified path.
     ///
     /// You can find the capnp schema [here](../../../../capnp/leaf.capnp).
+    ///
+    /// ```
+    /// # #[cfg(feature = "native")]
+    /// # mod native {
+    /// # use std::rc::Rc;
+    /// # use leaf::layer::*;
+    /// # use leaf::layers::*;
+    /// # use leaf::util;
+    /// # pub fn test() {
+    /// #
+    /// let mut net_cfg = SequentialConfig::default();
+    /// // ... set up network ...
+    /// let cfg = LayerConfig::new("network", net_cfg);
+    ///
+    /// let native_backend = Rc::new(util::native_backend());
+    /// let mut layer = Layer::from_config(native_backend, &cfg);
+    /// // ... do stuff with the layer ...
+    /// // ... and save it
+    /// layer.save("mynetwork").unwrap();
+    /// #
+    /// # }}
+    /// #
+    /// # #[cfg(not(feature = "native"))]
+    /// # mod native {
+    /// # pub fn test() {}
+    /// # }
+    /// #
+    /// # fn main() {
+    /// #     if cfg!(feature = "native") {
+    /// #         ::native::test();
+    /// #    }
+    /// # }
+    /// ```
     pub fn save<P: AsRef<Path>>(&mut self, path: P) -> io::Result<()> {
         let path = path.as_ref();
         let ref mut out = try!(File::create(path));
@@ -595,6 +628,92 @@ impl<B: IBackend> Layer<B> {
         ::capnp::serialize_packed::write_message(out, &message).unwrap();
 
         Ok(())
+    }
+
+    /// Read a Cap'n Proto file at the specified path and deserialize the Layer inside it.
+    ///
+    /// You can find the capnp schema [here](../../../../capnp/leaf.capnp).
+    ///
+    /// ```
+    /// # extern crate leaf;
+    /// # extern crate collenchyma;
+    /// # #[cfg(feature = "native")]
+    /// # mod native {
+    /// # use std::rc::Rc;
+    /// # use leaf::layer::*;
+    /// # use leaf::layers::*;
+    /// # use leaf::util;
+    /// use collenchyma::prelude::*;
+    /// # pub fn test() {
+    ///
+    /// let native_backend = Rc::new(util::native_backend());
+    /// # let mut net_cfg = SequentialConfig::default();
+    /// # let cfg = LayerConfig::new("network", net_cfg);
+    /// # let mut layer = Layer::from_config(native_backend.clone(), &cfg);
+    /// # layer.save("mynetwork").unwrap();
+    /// // Load layer from file "mynetwork"
+    /// let layer = Layer::<Backend<Native>>::load(native_backend, "mynetwork").unwrap();
+    /// #
+    /// # }}
+    /// #
+    /// # #[cfg(not(feature = "native"))]
+    /// # mod native {
+    /// # pub fn test() {}
+    /// # }
+    /// #
+    /// # fn main() {
+    /// #     if cfg!(feature = "native") {
+    /// #         ::native::test();
+    /// #    }
+    /// # }
+    /// ```
+    pub fn load<LB: IBackend + LayerOps<f32> + 'static, P: AsRef<Path>>(backend: Rc<LB>, path: P) -> io::Result<Layer<LB>> {
+        let path = path.as_ref();
+        let ref mut file = try!(File::open(path));
+        let mut reader = BufReader::new(file);
+
+        let message_reader = ::capnp::serialize_packed::read_message(&mut reader,
+                                                                     ::capnp::message::ReaderOptions::new()).unwrap();
+        let read_layer = message_reader.get_root::<capnp_layer::Reader>().unwrap();
+
+        let name = read_layer.get_name().unwrap().to_owned();
+        let layer_config = LayerConfig::read_capnp(read_layer.get_config().unwrap());
+        let mut layer = Layer::from_config(backend, &layer_config);
+        layer.name = name;
+
+        let read_weights = read_layer.get_weights_data().unwrap();
+
+        let names = layer.learnable_weights_names();
+        let weights_data = layer.learnable_weights_data();
+
+        let native_backend = Backend::<Native>::default().unwrap();
+        for (i, (name, weight)) in names.iter().zip(weights_data).enumerate() {
+            for j in 0..read_weights.len() {
+                let capnp_weight = read_weights.get(i as u32);
+                if capnp_weight.get_name().unwrap() != name {
+                    continue
+                }
+
+                let mut weight_lock = weight.write().unwrap();
+                weight_lock.sync(native_backend.device()).unwrap();
+
+                let capnp_tensor = capnp_weight.get_tensor().unwrap();
+                let mut shape = Vec::new();
+                let capnp_shape = capnp_tensor.get_shape().unwrap();
+                for k in 0..capnp_shape.len() {
+                    shape.push(capnp_shape.get(k) as usize)
+                }
+                weight_lock.reshape(&shape).unwrap();
+
+                let mut native_slice = weight_lock.get_mut(native_backend.device()).unwrap().as_mut_native().unwrap().as_mut_slice::<f32>();
+                let data = capnp_tensor.get_data().unwrap();
+                for k in 0..data.len() {
+                    native_slice[k as usize] = data.get(k);
+                }
+            }
+        }
+
+        Ok(layer)
     }
 
     /// Sets whether the layer should compute gradients w.r.t. a
@@ -671,6 +790,9 @@ impl<B: IBackend> Layer<B> {
             self.learnable_weights_data().iter().map(|_| Some(1f32)).collect::<Vec<_>>() }
     }
 }
+
+#[allow(unsafe_code)]
+unsafe impl<B: IBackend> Send for Layer<B> {}
 
 impl<'a, B: IBackend> CapnpWrite<'a> for Layer<B> {
     type Builder = capnp_layer::Builder<'a>;
@@ -1269,6 +1391,31 @@ impl<'a> CapnpWrite<'a> for LayerType {
     }
 }
 
+impl<'a> CapnpRead<'a> for LayerType {
+    type Reader = capnp_layer_type::Reader<'a>;
+
+    fn read_capnp(reader: Self::Reader) -> Self {
+        match reader.which().unwrap() {
+            #[cfg(all(feature="cuda", not(feature="native")))]
+            capnp_layer_type::Which::Convolution(read_config) => { let config = ConvolutionConfig::read_capnp(read_config.unwrap()); LayerType::Convolution(config) },
+            #[cfg(not(all(feature="cuda", not(feature="native"))))]
+            capnp_layer_type::Which::Convolution(_) => { panic!("Can not load Network because Convolution layer is not supported with the used feature flags.") },
+            capnp_layer_type::Which::Linear(read_config) => { let config = LinearConfig::read_capnp(read_config.unwrap()); LayerType::Linear(config) },
+            capnp_layer_type::Which::LogSoftmax(read_config) => { LayerType::LogSoftmax },
+            #[cfg(all(feature="cuda", not(feature="native")))]
+            capnp_layer_type::Which::Pooling(read_config) => { let config = PoolingConfig::read_capnp(read_config.unwrap()); LayerType::Pooling(config) },
+            #[cfg(not(all(feature="cuda", not(feature="native"))))]
+            capnp_layer_type::Which::Pooling(_) => { panic!("Can not load Network because Pooling layer is not supported with the used feature flags.") },
+            capnp_layer_type::Which::Sequential(read_config) => { let config = SequentialConfig::read_capnp(read_config.unwrap()); LayerType::Sequential(config) },
+            capnp_layer_type::Which::Softmax(_) => { LayerType::Softmax },
+            capnp_layer_type::Which::Relu(_) => { LayerType::ReLU },
+            capnp_layer_type::Which::Sigmoid(_) => { LayerType::Sigmoid },
+            capnp_layer_type::Which::NegativeLogLikelihood(read_config) => { let config = NegativeLogLikelihoodConfig::read_capnp(read_config.unwrap()); LayerType::NegativeLogLikelihood(config) },
+            capnp_layer_type::Which::Reshape(read_config) => { let config = ReshapeConfig::read_capnp(read_config.unwrap()); LayerType::Reshape(config) },
+        }
+    }
+}
+
 impl LayerConfig {
     /// Creates a new LayerConfig
     pub fn new<L: Into<LayerType>>(name: &str, layer_type: L) -> LayerConfig {
@@ -1338,9 +1485,13 @@ impl LayerConfig {
             Err("propagate_down config must be specified either 0 or inputs_len times")
         }
     }
+}
+
+impl<'a> CapnpWrite<'a> for LayerConfig {
+    type Builder = capnp_layer_config::Builder<'a>;
 
     /// Write the LayerConfig into a capnp message.
-    pub fn write_capnp(&self, builder: &mut capnp_layer_config::Builder) {
+    fn write_capnp(&self, builder: &mut Self::Builder) {
         builder.set_name(&self.name);
         {
             let mut layer_type = builder.borrow().init_layer_type();
@@ -1370,6 +1521,47 @@ impl LayerConfig {
             for (i, input) in self.propagate_down.iter().enumerate() {
                 propagate_down.set(i as u32, *input);
             }
+        }
+    }
+}
+
+impl<'a> CapnpRead<'a> for LayerConfig {
+    type Reader = capnp_layer_config::Reader<'a>;
+
+    fn read_capnp(reader: Self::Reader) -> Self {
+        let name = reader.get_name().unwrap().to_owned();
+        let layer_type = LayerType::read_capnp(reader.get_layer_type());
+
+        let read_outputs = reader.get_outputs().unwrap();
+        let mut outputs = Vec::new();
+        for i in 0..read_outputs.len() {
+            outputs.push(read_outputs.get(i).unwrap().to_owned())
+        }
+        let read_inputs = reader.get_inputs().unwrap();
+        let mut inputs = Vec::new();
+        for i in 0..read_inputs.len() {
+            inputs.push(read_inputs.get(i).unwrap().to_owned())
+        }
+
+        let read_params = reader.get_params().unwrap();
+        let mut params = Vec::new();
+        for i in 0..read_params.len() {
+            params.push(WeightConfig::read_capnp(read_params.get(i)))
+        }
+
+        let read_propagate_down = reader.get_propagate_down().unwrap();
+        let mut propagate_down = Vec::new();
+        for i in 0..read_propagate_down.len() {
+            propagate_down.push(read_propagate_down.get(i))
+        }
+
+        LayerConfig {
+            name: name,
+            layer_type: layer_type,
+            outputs: outputs,
+            inputs: inputs,
+            params: params,
+            propagate_down: propagate_down,
         }
     }
 }

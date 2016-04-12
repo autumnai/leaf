@@ -111,6 +111,22 @@ impl<'a> CapnpWrite<'a> for ReshapeConfig {
     }
 }
 
+impl<'a> CapnpRead<'a> for ReshapeConfig {
+    type Reader = capnp_config::Reader<'a>;
+
+    fn read_capnp(reader: Self::Reader) -> Self {
+        let read_shape = reader.get_shape().unwrap();
+        let mut shape = Vec::new();
+        for i in 0..read_shape.len() {
+            shape.push(read_shape.get(i) as usize)
+        }
+
+        ReshapeConfig {
+            shape: shape
+        }
+    }
+}
+
 impl Into<LayerType> for ReshapeConfig {
     fn into(self) -> LayerType {
         LayerType::Reshape(self)

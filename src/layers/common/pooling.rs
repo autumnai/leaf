@@ -193,6 +193,37 @@ impl<'a> CapnpWrite<'a> for PoolingConfig {
     }
 }
 
+impl<'a> CapnpRead<'a> for PoolingConfig {
+    type Reader = capnp_config::Reader<'a>;
+
+    fn read_capnp(reader: Self::Reader) -> Self {
+        let mode = PoolingMode::from_capnp(reader.get_mode().unwrap());
+
+        let read_filter_shape = reader.get_filter_shape().unwrap();
+        let mut filter_shape = Vec::new();
+        for i in 0..read_filter_shape.len() {
+            filter_shape.push(read_filter_shape.get(i) as usize)
+        }
+        let read_stride = reader.get_stride().unwrap();
+        let mut stride = Vec::new();
+        for i in 0..read_stride.len() {
+            stride.push(read_stride.get(i) as usize)
+        }
+        let read_padding = reader.get_padding().unwrap();
+        let mut padding = Vec::new();
+        for i in 0..read_padding.len() {
+            padding.push(read_padding.get(i) as usize)
+        }
+
+        PoolingConfig {
+            mode: mode,
+            filter_shape: filter_shape,
+            stride: stride,
+            padding: padding,
+        }
+    }
+}
+
 #[derive(Debug, Copy, Clone)]
 /// The different modes of pooling that can be calculated.
 pub enum PoolingMode {
@@ -207,6 +238,14 @@ impl PoolingMode {
     fn to_capnp(&self) -> CapnpPoolingMode {
         match *self {
             PoolingMode::Max => CapnpPoolingMode::Max,
+        }
+    }
+
+    /// Return the enum value for a Cap'n Proto value.
+    fn from_capnp(value: CapnpPoolingMode) -> Self {
+        match value {
+            CapnpPoolingMode::Max => PoolingMode::Max,
+            CapnpPoolingMode::Average => unimplemented!(),
         }
     }
 }

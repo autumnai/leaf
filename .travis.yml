@@ -28,16 +28,30 @@ script:
   travis-cargo --only stable doc -- --no-default-features --features $FEATURES
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
-    - libcurl4-openssl-dev
-    - libelf-dev
-    - libdw-dev
-    - libblas-dev
-    - fglrx
-    - opencl-headers
-    - binutils-dev
-    - nvidia-opencl-dev
-
+      - libcurl4-openssl-dev
+      - libelf-dev
+      - libdw-dev
+      - libblas-dev
+      - fglrx
+      - opencl-headers
+      - binutils-dev
+      - nvidia-opencl-dev
+      - gcc-4.8
+      - g++-4.8
+install:
+    - git clone https://github.com/kentonv/capnproto.git
+    - cd capnproto/c++
+    - git checkout tags/v0.5.3
+    - ./setup-autotools.sh
+    - autoreconf -i
+    - ./configure --disable-shared
+    - make -j5
+    - export PATH="$PATH:$(pwd)"
+    - export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$(pwd)"
+    -  cd ../..
 after_success:
 - travis-cargo doc-upload
 - travis-cargo coveralls --no-sudo --verify
@@ -46,6 +60,8 @@ notifications:
     on_success: never
 env:
   global:
+    - CC=gcc-4.8
+    - CXX=g++-4.8
     - secure: QcJ9u0BrVpvjYnerd/3dukvM+GLFQNikIoDHhtKjVenuM2ozZtW6+/RyyXVC1YMh/SghwTnu4Kcnv1sdmwuiC5KWdPoppfalXdxafPkl5PGEfTOexe6L5UAJNW6BdA4lbRKM3xnaUg0Guq6x6tD/zdABIkh8nym/gRLGKT40e9Xitkf6wUQqPBHTGZimip59qg5Fty8lAD48pCBEXynJm+ihA2tz6EDhp0/7wvieHyEl/FqNwvUL5+Z9EeTzEJfKNF8PA5DTHkgeXgeCnWKLm8cCdPEziRZlgdQtvIW27oZBkNTQGHyqI9/tVYhaW4AeKstzE5BoJuyRzmerWYRQCNiz8bgyAjc5HnpWLJPmPSFaGBWTRzwYwUk/iOUP4YEZiN3p0Xj1sKgSB0TA2AjKWND7cufwjrW8NdPdZ3hURVOnM8DHYSQMm2HOfbUNnkw+P5M8n+flT2HKWFdnPhJ3n12rDlLYdHeg9PQ3emJ6kE8Y/jrNT+6yZRrSwLQnsV0uU8Ii44MFQHpdUOGuOIxZFGh9rjKsUwhruUpGtbwI4FWPOqiQJvIaBFY1IUjIVlVCZevvIG3fPXvPksIEKwK93hM/ThDi2PLq2qwBpA87RNfKxDG4S0aR2j19IG+ludbpPcP95mYFVnGCb4rpj44iZoCifC8c9tVqC4L85hEGzik=
   matrix:
     - FEATURES=travis
