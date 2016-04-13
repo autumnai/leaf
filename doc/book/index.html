@@ -1,0 +1,175 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <link rel="stylesheet" href="book.css">
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+
+        <!-- MathJax -->
+        <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+    </head>
+    <body>
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = localStorage.getItem('theme');
+            if (theme == null) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = localStorage.getItem('sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./leaf.html" class="active"><strong>1.</strong> Leaf</a></li><li><a href="./layers.html"><strong>2.</strong> Layers</a></li><li><ul class="section"><li><a href="./layer-lifecycle.html"><strong>2.1.</strong> Layer Lifecycle</a></li><li><a href="./building-networks.html"><strong>2.2.</strong> Create a Network</a></li><li><a href="./create-new-layer.html"><strong>2.3.</strong> Create a new Layer</a></li></ul></li><li><a href="./solvers.html"><strong>3.</strong> Solvers</a></li><li><ul class="section"><li><a href="./optimize-layers.html"><strong>3.1.</strong> Optimize Layers</a></li><li><a href="./multi-device-optimization.html"><strong>3.2.</strong> Multi-Device Optimization</a></li><li><a href="./distributed-optimization.html"><strong>3.3.</strong> Distributed Optimization</a></li></ul></li><li><a href="./backend.html"><strong>4.</strong> Backend</a></li><li><a href="./deep-learning-glossary.html"><strong>5.</strong> Glossary</a></li><li class="spacer"></li><li><a href="http://autumnai.github.io/leaf/leaf/index.html"><strong>6.</strong> Rust API Documentation</a></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <h1>Leaf - Machine Learning for Hackers</h1>
+<blockquote>
+<p>Our life is frittered away by detail. Simplify, simplify. -
+<em>Henry David Thoreau</em></p>
+</blockquote>
+<p>This short book teaches you how you can build machine learning applications (with
+<a href="https://github.com/autumnai/leaf">Leaf</a>).</p>
+<p>Leaf is a Machine Intelligence Framework engineered by hackers, not scientists.
+It has a very simple API consisting of <a href="./layers.html">Layers</a> and <a href="./solvers.html">Solvers</a>, with which
+you can build classical machine as well as deep learning and other fancy machine
+intelligence applications. Although Leaf is just a few months old,
+thanks to Rust and Collenchyma it is already one of the fastest machine intelligence
+frameworks available.</p>
+<p>Leaf was inspired by the brilliant people behind TensorFlow, Torch, Caffe,
+Rust and numerous research papers and brings modularity, performance and
+portability to deep learning.</p>
+<p><br/></p>
+<div align="center">
+  <iframe src="https://ghbtns.com/github-btn.html?user=autumnai&repo=leaf&type=star&count=true" frameborder="0" scrolling="0" width="120px" height="20px"></iframe>
+  <a href="https://twitter.com/autumn_eng" class="twitter-follow-button" data-show-count="false">Follow @autumn_eng</a>
+  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+</div>
+<p><br/></p>
+<blockquote>
+<p>To make the most of the book, a basic understanding of the fundamental concepts
+of machine and deep learning is recommended. Good resources to get you from
+zero to almost-ready-to-build-machine-learning-applications:</p>
+<ul>
+<li><a href="http://neuralnetworksanddeeplearning.com/">Neural Networks and Deep Learning</a> or</li>
+<li><a href="http://cs231n.github.io/">Stanford Course on (Convolutional) Neural Networks</a></li>
+</ul>
+<p>And if you already have some experience, <a href="http://www.andreykurenkov.com/writing/a-brief-history-of-neural-nets-and-deep-learning/">A 'brief' history of Deep Learning</a> or <a href="./deep-learning-glossary.html">The Glossary</a>
+might prove informative.</p>
+</blockquote>
+<p>Both machine and deep learning are really easy with Leaf.</p>
+<p>Construct a <a href="./deep-learning-glossary.html#Network">Network</a> by chaining <a href="./deep-learning-glossary.html#Layer">Layers</a>.
+Then optimize the network by feeding it examples.
+This is why Leaf's entire API consists of only two concepts: <a href="./layers.html">Layers</a>
+and <a href="./solvers.html">Solvers</a>. Use layers to construct almost any kind of model: deep,
+classical, stochastic or hybrids, and solvers for executing and optimizing the
+model.</p>
+<p>This is already the entire API for machine learning with Leaf. To learn how
+this is possible and how to build machine learning applications, refer to
+<a href="./layers.html">2. Layers</a> and <a href="./solvers.html">3. Solvers</a>. Enjoy!</p>
+<h2>Benefits+</h2>
+<p>Leaf was built with three concepts in mind: accessibility/simplicity,
+performance and portability. We want developers and companies to be able to
+run their machine learning applications anywhere: on servers, desktops,
+smartphones and embedded devices. Any combination of platform and
+computation language (OpenCL, CUDA, etc.) is a first class citizen in Leaf.</p>
+<p>We coupled portability with simplicity, meaning you can deploy your machine
+learning applications to almost any machine and device with no code changes.
+Learn more at chapter <a href="./backend.html">4. Backend</a> or at the
+<a href="https://github.com/autumnai/collenchyma">Collenchyma Github repository</a>.</p>
+<h2>Contributing</h2>
+<p>Want to contribute? Awesome!
+<a href="https://github.com/autumnai/leaf/blob/master/CONTRIBUTING.md">We have instructions to help you get started</a>.</p>
+<p>Leaf has a near real-time collaboration culture, which happens at the <a href="https://github.com/autumnai/leaf">Github
+repository</a> and on the
+<a href="https://gitter.im/autumnai/leaf">Leaf Gitter Channel</a>.</p>
+<h2>API Documentation</h2>
+<p>Alongside this book you can also read the Rust API documentation if
+you would like to use Leaf as a crate, write a library on top of it or
+just want a more low-level overview.</p>
+<p><a href="http://autumnai.github.io/leaf/">&gt; Rust API documentation</a></p>
+<h2>License</h2>
+<p>Leaf is free for anyone for whatever purpose.
+Leaf is licensed under either
+<a href="https://github.com/autumnai/leaf/blob/master/LICENSE-APACHE">Apache License v2.0</a> or,
+<a href="https://github.com/autumnai/leaf/blob/master/LICENSE-MIT">MIT license</a>.
+Whatever strikes your fancy.</p>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+
+                
+                    <a href="./layers.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+
+            
+                <a href="./layers.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

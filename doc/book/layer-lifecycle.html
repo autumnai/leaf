@@ -1,0 +1,175 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+
+        <!-- MathJax -->
+        <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+    </head>
+    <body>
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = localStorage.getItem('theme');
+            if (theme == null) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = localStorage.getItem('sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./leaf.html"><strong>1.</strong> Leaf</a></li><li><a href="./layers.html"><strong>2.</strong> Layers</a></li><li><ul class="section"><li><a href="./layer-lifecycle.html" class="active"><strong>2.1.</strong> Layer Lifecycle</a></li><li><a href="./building-networks.html"><strong>2.2.</strong> Create a Network</a></li><li><a href="./create-new-layer.html"><strong>2.3.</strong> Create a new Layer</a></li></ul></li><li><a href="./solvers.html"><strong>3.</strong> Solvers</a></li><li><ul class="section"><li><a href="./optimize-layers.html"><strong>3.1.</strong> Optimize Layers</a></li><li><a href="./multi-device-optimization.html"><strong>3.2.</strong> Multi-Device Optimization</a></li><li><a href="./distributed-optimization.html"><strong>3.3.</strong> Distributed Optimization</a></li></ul></li><li><a href="./backend.html"><strong>4.</strong> Backend</a></li><li><a href="./deep-learning-glossary.html"><strong>5.</strong> Glossary</a></li><li class="spacer"></li><li><a href="http://autumnai.github.io/leaf/leaf/index.html"><strong>6.</strong> Rust API Documentation</a></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <h1>Layer Lifecycle</h1>
+<p>In <a href="./layers.html">2. Layers</a> we have already seen a little bit about how to
+construct a <code>Layer</code> from a <code>LayerConfig</code>. In this chapter, we take
+a closer look at what happens inside Leaf when initializing a <code>Layer</code> when
+running the <code>.forward</code> of a <code>Layer</code> and when running the <code>.backward</code>. In the
+next chapter <a href="./building-networks.html">2.2 Create a Network</a> we then
+apply our knowledge to construct deep networks via the container layer.</p>
+<p>Initialization (<code>::from_config</code>), <code>.forward</code> and <code>.backward</code> are the three most
+important methods of a <code>Layer</code> and describe basically the entire API. Let's
+take a closer look at what happens inside Leaf, when these methods are called.</p>
+<h3>Initialization</h3>
+<p>A layer is constructed from a <code>LayerConfig</code> via the <code>Layer::from_config</code>
+method, which returns a fully initialized <code>Layer</code>.</p>
+<pre><code class="language-rust">let mut sigmoid: Layer = Layer::from_config(backend.clone(), &amp;LayerConfig::new(&quot;sigmoid&quot;, LayerType::Sigmoid))
+let mut alexnet: Layer = Layer::from_config(backend.clone(), &amp;LayerConfig::new(&quot;alexnet&quot;, LayerType::Sequential(cfg)))
+</code></pre>
+<p>In the example above, the first layer has a Sigmoid worker
+(<code>LayerType::Sigmoid</code>). The second layer has a Sequential worker.
+Although both <code>Layer::from_config</code> methods, return a <code>Layer</code>, the behavior of
+the <code>Layer</code> depends on the <code>LayerConfig</code> it was constructed with. The
+<code>Layer::from_config</code> calls internally the <code>worker_from_config</code> method, which
+constructs the specific worker defined by the <code>LayerConfig</code>.</p>
+<pre><code class="language-rust">fn worker_from_config(backend: Rc&lt;B&gt;, config: &amp;LayerConfig) -&gt; Box&lt;ILayer&lt;B&gt;&gt; {
+    match config.layer_type.clone() {
+        // more matches
+        LayerType::Pooling(layer_config) =&gt; Box::new(Pooling::from_config(&amp;layer_config)),
+        LayerType::Sequential(layer_config) =&gt; Box::new(Sequential::from_config(backend, &amp;layer_config)),
+        LayerType::Softmax =&gt; Box::new(Softmax::default()),
+        // more matches
+    }
+}
+</code></pre>
+<p>The layer specific <code>::from_config</code> (if available or needed) then takes care of
+initializing the worker struct, allocating memory for weights and so on.</p>
+<p>In case the worker layer is a container layer, its <code>::from_config</code> takes
+care of initializing all the <code>LayerConfig</code>s it contains (which were added via its
+<code>.add_layer</code> method) and connecting them in
+the order they were provided to the <code>LayerConfig</code> of the container.</p>
+<p>Every <code>.forward</code> or <code>.backward</code> call that is now made to the returned <code>Layer</code> is
+sent to the worker.</p>
+<h3>Forward</h3>
+<p>The <code>forward</code> method of a <code>Layer</code> sends the input through the constructed
+network and returns the output of the network's final layer.</p>
+<p>The <code>.forward</code> method does three things:</p>
+<ol>
+<li>Reshape the input data if necessary</li>
+<li>Sync the input/weights to the device were the computation happens. This step
+removes the worker layer from the obligation to care about memory synchronization.</li>
+<li>Call the <code>forward</code> method of the worker layer.</li>
+</ol>
+<p>In case, the worker layer is a container layer, the <code>.forward</code> method of the
+container layer takes care of calling the <code>.forward</code> methods of its managed
+layers in the right order.</p>
+<h3>Backward</h3>
+<p>The <code>.backward</code> of a <code>Layer</code> works quite similar to its <code>.forward</code>. Although it
+does not need to reshape the input. The <code>.backward</code> computes
+the gradient with respect to the input and the gradient w.r.t. the parameters but
+only returns the gradient w.r.t the input as only that is needed to compute the
+gradient of the entire network via the chain rule.</p>
+<p>In case the worker layer is a container layer, the <code>.backward</code> method of the
+container layer takes care of calling the <code>.backward_input</code> and
+<code>.backward_parameter</code> methods of its managed layers in the right order.</p>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a href="./layers.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a href="./building-networks.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="./layers.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="./building-networks.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>
