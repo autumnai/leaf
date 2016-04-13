@@ -72,17 +72,17 @@
 <p>Our life is frittered away by detail. Simplify, simplify. -
 <em>Henry David Thoreau</em></p>
 </blockquote>
-<p>This short book teaches you how you can build Machine Learning applications (with
+<p>This short book teaches you how you can build machine learning applications (with
 <a href="https://github.com/autumnai/leaf">Leaf</a>).</p>
 <p>Leaf is a Machine Intelligence Framework engineered by hackers, not scientists.
-It has a very simple API, <a href="./layers.html">Layers</a> and <a href="./solvers.html">Solvers</a>, with which
-you can build classical Machine as well as Deep Learning and other fancy Machine
-Intelligence applications. Although Leaf is just a few months old, it is
-already, thanks to Rust and Collenchyma, one of the fastest Machine Intelligence
-Frameworks available.</p>
+It has a very simple API consisting of <a href="./layers.html">Layers</a> and <a href="./solvers.html">Solvers</a>, with which
+you can build classical machine as well as deep learning and other fancy machine
+intelligence applications. Although Leaf is just a few months old,
+thanks to Rust and Collenchyma it is already one of the fastest machine intelligence
+frameworks available.</p>
 <p>Leaf was inspired by the brilliant people behind TensorFlow, Torch, Caffe,
 Rust and numerous research papers and brings modularity, performance and
-portability to Deep Learning.</p>
+portability to deep learning.</p>
 <p><br/></p>
 <div align="center">
   <iframe src="https://ghbtns.com/github-btn.html?user=autumnai&repo=leaf&type=star&count=true" frameborder="0" scrolling="0" width="120px" height="20px"></iframe>
@@ -92,35 +92,34 @@ portability to Deep Learning.</p>
 <p><br/></p>
 <blockquote>
 <p>To make the most of the book, a basic understanding of the fundamental concepts
-of Machine and Deep Learning is recommended. Good resources to get you from
-zero to almost-ready-to-build-Machine-Learning-applications:</p>
+of machine and deep learning is recommended. Good resources to get you from
+zero to almost-ready-to-build-machine-learning-applications:</p>
 <ul>
 <li><a href="http://neuralnetworksanddeeplearning.com/">Neural Networks and Deep Learning</a> or</li>
 <li><a href="http://cs231n.github.io/">Stanford Course on (Convolutional) Neural Networks</a></li>
 </ul>
-<p>And in case some knowledge already exist, <a href="http://www.andreykurenkov.com/writing/a-brief-history-of-neural-nets-and-deep-learning/">A 'brief' history of Deep Learning</a> or <a href="./deep-learning-glossary.html">The Glossary</a>
+<p>And if you already have some experience, <a href="http://www.andreykurenkov.com/writing/a-brief-history-of-neural-nets-and-deep-learning/">A 'brief' history of Deep Learning</a> or <a href="./deep-learning-glossary.html">The Glossary</a>
 might prove informative.</p>
 </blockquote>
-<p>But Machine- and Deep Learning are really easy with Leaf.</p>
-<p>Chain <a href="./deep-learning-glossary.html#Layer">layers</a> to construct a
-<a href="./deep-learning-glossary.html#Network">network</a>, optimize the network by
-feeding it examples.
-That is why Leaf's entire API consists of only two concepts: <a href="./layers.html">Layers</a>
-and <a href="./solvers.html">Solvers</a>. Layers to construct almost any kind of model - deep,
-classical, stochastic or hybrids. And Solvers for executing and optimizing the
+<p>Both machine and deep learning are really easy with Leaf.</p>
+<p>Construct a <a href="./deep-learning-glossary.html#Network">Network</a> by chaining <a href="./deep-learning-glossary.html#Layer">Layers</a>.
+Then optimize the network by feeding it examples.
+This is why Leaf's entire API consists of only two concepts: <a href="./layers.html">Layers</a>
+and <a href="./solvers.html">Solvers</a>. Use layers to construct almost any kind of model: deep,
+classical, stochastic or hybrids, and solvers for executing and optimizing the
 model.</p>
-<p>This is already the entire API for Machine Learning with Leaf. To learn how
-this is possible and how to build Machine Learning applications, refer to
+<p>This is already the entire API for machine learning with Leaf. To learn how
+this is possible and how to build machine learning applications, refer to
 <a href="./layers.html">2. Layers</a> and <a href="./solvers.html">3. Solvers</a>. Enjoy!</p>
 <h2>Benefits+</h2>
-<p>Leaf was build with three concepts in mind: accessibility/simplicity,
-performance and portability. We want that developers and companies are able to
-run their Machine Learning application everywhere - servers, desktops,
-smartphones, embedded devices. Therefore any platform and
+<p>Leaf was built with three concepts in mind: accessibility/simplicity,
+performance and portability. We want developers and companies to be able to
+run their machine learning applications anywhere: on servers, desktops,
+smartphones and embedded devices. Any combination of platform and
 computation language (OpenCL, CUDA, etc.) is a first class citizen in Leaf.</p>
-<p>We coupled portability with simplicity, meaning you can deploy your Machine
-Learning applications to almost any machine and device - no code changes
-required. Learn more at chapter <a href="./backend.html">4. Backend</a> or at the
+<p>We coupled portability with simplicity, meaning you can deploy your machine
+learning applications to almost any machine and device with no code changes.
+Learn more at chapter <a href="./backend.html">4. Backend</a> or at the
 <a href="https://github.com/autumnai/collenchyma">Collenchyma Github repository</a>.</p>
 <h2>Contributing</h2>
 <p>Want to contribute? Awesome!
@@ -137,24 +136,24 @@ just want a more low-level overview.</p>
 <p>Leaf is free for anyone for whatever purpose.
 Leaf is licensed under either
 <a href="https://github.com/autumnai/leaf/blob/master/LICENSE-APACHE">Apache License v2.0</a> or,
-<a href="https://github.com/autumnai/leaf/blob/master/LICENSE-MIT">MIT license</a> -
-whatever strikes your fancy.</p>
+<a href="https://github.com/autumnai/leaf/blob/master/LICENSE-MIT">MIT license</a>.
+Whatever strikes your fancy.</p>
 <h1>Layers</h1>
 <h3>What is a Layer?</h3>
-<p>A <a href="./deep-learning-glossary.html#Layer">Layer</a> is the highest-level and only building
-block in Leaf. A layer is similar to a function as it computes an output given
-an input. The function of a layer can contain purely mathematical expressions
-like Sigmoid, ReLU, etc. or none mathematical instructions like querying data
-from a database, logging data, etc. or anything in between.</p>
-<p>In Leaf, layers describe not only the 'hidden layers' but also the input and
-output layer. In Leaf, as we will see later on, everything is a layer. Even when
-we construct <a href="./deep-learning-glossary.html#Network">networks</a>, we are just
-working with layers. This makes the API so clean and expressive.</p>
-<p>Layers in Leaf are only slightly opinionated - they need to take
+<p><a href="./deep-learning-glossary.html#Layer">Layers</a> are the highest-level and only building
+blocks in Leaf. As we will see later on, everything is a layer. Even when
+we construct <a href="./deep-learning-glossary.html#Network">networks</a>, we are still just
+working with layers composed of smalle layers. This makes the API clean and expressive.</p>
+<p>A layer is like a function: given an input it computes an output.
+It could be some mathematical expression, like Sigmoid, ReLU, or a non-mathematical instruction,
+like querying data from a database, logging data, or anything in between.
+In Leaf, layers describe not only the interior 'hidden layers' but also the input and
+output layer.</p>
+<p>Layers in Leaf are only slightly opinionated, they need to take
 an input and produce an output. This is required in order to successfully stack
-layers on top of each other and therefore, create a network. Other than that, a
+layers on top of each other to build a network. Other than that, a
 layer in Leaf can implement any behaviour.</p>
-<p>In Leaf, every layer can be constructed via the <a href="https://github.com/autumnai/leaf/blob/master/src/layer.rs"><code>LayerConfig</code>
+<p>Layers are constructed via the <a href="https://github.com/autumnai/leaf/blob/master/src/layer.rs"><code>LayerConfig</code>
 (/src/layer.rs)</a>, which makes creating even complex networks easy
 and manageable.</p>
 <pre><code class="language-rust">// construct the config for a fully connected layer with 500 notes
@@ -169,52 +168,51 @@ let linear_network_with_one_layer: Layer = Layer::from_config(backend, &amp;line
 <p>Hurray! We just constructed a <a href="./deep-learning-glossary.html#Network">network</a>
 with one layer. (In the following chapter we will learn how to create more
 powerful networks).</p>
-<p>The <code>from_config</code> method initializes a <code>Layer</code>, which has a worker field to which
-it assigns the specific layer, (a struct that has <a href="https://github.com/autumnai/leaf/blob/master/src/layer.rs"><code>ILayer</code> (/src/layer.rs)</a> implemented).
-In that tiny example above, the worker field of the <code>linear_network_with_one_layer</code>
-is a <a href="https://github.com/autumnai/leaf/blob/master/src/layers/common/linear.rs"><code>Linear</code> (/src/layers/common/linear.rs)</a> as we constructed
-the <code>linear_network_with_one_layer</code> from a <code>LinearConfig</code>. That worker field
+<p>The <code>from_config</code> method initializes a <code>Layer</code>, which wraps the specific implementation (a struct that has  <a href="https://github.com/autumnai/leaf/blob/master/src/layer.rs"><code>ILayer</code>(/src/layer.rs)</a> implemented) in a worker field.
+In the tiny example above, the worker field of the <code>linear_network_with_one_layer</code>
+is a <a href="https://github.com/autumnai/leaf/blob/master/src/layers/common/linear.rs"><code>Linear</code> (/src/layers/common/linear.rs)</a> because we constructed
+the <code>linear_network_with_one_layer</code> from a <code>LinearConfig</code>. The worker field
 introduces the specific behaviour of the layer.</p>
-<p>In the next chapters of 2. Layers we explore more about how we can construct
-real-world networks, the layer lifecycle and how we can add new layers to Leaf.</p>
+<p>In the following chapters we explore more about how we can construct
+real-world networks, the layer lifecycle and how we can add new layers to the Leaf framework.</p>
 <h3>What can Layers do?</h3>
-<p>A layer can implement basically any behaviour, Deep Learning related like
-convolutions or LSTM, classical Machine Learning related like nearest neighbors
-or random forest or utility related like logging or normalization. To make the
-behaviour of a layer more explicit Leaf groups layers into one of five
-categories based on their (Machine Learning) functionality.</p>
+<p>A layer can implement basically any behaviour: deep learning related like
+convolutions or LSTM, classical machine learning related like nearest neighbors
+or random forest, or utility related like logging or normalization. To make the
+behaviour of a layer more explicit, Leaf groups layers into one of five
+categories based on their (machine learning) functionality:</p>
 <ol>
 <li><a href="#Activation%20Layers">Activation</a></li>
 <li><a href="#Common%20Layers">Common</a></li>
 <li><a href="#Loss%20Layers">Loss</a></li>
 <li><a href="#Utility%20Layers">Utility</a></li>
-<li><a href="#Container%20Layers">Container</a></li>
+<li><a href="#Container%20Layers">Container.</a></li>
 </ol>
-<p>In practice, the groups are of not much relevance. It helps at making the file
-structure cleaner, though. And it simplifies the explanation of what a layer is
+<p>In practice, the groups are not really relevant, it helps make the file
+structure cleaner. And it simplifies the explanation of what a layer is
 doing.</p>
 <h4>Activation Layers</h4>
 <p>Activation layers provide element-wise operations and return an output of
-the same size as the input. Activation layers can be seen as a synonym to
+the same size as the input. Activation layers can be seen as equivalent to
 nonlinear <a href="https://en.wikipedia.org/wiki/Activation_function">Activation Functions</a>
-and are a fundamental piece in Neural Networks.</p>
-<p>Examples of Activation layers are <code>Sigmoid</code>, <code>TanH</code> or <code>ReLU</code>. All available
+and are a fundamental piece in neural networks.</p>
+<p>Examples of activation layers are <code>Sigmoid</code>, <code>TanH</code> or <code>ReLU</code>. All available
 activation layers can be found at
 <a href="https://github.com/autumnai/leaf/tree/master/src/layers/activation">src/layers/activation</a>.</p>
-<h4>Common Layers</h4>
-<p>Common layers can differ in their connectivity and behavior and are typically
-all network layer types which are not covered by activation or loss layers.</p>
-<p>Examples of Common layers are <code>fully-connected</code>, <code>convolutional</code>, <code>pooling</code>, <code>LSTM</code>,
-etc. All available common layers can be found at
-<a href="https://github.com/autumnai/leaf/tree/master/src/layers/common">src/layers/common</a>.</p>
 <h4>Loss Layers</h4>
 <p>Loss layers compare an output to a target value and assign a cost to minimize.
-Loss layers are often the last layer in a model.</p>
-<p>Examples of Loss layers are <code>Hinge Loss</code>, <code>Softmax Loss</code> or <code>Negative Log Likelihood</code>. All available loss layers can be found at
+Loss layers are often the last layer in a network.</p>
+<p>Examples of loss layers are <code>Hinge Loss</code>, <code>Softmax Loss</code> or <code>Negative Log Likelihood</code>. All available loss layers can be found at
 <a href="https://github.com/autumnai/leaf/tree/master/src/layers/loss">src/layers/loss</a>.</p>
+<h4>Common Layers</h4>
+<p>Common layers can differ in their connectivity and behavior. They are typically
+anything that is not an activation or loss layer.</p>
+<p>Examples of common layers are <code>fully-connected</code>, <code>convolutional</code>, <code>pooling</code>, <code>LSTM</code>,
+etc. All available common layers can be found at
+<a href="https://github.com/autumnai/leaf/tree/master/src/layers/common">src/layers/common</a>.</p>
 <h4>Utility Layers</h4>
 <p>Utility layers introduce all kind of helpful functionality, which might not be
-directly related to machine learning and neural nets. This could be operations
+directly related to machine learning and neural nets. These could be operations
 for normalizing, restructuring or transforming information, log and debug
 behavior or data access. Utility Layers follow the general behavior of a layer
 like the other types.</p>
@@ -223,20 +221,20 @@ available utility layers can be found at
 <a href="https://github.com/autumnai/leaf/tree/master/src/layers/utility">src/layers/utility</a>.</p>
 <h4>Container Layers</h4>
 <p>Container layers take <code>LayerConfig</code>s and connect them on initialization, which
-creates a &quot;network&quot;. But as container layers are layers one can stack multiple
+creates a &quot;network&quot;. But as container layers are layers themselves, one can stack multiple
 container layers on top of another and compose even bigger container layers.
 Container layers differ in how they connect the layers that it receives.</p>
-<p>Examples of Container layers are <code>Sequential</code>. All available container layers
+<p>Examples of container layers are <code>Sequential</code>. All available container layers
 can be found at
 <a href="https://github.com/autumnai/leaf/tree/master/src/layers/container">src/layers/container</a>.</p>
 <h3>Why Layers?</h3>
-<p>The benefit of using a layer design approach is, that it allows for a very expressive
-setup, which can represent, as far as we know, any machine learning algorithm.
-Which makes Leaf a framework, that can be used to construct practical Machine
-Learning applications that combine different paradigms.</p>
-<p>Other Machine Learning frameworks take a symbolic instead of a layered approach.
+<p>The benefit of using a layer-based design approach is, that it allows for a very expressive
+setup that can represent, as far as we know, any machine learning algorithm.
+That makes Leaf a framework, that can be used to construct practical machine
+learning applications that combine different paradigms.</p>
+<p>Other machine learning frameworks take a symbolic instead of a layered approach.
 For Leaf, we decided against it, as we found it easier for developers to handle
-layers, than mathematical expressions. More complex algorithms e.g. LSTMs are
+layers, than mathematical expressions. More complex algorithms like LSTMs are
 also harder to replicate in a symbolic framework than with layered ones. We
 believe that Leafs layer approach strikes a great balance between,
 expressiveness, usability and performance.</p>

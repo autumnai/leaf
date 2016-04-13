@@ -1,19 +1,17 @@
 # Layer Lifecycle
 
-In [2. Layers](./layers.html) we have already seen a little bit about how to
-construct a `Layer` from a `LayerConfig`. In this chapter, we take
-a closer look at what happens inside Leaf when initializing a `Layer` when
-running the `.forward` of a `Layer` and when running the `.backward`. In the
-next chapter [2.2 Create a Network](./building-networks.html) we then
-apply our knowledge to construct deep networks via the container layer.
+In chapter [2. Layers](./layers.html) we saw how to
+construct a simple `Layer` from a `LayerConfig`. In this chapter, we take
+a closer look at what happens inside Leaf when initializing a `Layer` and when running its 
+`.forward` and `.backward` methods. In the next chapter [2.2 Create a Network](./building-networks.html) we 
+apply our knowledge to construct deep networks with the container layer.
 
-Initialization (`::from_config`), `.forward` and `.backward` are the three most
-important methods of a `Layer` and describe basically the entire API. Let's
-take a closer look at what happens inside Leaf, when these methods are called.
+The most important methods of a `Layer` are initialization (`::from_config`), `.forward` and `.backward`.
+They basically describe the entire API, so let's take a closer look at what happens inside Leaf when these methods are called.
 
 ### Initialization
 
-A layer is constructed from a `LayerConfig` via the `Layer::from_config`
+A layer is constructed from a `LayerConfig` with the `Layer::from_config`
 method, which returns a fully initialized `Layer`.
 
 ```rust
@@ -22,10 +20,10 @@ let mut alexnet: Layer = Layer::from_config(backend.clone(), &LayerConfig::new("
 ```
 
 In the example above, the first layer has a Sigmoid worker
-(`LayerType::Sigmoid`). The second layer has a Sequential worker.
-Although both `Layer::from_config` methods, return a `Layer`, the behavior of
-the `Layer` depends on the `LayerConfig` it was constructed with. The
-`Layer::from_config` calls internally the `worker_from_config` method, which
+(`LayerType::Sigmoid`) and the second layer has a Sequential worker.
+Although both `::from_config` methods return a `Layer`, the behavior of
+that `Layer` depends on the `LayerConfig` it was constructed with. The
+`Layer::from_config` internally calls the `worker_from_config` method, which
 constructs the specific worker defined by the `LayerConfig`.
 
 ```rust
@@ -40,41 +38,40 @@ fn worker_from_config(backend: Rc<B>, config: &LayerConfig) -> Box<ILayer<B>> {
 }
 ```
 
-The layer specific `::from_config` (if available or needed) then takes care of
+The layer-specific `::from_config` (if available or needed) then takes care of
 initializing the worker struct, allocating memory for weights and so on.
 
-In case the worker layer is a container layer, its `::from_config` takes
+If the worker is a container layer, its `::from_config` takes
 care of initializing all the `LayerConfig`s it contains (which were added via its
-`.add_layer` method) and connecting them in
-the order they were provided to the `LayerConfig` of the container.
+`.add_layer` method) and connecting them in the order they were provided.
 
-Every `.forward` or `.backward` call that is now made to the returned `Layer` is
-sent to the worker.
+Every `.forward` or `.backward` call that is made on the returned `Layer` is
+run by the internal worker.
 
 ### Forward
 
-The `forward` method of a `Layer` sends the input through the constructed
+The `forward` method of a `Layer` threads the input through the constructed
 network and returns the output of the network's final layer.
 
 The `.forward` method does three things:
 
 1. Reshape the input data if necessary
-2. Sync the input/weights to the device were the computation happens. This step
-removes the worker layer from the obligation to care about memory synchronization.
-3. Call the `forward` method of the worker layer.
+2. Sync the input/weights to the device where the computation happens. This step
+removes the need for the worker layer to care about memory synchronization.
+3. Call the `forward` method of the internal worker layer.
 
-In case, the worker layer is a container layer, the `.forward` method of the
-container layer takes care of calling the `.forward` methods of its managed
+If the worker layer is a container layer, the `.forward` method 
+takes care of calling the `.forward` methods of its managed
 layers in the right order.
 
 ### Backward
 
-The `.backward` of a `Layer` works quite similar to its `.forward`. Although it
-does not need to reshape the input. The `.backward` computes
-the gradient with respect to the input and the gradient w.r.t. the parameters but
-only returns the gradient w.r.t the input as only that is needed to compute the
+The `.backward` method of a `Layer` works similarly to `.forward`, apart from
+needing to reshape the input. The `.backward` method computes
+the gradient with respect to the input as well as the gradient w.r.t. the parameters. However, 
+the method only returns the input gradient because that is all that is needed to compute the
 gradient of the entire network via the chain rule.
 
-In case the worker layer is a container layer, the `.backward` method of the
-container layer takes care of calling the `.backward_input` and
+If the worker layer is a container layer, the `.backward` method 
+takes care of calling the `.backward_input` and
 `.backward_parameter` methods of its managed layers in the right order.
