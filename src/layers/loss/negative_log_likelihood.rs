@@ -3,6 +3,8 @@
 use co::{IBackend, ITensorDesc, SharedTensor};
 use layer::*;
 use util::{ArcLock, native_backend};
+use leaf_capnp::negative_log_likelihood_config as capnp_config;
+use capnp_util::*;
 
 #[derive(Debug, Clone)]
 #[allow(missing_copy_implementations)]
@@ -121,6 +123,27 @@ impl<B: IBackend> ComputeParametersGradient<f32, B> for NegativeLogLikelihood { 
 pub struct NegativeLogLikelihoodConfig {
     /// How many different classes can be classified.
     pub num_classes: usize,
+}
+
+impl<'a> CapnpWrite<'a> for NegativeLogLikelihoodConfig {
+    type Builder = capnp_config::Builder<'a>;
+
+    /// Write the NegativeLogLikelihoodConfig into a capnp message.
+    fn write_capnp(&self, builder: &mut Self::Builder) {
+        builder.set_num_classes(self.num_classes as u64);
+    }
+}
+
+impl<'a> CapnpRead<'a> for NegativeLogLikelihoodConfig {
+    type Reader = capnp_config::Reader<'a>;
+
+    fn read_capnp(reader: Self::Reader) -> Self {
+        let num_classes = reader.get_num_classes() as usize;
+
+        NegativeLogLikelihoodConfig {
+            num_classes: num_classes
+        }
+    }
 }
 
 impl Into<LayerType> for NegativeLogLikelihoodConfig {

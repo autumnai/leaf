@@ -36,6 +36,43 @@ mod layer_spec {
         }
     }
 
+    #[cfg(feature="native")]
+    mod native {
+        use co::prelude::*;
+        use leaf::layer::*;
+        use leaf::layers::*;
+        use super::native_backend;
+
+        fn simple_network() -> LayerConfig {
+            let mut net_cfg = SequentialConfig::default();
+            net_cfg.add_input("data", &vec![1, 1, 28, 28]);
+            net_cfg.add_layer(LayerConfig::new("linear", LayerType::Linear(LinearConfig { output_size: 10 })));
+
+            LayerConfig::new("network", net_cfg)
+        }
+
+        #[test]
+        fn save_and_load_layer() {
+            let cfg = simple_network();
+            let mut original_layer = Layer::from_config(native_backend(), &cfg);
+
+            original_layer.save("target/testnetwork").unwrap();
+            let mut loaded_layer = Layer::<Backend<Native>>::load(native_backend(), "target/testnetwork").unwrap();
+
+            assert_eq!(original_layer.input_blob_names(), loaded_layer.input_blob_names());
+
+            let original_weights = original_layer.learnable_weights_data();
+            let original_weight_lock = original_weights[0].read().unwrap();
+            let loaded_weights = loaded_layer.learnable_weights_data();
+            let loaded_weight_lock = loaded_weights[0].read().unwrap();
+
+            let original_weight = original_weight_lock.get(native_backend().device()).unwrap().as_native().unwrap().as_slice::<f32>();
+            let loaded_weight = loaded_weight_lock.get(native_backend().device()).unwrap().as_native().unwrap().as_slice::<f32>();
+
+            assert_eq!(original_weight, loaded_weight);
+        }
+    }
+
     #[cfg(feature="cuda")]
     mod cuda {
         use std::sync::{Arc, RwLock};
