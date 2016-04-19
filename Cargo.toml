@@ -13,6 +13,8 @@ readme = "README.md"
 keywords = ["deep-learning", "neural-networks", "machine-learning", "framework"]
 license = "MIT OR Apache-2.0"
 
+build = "build.rs"
+
 [dependencies]
 collenchyma = { version = "0.0.8", default-features = false, features = ["native"] } # native feature to read/write data into tensors
 collenchyma-blas = { version = "0.2.0", default-features = false, features = ["native"] } # only compiles with native feature
@@ -22,9 +24,14 @@ log = "0.3.2"
 rand = "0.3.0"
 num = "0.1"
 
-clippy = { version = "0.0.41", optional = true }
+capnp = "0.6.2"
 
 timeit = "0.1.2"
+
+clippy = { version = "0.0.41", optional = true }
+
+[build-dependencies]
+capnpc = "0.6.1"
 
 [dev-dependencies]
 env_logger = "0.3"

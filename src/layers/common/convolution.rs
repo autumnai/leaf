@@ -20,6 +20,8 @@ use layer::*;
 use util::{ArcLock, cast_vec_usize_to_i32};
 use weight::FillerType;
 use super::FilterLayer;
+use leaf_capnp::convolution_config as capnp_config;
+use capnp_util::*;
 
 #[derive(Debug, Clone)]
 /// Convolution Layer
@@ -232,6 +234,64 @@ pub struct ConvolutionConfig {
 impl Into<LayerType> for ConvolutionConfig {
     fn into(self) -> LayerType {
         LayerType::Convolution(self)
+    }
+}
+
+impl<'a> CapnpWrite<'a> for ConvolutionConfig {
+    type Builder = capnp_config::Builder<'a>;
+
+    /// Write the ConvolutionConfig into a capnp message.
+    fn write_capnp(&self, builder: &mut Self::Builder) {
+        builder.borrow().set_num_output(self.num_output as u64);
+        {
+            let mut filter_shape = builder.borrow().init_filter_shape(self.filter_shape.len() as u32);
+            for (i, dim) in self.filter_shape.iter().enumerate() {
+                filter_shape.set(i as u32, *dim as u64);
+            }
+        }
+        {
+            let mut stride = builder.borrow().init_stride(self.stride.len() as u32);
+            for (i, dim) in self.stride.iter().enumerate() {
+                stride.set(i as u32, *dim as u64);
+            }
+        }
+        {
+            let mut padding = builder.borrow().init_padding(self.padding.len() as u32);
+            for (i, dim) in self.padding.iter().enumerate() {
+                padding.set(i as u32, *dim as u64);
+            }
+        }
+    }
+}
+
+impl<'a> CapnpRead<'a> for ConvolutionConfig {
+    type Reader = capnp_config::Reader<'a>;
+
+    fn read_capnp(reader: Self::Reader) -> Self {
+        let num_output = reader.get_num_output() as usize;
+
+        let read_filter_shape = reader.get_filter_shape().unwrap();
+        let mut filter_shape = Vec::new();
+        for i in 0..read_filter_shape.len() {
+            filter_shape.push(read_filter_shape.get(i) as usize)
+        }
+        let read_stride = reader.get_stride().unwrap();
+        let mut stride = Vec::new();
+        for i in 0..read_stride.len() {
+            stride.push(read_stride.get(i) as usize)
+        }
+        let read_padding = reader.get_padding().unwrap();
+        let mut padding = Vec::new();
+        for i in 0..read_padding.len() {
+            padding.push(read_padding.get(i) as usize)
+        }
+
+        ConvolutionConfig {
+            num_output: num_output,
+            filter_shape: filter_shape,
+            stride: stride,
+            padding: padding,
+        }
     }
 }
 
