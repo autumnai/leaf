@@ -1,7 +1,7 @@
 [package]
 name = "leaf"
-description = "Machine Learning Framework"
-version = "0.2.0"
+description = "Machine Learning Framework for Hackers"
+version = "0.2.1"
 authors = [
   "Maximilian Goisser <max@autumnai.com>",
   "Michael Hirn <mj@autumnai.com>"

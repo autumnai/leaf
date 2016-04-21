@@ -1,3 +1,31 @@
+<a name="0.2.1"></a>
+## 0.2.1 (2016-04-21)
+
+
+#### Bug Fixes
+
+* **sgd:**  initialize weight gradient history with zeroes ([68689955](https://github.com/autumnai/leaf/commit/68689955c29c5e061389067b4dd4729b71404ad0))
+* **solvers:**  remove CUDA build flag ([1f5f6b87](https://github.com/autumnai/leaf/commit/1f5f6b87260f7b7c2d202d59cedc686c9c3f6b1e))
+
+#### Breaking Changes
+
+* **container:**  put sequential layer into container dir ([bb23b76b](https://github.com/autumnai/leaf/commit/bb23b76b41935a572135564c41c9df2b627d73d5), breaks [#](https://github.com/autumnai/leaf/issues/))
+
+#### Features
+
+* **container:**  put sequential layer into container dir ([bb23b76b](https://github.com/autumnai/leaf/commit/bb23b76b41935a572135564c41c9df2b627d73d5), breaks [#](https://github.com/autumnai/leaf/issues/))
+* **features:**  change meaning of framework features ([58d72f50](https://github.com/autumnai/leaf/commit/58d72f50964f8ddc3fc43d5f8b91b31af5881a7d))
+* **layers:**  add tanh layer ([b1d5ec91](https://github.com/autumnai/leaf/commit/b1d5ec913be86c91a58ac281151d2cdf1ca976aa))
+* **serialization:**
+  *  add deserialization ([df7c9d88](https://github.com/autumnai/leaf/commit/df7c9d88713cffbc50261c488e940f0926edfea4))
+  *  add serialization ([cb1a1b4b](https://github.com/autumnai/leaf/commit/cb1a1b4b72eddcbba0414c32829f1e1e23b10ca1))
+
+#### Performance
+
+* **sgd:**  use GPU for computation of weight updates ([08fd965b](https://github.com/autumnai/leaf/commit/08fd965b19a64879bc364f488ebb393b07e3f413))
+* **solver:**  don't zero fill weight gradients ([6c4482c5](https://github.com/autumnai/leaf/commit/6c4482c5c17de761516f3cce7e860e5651041ea1))
+
+
 <a name="0.2.0"></a>
 ## 0.2.0 (2016-03-04)
 

@@ -10,6 +10,8 @@ modularity, performance and portability to deep learning.
 Leaf has one of the simplest APIs, is lean and tries to introduce minimal
 technical debt to your stack.
 
+See the [Leaf - Machine Learning for Hackers][leaf-book] book for more.
+
 Leaf is a few months old, but thanks to its architecture and Rust, it is already
 one of the fastest Machine Intelligence Frameworks available.
 
@@ -81,7 +83,7 @@ To start building a machine learning application (Rust only for now. Wrappers ar
 
 ```toml
 [dependencies]
-leaf = "0.2.0"
+leaf = "0.2.1"
 ```
 
 [rust_download]: https://www.rust-lang.org/downloads.html
@@ -93,7 +95,7 @@ can selectively enable them like this in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-leaf = { version = "0.2.0", default-features = false }
+leaf = { version = "0.2.1", default-features = false }
 
 [features]
 default = ["native"] # include only the ones you want to use, in this case "native"
