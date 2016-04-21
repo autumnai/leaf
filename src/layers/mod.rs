@@ -2,8 +2,7 @@
 //!
 //! These layers provide different type of operations to the data Blobs
 //! that flow through them.
-//! The operations provided by the layers can be
-//! roughly grouped into four categories:
+//! The operations provided by the layers are grouped into five categories:
 //!
 //! * [__Activation__][mod_activation]</br>
 //! Activation Layers provide element-wise operations and produce one top Blob
@@ -31,6 +30,12 @@
 //! Utility Layers follow the general behavior of a layer, like the other types
 //! do.
 //!
+//! * [__Container__][mod_container]</br>
+//! Container layers take `LayerConfig`s and connect them on initialization, which
+//! creates a "network". But as container layers are layers one can stack multiple
+//! container layers on top of another and compose even bigger container layers.
+//! Container layers differ in how they connect the layers that it receives.
+//!
 //! For more information about how these layers work together, see the
 //! documentation for the general [Layer module][3].
 //!
@@ -41,6 +46,7 @@
 //! [mod_common]: ./common/index.html
 //! [mod_loss]: ./loss/index.html
 //! [mod_utility]: ./utility/index.html
+//! [mod_container]: ./container/index.html
 
 /// Implement [ILayer][1] for [activation layers][2].
 /// [1]: ./layer/trait.ILayer.html
@@ -61,7 +67,6 @@ pub use self::common::{
 pub use self::common::{
     Linear, LinearConfig,
     LogSoftmax,
-    Sequential, SequentialConfig,
     Softmax,
 };
 
@@ -74,7 +79,12 @@ pub use self::utility::{
     Reshape, ReshapeConfig,
 };
 
+pub use self::container::{
+    Sequential, SequentialConfig,
+};
+
 pub mod activation;
 pub mod common;
 pub mod loss;
 pub mod utility;
+pub mod container;
