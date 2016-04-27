@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ParseRatioError",""],["Ratio","Represents the ratio between 2 numbers."]],"type":[["BigRational",""],["Rational",""],["Rational32",""],["Rational64",""]]});

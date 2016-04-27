@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Transpose","Possible transpose operations that can be applied in Level 2 and Level 3 BLAS operations."]]});

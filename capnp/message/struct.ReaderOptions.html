@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `ReaderOptions` struct in crate `capnp`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ReaderOptions">
+
+    <title>capnp::message::ReaderOptions - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>capnp</a>::<wbr><a href='index.html'>message</a></p><script>window.sidebarCurrent = {name: 'ReaderOptions', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>capnp</a>::<wbr><a href='index.html'>message</a>::<wbr><a class='struct' href=''>ReaderOptions</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-636' class='srclink' href='../../src/capnp/message.rs.html#33-61' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct ReaderOptions {
+    pub traversal_limit_in_words: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>,
+    pub nesting_limit: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>,
+}</pre><div class='docblock'><p>Options controlling how data is read.</p>
+</div><h2 class='fields'>Fields</h2>
+<table><tr class='stab '>
+                                  <td id='structfield.traversal_limit_in_words'><code>traversal_limit_in_words</code></td><td><div class='docblock'><p>Limits how many total words of data are allowed to be traversed. Traversal is counted when
+a new struct or list builder is obtained, e.g. from a get() accessor. This means that calling
+the getter for the same sub-struct multiple times will cause it to be double-counted. Once
+the traversal limit is reached, an error will be reported.</p>
+
+<p>This limit exists for security reasons. It is possible for an attacker to construct a message
+in which multiple pointers point at the same location. This is technically invalid, but hard
+to detect. Using such a message, an attacker could cause a message which is small on the wire
+to appear much larger when actually traversed, possibly exhausting server resources leading to
+denial-of-service.</p>
+
+<p>It makes sense to set a traversal limit that is much larger than the underlying message.
+Together with sensible coding practices (e.g. trying to avoid calling sub-object getters
+multiple times, which is expensive anyway), this should provide adequate protection without
+inconvenience.</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.nesting_limit'><code>nesting_limit</code></td><td><div class='docblock'><p>Limits how deeply nested a message structure can be, e.g. structs containing other structs or
+lists of structs.</p>
+
+<p>Like the traversal limit, this limit exists for security reasons. Since it is common to use
+recursive code to traverse recursive data structures, an attacker could easily cause a stack
+overflow by sending a very-depply-nested (or even cyclic) message, without the message even
+being very large. The default limit of 64 is probably low enough to prevent any chance of
+stack overflow, yet high enough that it is never a problem in practice.</p>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../capnp/message/struct.ReaderOptions.html' title='capnp::message::ReaderOptions'>ReaderOptions</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../capnp/message/struct.ReaderOptions.html' title='capnp::message::ReaderOptions'>ReaderOptions</a></code></h4>
+<h4 id='method.nesting_limit' class='method'><code>fn <a href='#method.nesting_limit' class='fnname'>nesting_limit</a>&lt;'a&gt;(&amp;'a mut self, value: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>) -&gt; &amp;'a mut <a class='struct' href='../../capnp/message/struct.ReaderOptions.html' title='capnp::message::ReaderOptions'>ReaderOptions</a></code></h4>
+<h4 id='method.traversal_limit_in_words' class='method'><code>fn <a href='#method.traversal_limit_in_words' class='fnname'>traversal_limit_in_words</a>&lt;'a&gt;(&amp;'a mut self, value: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>) -&gt; &amp;'a mut <a class='struct' href='../../capnp/message/struct.ReaderOptions.html' title='capnp::message::ReaderOptions'>ReaderOptions</a></code></h4>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/default/trait.Default.html' title='core::default::Default'>Default</a> for <a class='struct' href='../../capnp/message/struct.ReaderOptions.html' title='capnp::message::ReaderOptions'>ReaderOptions</a></code></h3><div class='impl-items'><h4 id='method.default' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/default/trait.Default.html#method.default' class='fnname'>default</a>() -&gt; <a class='struct' href='../../capnp/message/struct.ReaderOptions.html' title='capnp::message::ReaderOptions'>ReaderOptions</a></code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='struct' href='../../capnp/message/struct.ReaderOptions.html' title='capnp::message::ReaderOptions'>ReaderOptions</a></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../capnp/message/struct.ReaderOptions.html' title='capnp::message::ReaderOptions'>ReaderOptions</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../capnp/message/struct.ReaderOptions.html' title='capnp::message::ReaderOptions'>ReaderOptions</a></code></h4>
+<h4 id='method.clone_from' class='method'><span class="since">1.0.0</span><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "capnp";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

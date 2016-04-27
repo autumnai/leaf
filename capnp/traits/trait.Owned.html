@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Owned` trait in crate `capnp`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Owned">
+
+    <title>capnp::traits::Owned - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>capnp</a>::<wbr><a href='index.html'>traits</a></p><script>window.sidebarCurrent = {name: 'Owned', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>capnp</a>::<wbr><a href='index.html'>traits</a>::<wbr><a class='trait' href=''>Owned</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-3250' class='srclink' href='../../src/capnp/traits.rs.html#52-55' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait Owned&lt;'a&gt; {
+    type Reader: <a class='trait' href='../../capnp/traits/trait.FromPointerReader.html' title='capnp::traits::FromPointerReader'>FromPointerReader</a>&lt;'a&gt; + <a class='trait' href='../../capnp/traits/trait.SetPointerBuilder.html' title='capnp::traits::SetPointerBuilder'>SetPointerBuilder</a>&lt;Self::<a class='trait' href='../../capnp/traits/trait.Owned.html' title='capnp::traits::Owned'>Builder</a>&gt;;
+    type Builder: <a class='trait' href='../../capnp/traits/trait.FromPointerBuilder.html' title='capnp::traits::FromPointerBuilder'>FromPointerBuilder</a>&lt;'a&gt;;
+}</pre><div class='docblock'><p>Associated types hackery that allows us to reason about Cap&#39;n Proto types
+without needing to give them a lifetime <code>&#39;a</code>.</p>
+
+<p>If <code>Foo</code> is a Cap&#39;n Proto struct and <code>Bar</code> is a Rust-native struct, then
+<code>foo::Reader&lt;&#39;a&gt;</code> is to <code>foo::Owned</code> as <code>&amp;&#39;a Bar</code> is to <code>Bar</code>, and
+<code>foo::Builder&lt;&#39;a&gt;</code> is to <code>foo::Owned</code> as <code>&amp;&#39;a mut Bar</code> is to <code>Bar</code>.
+The relationship is formalized by an <code>impl &lt;&#39;a&gt; capnp::traits::Owned&lt;&#39;a&gt; for foo::Owned</code>.
+Because Cap&#39;n Proto struct layout differs from Rust struct layout,
+<code>foo::Owned</code> cannot be an inhabited type; it is useful nonetheless
+as a type parameter, e.g. for a generic container that owns a Cap&#39;n Proto message
+of type <code>T: for&lt;&#39;a&gt; capnp::traits::Owned&lt;&#39;a&gt;</code>.</p>
+</div>
+            <h2 id='associated-types'>Associated Types</h2>
+            <div class='methods'>
+        <h3 id='associatedtype.Reader' class='method stab '><code>type Reader: <a class='trait' href='../../capnp/traits/trait.FromPointerReader.html' title='capnp::traits::FromPointerReader'>FromPointerReader</a>&lt;'a&gt; + <a class='trait' href='../../capnp/traits/trait.SetPointerBuilder.html' title='capnp::traits::SetPointerBuilder'>SetPointerBuilder</a>&lt;Self::<a class='trait' href='../../capnp/traits/trait.Owned.html' title='capnp::traits::Owned'>Builder</a>&gt;</code></h3><h3 id='associatedtype.Builder' class='method stab '><code>type Builder: <a class='trait' href='../../capnp/traits/trait.FromPointerBuilder.html' title='capnp::traits::FromPointerBuilder'>FromPointerBuilder</a>&lt;'a&gt;</code></h3></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    <li><code>impl&lt;'a&gt; <a class='trait' href='../../capnp/traits/trait.Owned.html' title='capnp::traits::Owned'>Owned</a>&lt;'a&gt; for <a class='struct' href='../../capnp/any_pointer/struct.Owned.html' title='capnp::any_pointer::Owned'>Owned</a></code></li>
+<li><code>impl&lt;'a&gt; <a class='trait' href='../../capnp/traits/trait.Owned.html' title='capnp::traits::Owned'>Owned</a>&lt;'a&gt; for <a class='struct' href='../../capnp/data/struct.Owned.html' title='capnp::data::Owned'>Owned</a></code></li>
+<li><code>impl&lt;'a&gt; <a class='trait' href='../../capnp/traits/trait.Owned.html' title='capnp::traits::Owned'>Owned</a>&lt;'a&gt; for <a class='struct' href='../../capnp/data_list/struct.Owned.html' title='capnp::data_list::Owned'>Owned</a></code></li>
+<li><code>impl&lt;'a, T&gt; <a class='trait' href='../../capnp/traits/trait.Owned.html' title='capnp::traits::Owned'>Owned</a>&lt;'a&gt; for <a class='struct' href='../../capnp/enum_list/struct.Owned.html' title='capnp::enum_list::Owned'>Owned</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../capnp/traits/trait.FromU16.html' title='capnp::traits::FromU16'>FromU16</a></span></code></li>
+<li><code>impl&lt;'a, T&gt; <a class='trait' href='../../capnp/traits/trait.Owned.html' title='capnp::traits::Owned'>Owned</a>&lt;'a&gt; for <a class='struct' href='../../capnp/list_list/struct.Owned.html' title='capnp::list_list::Owned'>Owned</a>&lt;T&gt; <span class='where'>where T: for&lt;'b&gt; <a class='trait' href='../../capnp/traits/trait.Owned.html' title='capnp::traits::Owned'>Owned</a>&lt;'b&gt;</span></code></li>
+<li><code>impl&lt;'a, T&gt; <a class='trait' href='../../capnp/traits/trait.Owned.html' title='capnp::traits::Owned'>Owned</a>&lt;'a&gt; for <a class='struct' href='../../capnp/primitive_list/struct.Owned.html' title='capnp::primitive_list::Owned'>Owned</a>&lt;T&gt; <span class='where'>where T: <a class='trait' href='../../capnp/private/layout/trait.PrimitiveElement.html' title='capnp::private::layout::PrimitiveElement'>PrimitiveElement</a></span></code></li>
+<li><code>impl&lt;'a, T&gt; <a class='trait' href='../../capnp/traits/trait.Owned.html' title='capnp::traits::Owned'>Owned</a>&lt;'a&gt; for <a class='struct' href='../../capnp/struct_list/struct.Owned.html' title='capnp::struct_list::Owned'>Owned</a>&lt;T&gt; <span class='where'>where T: for&lt;'b&gt; <a class='trait' href='../../capnp/traits/trait.OwnedStruct.html' title='capnp::traits::OwnedStruct'>OwnedStruct</a>&lt;'b&gt;</span></code></li>
+<li><code>impl&lt;'a&gt; <a class='trait' href='../../capnp/traits/trait.Owned.html' title='capnp::traits::Owned'>Owned</a>&lt;'a&gt; for <a class='struct' href='../../capnp/text/struct.Owned.html' title='capnp::text::Owned'>Owned</a></code></li>
+<li><code>impl&lt;'a&gt; <a class='trait' href='../../capnp/traits/trait.Owned.html' title='capnp::traits::Owned'>Owned</a>&lt;'a&gt; for <a class='struct' href='../../capnp/text_list/struct.Owned.html' title='capnp::text_list::Owned'>Owned</a></code></li>
+</ul><script type="text/javascript" async
+                              src="../../implementors/capnp/traits/trait.Owned.js">
+                      </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "capnp";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

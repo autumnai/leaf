@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["native","Provides informations about the software system, such as OpenCL, CUDA, that contains the set of components to support [hardwares][hardware] with kernel execution. [hardware]: ../hardware/index.html"]]});

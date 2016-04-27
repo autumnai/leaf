@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `ClientHook` trait in crate `capnp`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ClientHook">
+
+    <title>capnp::private::capability::ClientHook - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>capnp</a>::<wbr><a href='../index.html'>private</a>::<wbr><a href='index.html'>capability</a></p><script>window.sidebarCurrent = {name: 'ClientHook', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'><span class='in-band'>Trait <a href='../../index.html'>capnp</a>::<wbr><a href='../index.html'>private</a>::<wbr><a href='index.html'>capability</a>::<wbr><a class='trait' href=''>ClientHook</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-1121' class='srclink' href='../../../src/capnp/private/capability.rs.html#38-80' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait ClientHook {
+    fn <a href='#tymethod.add_ref' class='fnname'>add_ref</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../capnp/private/capability/trait.ClientHook.html' title='capnp::private::capability::ClientHook'>ClientHook</a>&gt;;
+    fn <a href='#tymethod.new_call' class='fnname'>new_call</a>(&amp;self, interface_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, method_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a>, size_hint: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../../capnp/struct.MessageSize.html' title='capnp::MessageSize'>MessageSize</a>&gt;) -&gt; <a class='struct' href='../../../capnp/capability/struct.Request.html' title='capnp::capability::Request'>Request</a>&lt;<a class='struct' href='../../../capnp/any_pointer/struct.Owned.html' title='capnp::any_pointer::Owned'>Owned</a>, <a class='struct' href='../../../capnp/any_pointer/struct.Owned.html' title='capnp::any_pointer::Owned'>Owned</a>&gt;;
+    fn <a href='#tymethod.call' class='fnname'>call</a>(&amp;self, interface_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, method_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a>, params: <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../capnp/private/capability/trait.ParamsHook.html' title='capnp::private::capability::ParamsHook'>ParamsHook</a>&gt;, results: <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../capnp/private/capability/trait.ResultsHook.html' title='capnp::private::capability::ResultsHook'>ResultsHook</a>&gt;, results_done: <a class='struct' href='../../../capnp/capability/struct.Promise.html' title='capnp::capability::Promise'>Promise</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../capnp/private/capability/trait.ResultsDoneHook.html' title='capnp::private::capability::ResultsDoneHook'>ResultsDoneHook</a>&gt;, <a class='struct' href='../../../capnp/struct.Error.html' title='capnp::Error'>Error</a>&gt;) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a><a class='struct' href='../../../capnp/capability/struct.Promise.html' title='capnp::capability::Promise'>Promise</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='../../../capnp/struct.Error.html' title='capnp::Error'>Error</a>&gt;, <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../capnp/private/capability/trait.PipelineHook.html' title='capnp::private::capability::PipelineHook'>PipelineHook</a>&gt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a>;
+    fn <a href='#tymethod.get_brand' class='fnname'>get_brand</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>;
+    fn <a href='#tymethod.get_ptr' class='fnname'>get_ptr</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>;
+    fn <a href='#tymethod.get_resolved' class='fnname'>get_resolved</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../capnp/private/capability/trait.ClientHook.html' title='capnp::private::capability::ClientHook'>ClientHook</a>&gt;&gt;;
+    fn <a href='#tymethod.when_more_resolved' class='fnname'>when_more_resolved</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../../capnp/capability/struct.Promise.html' title='capnp::capability::Promise'>Promise</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../capnp/private/capability/trait.ClientHook.html' title='capnp::private::capability::ClientHook'>ClientHook</a>&gt;, <a class='struct' href='../../../capnp/struct.Error.html' title='capnp::Error'>Error</a>&gt;&gt;;
+
+    fn <a href='#method.when_resolved' class='fnname'>when_resolved</a>(&amp;self) -&gt; <a class='struct' href='../../../capnp/capability/struct.Promise.html' title='capnp::capability::Promise'>Promise</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='../../../capnp/struct.Error.html' title='capnp::Error'>Error</a>&gt; { ... }
+}</pre>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.add_ref' class='method stab '><code>fn <a href='#tymethod.add_ref' class='fnname'>add_ref</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../capnp/private/capability/trait.ClientHook.html' title='capnp::private::capability::ClientHook'>ClientHook</a>&gt;</code></h3><h3 id='tymethod.new_call' class='method stab '><code>fn <a href='#tymethod.new_call' class='fnname'>new_call</a>(&amp;self, interface_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, method_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a>, size_hint: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../../capnp/struct.MessageSize.html' title='capnp::MessageSize'>MessageSize</a>&gt;) -&gt; <a class='struct' href='../../../capnp/capability/struct.Request.html' title='capnp::capability::Request'>Request</a>&lt;<a class='struct' href='../../../capnp/any_pointer/struct.Owned.html' title='capnp::any_pointer::Owned'>Owned</a>, <a class='struct' href='../../../capnp/any_pointer/struct.Owned.html' title='capnp::any_pointer::Owned'>Owned</a>&gt;</code></h3><h3 id='tymethod.call' class='method stab '><code>fn <a href='#tymethod.call' class='fnname'>call</a>(&amp;self, interface_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, method_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a>, params: <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../capnp/private/capability/trait.ParamsHook.html' title='capnp::private::capability::ParamsHook'>ParamsHook</a>&gt;, results: <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../capnp/private/capability/trait.ResultsHook.html' title='capnp::private::capability::ResultsHook'>ResultsHook</a>&gt;, results_done: <a class='struct' href='../../../capnp/capability/struct.Promise.html' title='capnp::capability::Promise'>Promise</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../capnp/private/capability/trait.ResultsDoneHook.html' title='capnp::private::capability::ResultsDoneHook'>ResultsDoneHook</a>&gt;, <a class='struct' href='../../../capnp/struct.Error.html' title='capnp::Error'>Error</a>&gt;) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a><a class='struct' href='../../../capnp/capability/struct.Promise.html' title='capnp::capability::Promise'>Promise</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='../../../capnp/struct.Error.html' title='capnp::Error'>Error</a>&gt;, <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../capnp/private/capability/trait.PipelineHook.html' title='capnp::private::capability::PipelineHook'>PipelineHook</a>&gt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a></code></h3><h3 id='tymethod.get_brand' class='method stab '><code>fn <a href='#tymethod.get_brand' class='fnname'>get_brand</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h3><h3 id='tymethod.get_ptr' class='method stab '><code>fn <a href='#tymethod.get_ptr' class='fnname'>get_ptr</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h3><h3 id='tymethod.get_resolved' class='method stab '><code>fn <a href='#tymethod.get_resolved' class='fnname'>get_resolved</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../capnp/private/capability/trait.ClientHook.html' title='capnp::private::capability::ClientHook'>ClientHook</a>&gt;&gt;</code></h3><div class='docblock'><p>If this ClientHook is a promise that has already resolved, returns the inner, resolved version
+of the capability.  The caller may permanently replace this client with the resolved one if
+desired.  Returns null if the client isn&#39;t a promise or hasn&#39;t resolved yet -- use
+<code>whenMoreResolved()</code> to distinguish between them.</p>
+</div><h3 id='tymethod.when_more_resolved' class='method stab '><code>fn <a href='#tymethod.when_more_resolved' class='fnname'>when_more_resolved</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../../capnp/capability/struct.Promise.html' title='capnp::capability::Promise'>Promise</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../capnp/private/capability/trait.ClientHook.html' title='capnp::private::capability::ClientHook'>ClientHook</a>&gt;, <a class='struct' href='../../../capnp/struct.Error.html' title='capnp::Error'>Error</a>&gt;&gt;</code></h3><div class='docblock'><p>If this client is a settled reference (not a promise), return nullptr.  Otherwise, return a
+promise that eventually resolves to a new client that is closer to being the final, settled
+client (i.e. the value eventually returned by <code>getResolved()</code>).  Calling this repeatedly
+should eventually produce a settled client.</p>
+</div></div>
+            <h2 id='provided-methods'>Provided Methods</h2>
+            <div class='methods'>
+        <h3 id='method.when_resolved' class='method stab '><code>fn <a href='#method.when_resolved' class='fnname'>when_resolved</a>(&amp;self) -&gt; <a class='struct' href='../../../capnp/capability/struct.Promise.html' title='capnp::capability::Promise'>Promise</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='../../../capnp/struct.Error.html' title='capnp::Error'>Error</a>&gt;</code></h3><div class='docblock'><p>Repeatedly calls whenMoreResolved() until it returns nullptr.</p>
+</div></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    </ul><script type="text/javascript" async
+                              src="../../../implementors/capnp/private/capability/trait.ClientHook.js">
+                      </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "capnp";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

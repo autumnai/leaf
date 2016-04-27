@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["TanH","TanH Activation Layer"]]});

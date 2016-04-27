@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Client",""],["Params",""],["Promise","This fake Promise struct is defined so that the generated code for interfaces can typecheck even if the \"rpc\" feature is not enabled."],["RemotePromise",""],["Request",""],["Response",""],["Results",""]],"trait":[["FromClientHook",""],["FromTypelessPipeline",""],["Server",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Sequential","Sequential Layer"],["SequentialConfig","Specifies configuration parameters for a Sequential Layer."]]});

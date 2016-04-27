@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error","An error type for reading bytes."]],"trait":[["ReadBytesExt","Extends `Read` with methods for reading numbers. (For `std::io`.)"],["WriteBytesExt","Extends `Write` with methods for writing numbers. (For `std::io`.)"]],"type":[["Result","A short-hand for `result::Result<T, byteorder::Error>`."]]});

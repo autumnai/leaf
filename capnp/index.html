@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `capnp` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, capnp">
+
+    <title>capnp - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'></p><script>window.sidebarCurrent = {name: 'capnp', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>capnp</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-0' class='srclink' href='../src/capnp/lib.rs.html#22-304' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'>
+<h1 id='capn-proto-runtime-library' class='section-header'><a href='#capn-proto-runtime-library'>Cap&#39;n Proto Runtime Library</a></h1>
+<p><a href="https://capnproto.org">Cap&#39;n Proto</a> is an extremely efficient protocol for
+sharing data and capabilities.</p>
+
+<p>The Rust implementation is split into three separate crates.</p>
+
+<p>Code generation is handled by <a href="https://github.com/dwrensha/capnpc-rust">capnpc-rust</a>.</p>
+
+<p>The present crate is the runtime library required by that generated code. It is hosted on Github
+<a href="https://github.com/dwrensha/capnproto-rust">here</a>.</p>
+
+<p><a href="https://github.com/dwrensha/capnp-rpc-rust">capnp-rpc-rust</a> is an implementation of a
+distributed object-capability layer.</p>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='any_pointer/index.html'
+                               title='capnp::any_pointer'>any_pointer</a></td>
+                        <td class='docblock short'>
+                             <p>Dynamically typed value.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='capability/index.html'
+                               title='capnp::capability'>capability</a></td>
+                        <td class='docblock short'>
+                             <p>Hooks for for the RPC system.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='data/index.html'
+                               title='capnp::data'>data</a></td>
+                        <td class='docblock short'>
+                             <p>Sequence of bytes.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='data_list/index.html'
+                               title='capnp::data_list'>data_list</a></td>
+                        <td class='docblock short'>
+                             <p>List of sequences of bytes.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='enum_list/index.html'
+                               title='capnp::enum_list'>enum_list</a></td>
+                        <td class='docblock short'>
+                             <p>List of enums.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='list_list/index.html'
+                               title='capnp::list_list'>list_list</a></td>
+                        <td class='docblock short'>
+                             <p>List of lists.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='message/index.html'
+                               title='capnp::message'>message</a></td>
+                        <td class='docblock short'>
+                             <p>Untyped root container for a Cap&#39;n Proto value.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='primitive_list/index.html'
+                               title='capnp::primitive_list'>primitive_list</a></td>
+                        <td class='docblock short'>
+                             <p>List of primitives.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='private/index.html'
+                               title='capnp::private'>private</a></td>
+                        <td class='docblock short'>
+                             <p>Implementation details that should never be directly used by clients.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='serialize/index.html'
+                               title='capnp::serialize'>serialize</a></td>
+                        <td class='docblock short'>
+                             <p>Reading and writing of messages using the
+<a href="https://capnproto.org/encoding.html#serialization-over-a-stream">standard stream framing</a>.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='serialize_packed/index.html'
+                               title='capnp::serialize_packed'>serialize_packed</a></td>
+                        <td class='docblock short'>
+                             <p>Reading and writing of messages using the
+<a href="https://capnproto.org/encoding.html#packing">packed stream encoding</a>.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='struct_list/index.html'
+                               title='capnp::struct_list'>struct_list</a></td>
+                        <td class='docblock short'>
+                             <p>List of structs.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='text/index.html'
+                               title='capnp::text'>text</a></td>
+                        <td class='docblock short'>
+                             <p>UTF-8 encoded text.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='text_list/index.html'
+                               title='capnp::text_list'>text_list</a></td>
+                        <td class='docblock short'>
+                             <p>List of strings containing UTF-8 encoded text.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='traits/index.html'
+                               title='capnp::traits'>traits</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                </table><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='macro' href='macro.capnp_word!.html'
+                               title='capnp::capnp_word!'>capnp_word!</a></td>
+                        <td class='docblock short'>
+                             <p>Constructs a <a href="struct.Word.html"><code>Word</code></a> from its constituent bytes.
+This macro can be used to construct constants. In the future, when
+Rust supports <a href="https://github.com/rust-lang/rust/issues/24111">constant functions</a>,
+ this macro will be replaced by such a function.</p>
+                        </td>
+                    </tr>
+                </table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.Error.html'
+                               title='capnp::Error'>Error</a></td>
+                        <td class='docblock short'>
+                             <p>Describes an arbitrary error that prevented an operation from completing.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.MessageSize.html'
+                               title='capnp::MessageSize'>MessageSize</a></td>
+                        <td class='docblock short'>
+                             <p>Size of a message. Every generated struct has a method <code>.total_size()</code> that returns this.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.NotInSchema.html'
+                               title='capnp::NotInSchema'>NotInSchema</a></td>
+                        <td class='docblock short'>
+                             <p>An enum value or union discriminant that was not found among those defined in a schema.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.Word.html'
+                               title='capnp::Word'>Word</a></td>
+                        <td class='docblock short'>
+                             <p>Eight bytes of memory with opaque interior. Use <a href="macro.capnp_word!.html"><code>capnp_word!()</code></a>
+to construct one of these.</p>
+                        </td>
+                    </tr>
+                </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='enum' href='enum.ErrorKind.html'
+                               title='capnp::ErrorKind'>ErrorKind</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='enum' href='enum.OutputSegments.html'
+                               title='capnp::OutputSegments'>OutputSegments</a></td>
+                        <td class='docblock short'>
+                             <p>Helper struct that allows <code>MessageBuilder::get_segments_for_output()</code> to avoid heap allocations
+in the single-segment case.</p>
+                        </td>
+                    </tr>
+                </table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='type' href='type.Result.html'
+                               title='capnp::Result'>Result</a></td>
+                        <td class='docblock short'>
+                             <p>Because messages are lazily validated, the return type of any method that reads a pointer field
+must be wrapped in a Result.</p>
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "capnp";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

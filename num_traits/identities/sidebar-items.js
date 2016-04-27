@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["One","Defines a multiplicative identity element for `Self`."],["Zero","Defines an additive identity element for `Self`."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["cblas_cgbmv",""],["cblas_cgemv",""],["cblas_cgerc",""],["cblas_cgeru",""],["cblas_chbmv",""],["cblas_chemv",""],["cblas_cher",""],["cblas_cher2",""],["cblas_chpmv",""],["cblas_chpr",""],["cblas_chpr2",""],["cblas_csymv",""],["cblas_ctbmv",""],["cblas_ctbsv",""],["cblas_ctpmv",""],["cblas_ctpsv",""],["cblas_ctrmv",""],["cblas_ctrsv",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["linear","Applies a linear transformation to the input data `y = a * x + b`"],["log_softmax","Computes the logarithmic softmax of its input."],["softmax","Computes the softmax of its input."]],"trait":[["FilterLayer","Provides common utilities for Layers that utilize a filter with stride and padding."]]});
