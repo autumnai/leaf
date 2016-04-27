@@ -5,7 +5,7 @@
 [Layers](./deep-learning-glossary.html#Layer) are the only building
 blocks in Leaf. As we will see later on, everything is a layer. Even when 
 we construct [networks](./deep-learning-glossary.html#Network), we are still just 
-working with layers composed of smalle layers. This makes the API clean and expressive.
+working with layers composed of smaller layers. This makes the API clean and expressive.
 
 A layer is like a function: given an input it computes an output. 
 It could be some mathematical expression, like Sigmoid, ReLU, or a non-mathematical instruction, 
