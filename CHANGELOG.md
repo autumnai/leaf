@@ -49,7 +49,7 @@
 * **layer:**  add Sequential layer ([aaacc1ed](https://github.com/autumnai/leaf/commit/aaacc1edf351d2fb07f1f7a375cffac03d9932ed))
 * **layers:**  implement Into<LayerType> for all layers ([b9a4e8f6](https://github.com/autumnai/leaf/commit/b9a4e8f6dd86fe1bd80a669ae1aa2e17a017c4c1))
 * **license:**  change license to dual MIT/Apache-2.0 ([a06b7c52](https://github.com/autumnai/leaf/commit/a06b7c522c7e9f1c837b96ce27a9eca4b34d2bad))
-* **reshape:**  added in-place functonality to reshape layer ([f03bfc20](https://github.com/autumnai/leaf/commit/f03bfc20711451493a8324cad553f7f2f00ffcbe))
+* **reshape:**  added in-place functionality to reshape layer ([f03bfc20](https://github.com/autumnai/leaf/commit/f03bfc20711451493a8324cad553f7f2f00ffcbe))
 * **solvers:**  reintroduce solvers for Layers ([0254a432](https://github.com/autumnai/leaf/commit/0254a432b0d990990564aed8c25b237bda15a685))
 
 #### Performance
