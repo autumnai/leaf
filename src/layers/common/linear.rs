@@ -18,7 +18,6 @@
 //!
 //! In the context of convolutional neural networks this layer is also
 //! called a "fully-connected layer" if it is used at the end of the network.
-use std::rc::Rc;
 use co::backend::IBackend;
 use co::tensor::SharedTensor;
 use coblas::transpose::Transpose;
@@ -75,14 +74,6 @@ impl<B: IBackend + LayerOps<f32>> ILayer<B> for Linear {
         true
     }
 
-    fn init(&mut self, backend: Rc<B>) {
-        let device = <B as IBackend>::device(&backend);
-        let _ = self.one.add_device(device);
-        self.one.sync(device).unwrap();
-        let _ = self.zero.add_device(device);
-        self.zero.sync(device).unwrap();
-    }
-
     fn reshape(&mut self,
                backend: ::std::rc::Rc<B>,
                input_data: &mut Vec<ArcLock<SharedTensor<f32>>>,
@@ -106,10 +97,6 @@ impl<B: IBackend + LayerOps<f32>> ILayer<B> for Linear {
                 output_size: self.output_size,
             };
             filler.fill(&mut weight.write().unwrap());
-
-            let native_backend = ::util::native_backend();
-            let bound_weight = weight.read().unwrap();
-            let native_output = bound_weight.get(native_backend.device()).unwrap().as_native().unwrap();
         }
         if let Some(weight) = weights_gradient.get(0) {
             weight.write().unwrap().resize(&weight_shape).unwrap();
@@ -123,12 +110,20 @@ impl<B: IBackend + LayerOps<f32>> ComputeOutput<f32, B> for Linear {
                       weights: &[&SharedTensor<f32>],
                       input_data: &[&SharedTensor<f32>],
                       output_data: &mut [&mut SharedTensor<f32>]) {
-        backend.gemm_plain(&self.one, Transpose::NoTrans, input_data[0], Transpose::Trans, weights[0], &self.zero, output_data[0]).unwrap();
+        backend.gemm(&self.one,
+                     Transpose::NoTrans, input_data[0],
+                     Transpose::Trans, weights[0],
+                     &self.zero,
+                     output_data[0]).unwrap();
         let has_bias_term = false; // TODO: implement bias term
         if has_bias_term {
             let bias_multiplier = unimplemented!();
             let bias_data = unimplemented!();
-            backend.gemm_plain(&self.one, Transpose::NoTrans, bias_multiplier, Transpose::NoTrans, bias_data, &self.one, output_data[0]).unwrap();
+            backend.gemm(&self.one,
+                         Transpose::NoTrans, bias_multiplier,
+                         Transpose::NoTrans, bias_data,
+                         &self.one,
+                         output_data[0]).unwrap();
         }
     }
 }
@@ -142,7 +137,11 @@ impl<B: IBackend + LayerOps<f32>> ComputeInputGradient<f32, B> for Linear {
                               input_data: &[&SharedTensor<f32>],
                               input_gradients: &mut [&mut SharedTensor<f32>]) {
         // Gradient with respect to input data
-        backend.gemm_plain(&self.one, Transpose::NoTrans, output_gradients[0], Transpose::NoTrans, weights_data[0], &self.zero, input_gradients[0]).unwrap();
+        backend.gemm(&self.one,
+                     Transpose::NoTrans, output_gradients[0],
+                     Transpose::NoTrans, weights_data[0],
+                     &self.zero,
+                     input_gradients[0]).unwrap();
     }
 }
 
@@ -154,7 +153,11 @@ impl<B: IBackend + LayerOps<f32>> ComputeParametersGradient<f32, B> for Linear {
                                    input_data: &[&SharedTensor<f32>],
                                    parameters_gradients: &mut [&mut SharedTensor<f32>]) {
         // gradient w.r.t. weights
-        backend.gemm_plain(&self.one, Transpose::Trans, output_gradients[0], Transpose::NoTrans, input_data[0], &self.zero, parameters_gradients[0]).unwrap();
+        backend.gemm(&self.one,
+                     Transpose::Trans, output_gradients[0],
+                     Transpose::NoTrans, input_data[0],
+                     &self.zero,
+                     parameters_gradients[0]).unwrap();
 
         // TODO: implement gradient w.r.t bias
         // if (bias_term_ && this->param_propagate_down_[1]) {

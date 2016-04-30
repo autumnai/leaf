@@ -57,8 +57,8 @@ impl<B: IBackend + conn::Tanh<f32> + conn::TanhPointwise<f32>> ComputeOutput<f32
                       input_data: &[&SharedTensor<f32>],
                       output_data: &mut [&mut SharedTensor<f32>]) {
         match input_data.get(0) {
-            Some(input) => backend.tanh_plain(input, output_data[0]).unwrap(),
-            None => backend.tanh_pointwise_plain(output_data[0]).unwrap(),
+            Some(input) => backend.tanh(input, output_data[0]).unwrap(),
+            None => backend.tanh_pointwise(output_data[0]).unwrap(),
         }
     }
 }
@@ -73,8 +73,9 @@ impl<B: IBackend + conn::Tanh<f32> + conn::TanhPointwise<f32>> ComputeInputGradi
                               input_data: &[&SharedTensor<f32>],
                               input_gradients: &mut [&mut SharedTensor<f32>]) {
         match output_data.get(0) {
-            Some(_) => backend.tanh_grad_plain(output_data[0], output_gradients[0], input_data[0], input_gradients[0]).unwrap(),
-            None => backend.tanh_pointwise_grad_plain(input_data[0], input_gradients[0]).unwrap(),
+            Some(_) => backend.tanh_grad(output_data[0], output_gradients[0],
+                                         input_data[0], input_gradients[0]).unwrap(),
+            None => backend.tanh_pointwise_grad(input_data[0], input_gradients[0]).unwrap(),
         }
     }
 }
@@ -116,7 +117,7 @@ impl<B: IBackend + conn::Tanh<f32>> ComputeOutput<f32, B> for TanH {
                       input_data: &[&SharedTensor<f32>],
                       output_data: &mut [&mut SharedTensor<f32>]) {
         match input_data.get(0) {
-            Some(input) => backend.tanh_plain(input, output_data[0]).unwrap(),
+            Some(input) => backend.tanh(input, output_data[0]).unwrap(),
             None => panic!("No input provided for TanH layer."),
         }
     }
@@ -132,7 +133,8 @@ impl<B: IBackend + conn::Tanh<f32>> ComputeInputGradient<f32, B> for TanH {
                               input_data: &[&SharedTensor<f32>],
                               input_gradients: &mut [&mut SharedTensor<f32>]) {
         match output_data.get(0) {
-            Some(_) => backend.tanh_grad_plain(output_data[0], output_gradients[0], input_data[0], input_gradients[0]).unwrap(),
+            Some(_) => backend.tanh_grad(output_data[0], output_gradients[0],
+                                         input_data[0], input_gradients[0]).unwrap(),
             None => panic!("No output_data provided for TanH layer backward."),
         }
     }

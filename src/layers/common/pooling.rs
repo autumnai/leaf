@@ -123,7 +123,8 @@ impl<B: IBackend + conn::Pooling<f32>> ComputeOutput<f32, B> for Pooling<f32, B>
                       output_data: &mut [&mut SharedTensor<f32>]) {
         let config = &self.pooling_configs[0];
         match self.mode {
-            PoolingMode::Max => backend.pooling_max_plain(input_data[0], output_data[0], &*config).unwrap(),
+            PoolingMode::Max => backend.pooling_max(input_data[0], output_data[0],
+                                                    &*config).unwrap(),
             // TODO: implement average pooling
             // PoolingMode::Average => unimplemented!(),
         }
@@ -140,7 +141,9 @@ impl<B: IBackend + conn::Pooling<f32>> ComputeInputGradient<f32, B> for Pooling<
                               input_gradients: &mut [&mut SharedTensor<f32>]) {
         let config = &self.pooling_configs[0];
         match self.mode {
-            PoolingMode::Max => backend.pooling_max_grad_plain(output_data[0], output_gradients[0], input_data[0], input_gradients[0], config).unwrap()
+            PoolingMode::Max => backend.pooling_max_grad(
+                output_data[0], output_gradients[0],
+                input_data[0], input_gradients[0], config).unwrap()
         }
     }
 }

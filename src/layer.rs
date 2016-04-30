@@ -210,8 +210,8 @@ impl<B: IBackend> Layer<B> {
             }
 
             let backend: Rc<IBackend<F=B::F>> = self.backend.clone();
-            blob_data = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &vec![1,1,1]).unwrap())); // [1,1,1] for CUDA
-            blob_gradient = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &vec![1,1,1]).unwrap())); // [1,1,1] for CUDA
+            blob_data = Arc::new(RwLock::new(SharedTensor::new(&[1,1,1]))); // [1,1,1] for CUDA
+            blob_gradient = Arc::new(RwLock::new(SharedTensor::new(&[1,1,1]))); // [1,1,1] for CUDA
         }
         self.output_blob_names.push(blob_name.clone());
         self.output_blobs_data.push(blob_data.clone());
@@ -234,8 +234,8 @@ impl<B: IBackend> Layer<B> {
         info!("{} -> {}", self.name, blob_name);
 
         let backend: Rc<IBackend<F=B::F>> = self.backend.clone();
-        let output_data = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &vec![1,1,1]).unwrap())); // [1,1,1] for CUDA
-        let output_gradient = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &vec![1,1,1]).unwrap())); // [1,1,1] for CUDA
+        let output_data = Arc::new(RwLock::new(SharedTensor::new(&[1,1,1]))); // [1,1,1] for CUDA
+        let output_gradient = Arc::new(RwLock::new(SharedTensor::new(&[1,1,1]))); // [1,1,1] for CUDA
         self.output_blobs_data.push(output_data);
         self.output_blobs_gradient.push(output_gradient);
     }
@@ -264,8 +264,8 @@ impl<B: IBackend> Layer<B> {
             let net_weight_id = weights_len;
             let output_data = self.output_blobs_data[weight_id].read().unwrap();
             debug!("Layer {} - creating weight and gradient of size {:?}", &layer_config.name, output_data.desc());
-            let weight_data = Arc::new(RwLock::new(SharedTensor::<f32>::new(output_data.latest_device(), output_data.desc()).unwrap()));
-            let weight_gradient = Arc::new(RwLock::new(SharedTensor::<f32>::new(output_data.latest_device(), output_data.desc()).unwrap()));
+            let weight_data = Arc::new(RwLock::new(SharedTensor::new(output_data.desc())));
+            let weight_gradient = Arc::new(RwLock::new(SharedTensor::new(output_data.desc())));
             self.weights_data.push(weight_data.clone());
             self.weights_gradient.push(weight_gradient.clone());
 
@@ -460,11 +460,6 @@ impl<B: IBackend> Layer<B> {
             self.input_blobs_data[input_i].write().unwrap().reshape(&reshaped_shape).unwrap();
         }
 
-        self.worker.sync(&self.backend,
-                         &mut self.input_blobs_data, &mut self.input_blobs_gradient,
-                         &mut self.weights_data, &mut self.weights_gradient,
-                         &mut self.output_blobs_data, &mut self.output_blobs_gradient);
-
         let forward_time = timeit_loops!(1, {
             if self.is_using_in_place() {
                 self.worker.forward(&self.backend, &vec![], &self.weights_data, &mut self.output_blobs_data);
@@ -497,11 +492,6 @@ impl<B: IBackend> Layer<B> {
             self.output_blobs_gradient[output_i] = output.clone();
         }
 
-        self.worker.sync(&self.backend,
-                         &mut self.input_blobs_data, &mut self.input_blobs_gradient,
-                         &mut self.weights_data, &mut self.weights_gradient,
-                         &mut self.output_blobs_data, &mut self.output_blobs_gradient);
-
         if self.is_using_in_place() {
             self.worker.backward_input(&self.backend,
                                  &self.weights_data,
@@ -527,11 +517,6 @@ impl<B: IBackend> Layer<B> {
     ///
     /// This method is mostly used when doing backpropagation.
     pub fn backward_parameters(&mut self) {
-        self.worker.sync(&self.backend,
-                         &mut self.input_blobs_data, &mut self.input_blobs_gradient,
-                         &mut self.weights_data, &mut self.weights_gradient,
-                         &mut self.output_blobs_data, &mut self.output_blobs_gradient);
-
         self.worker.backward_parameters(&self.backend,
                              &self.output_blobs_data,
                              &self.output_blobs_gradient,
@@ -553,13 +538,11 @@ impl<B: IBackend> Layer<B> {
     ///
     /// [3]: ../solver/enum.LRPolicy.html
     pub fn update_weights<SolverB: IBackend + ::util::SolverOps<f32>>(&mut self, backend: &SolverB) {
-        let mut shared_a = ::util::native_scalar(-1f32);
-        let _ = shared_a.add_device(IBackend::device(backend));
-        shared_a.sync(IBackend::device(backend)).unwrap();
+        // PERF: allocate this scalar once
+        let shared_a = ::util::native_scalar(-1f32);
         for (weight_gradient, weight_data) in self.learnable_weights_gradients().iter().zip(&mut self.learnable_weights_data()) {
-            weight_gradient.write().unwrap().sync(IBackend::device(backend)).unwrap();
-            weight_data.write().unwrap().sync(IBackend::device(backend)).unwrap();
-            backend.axpy_plain(&shared_a, &weight_gradient.read().unwrap(), &mut weight_data.write().unwrap()).unwrap();
+            backend.axpy(&shared_a, &weight_gradient.read().unwrap(),
+                         &mut weight_data.write().unwrap()).unwrap();
         }
     }
 
@@ -695,7 +678,6 @@ impl<B: IBackend> Layer<B> {
                 }
 
                 let mut weight_lock = weight.write().unwrap();
-                weight_lock.sync(native_backend.device()).unwrap();
 
                 let capnp_tensor = capnp_weight.get_tensor().unwrap();
                 let mut shape = Vec::new();
@@ -705,7 +687,7 @@ impl<B: IBackend> Layer<B> {
                 }
                 weight_lock.reshape(&shape).unwrap();
 
-                let mut native_slice = weight_lock.get_mut(native_backend.device()).unwrap().as_mut_native().unwrap().as_mut_slice::<f32>();
+                let mut native_slice = weight_lock.write_only(native_backend.device()).unwrap().as_mut_native().unwrap().as_mut_slice::<f32>();
                 let data = capnp_tensor.get_data().unwrap();
                 for k in 0..data.len() {
                     native_slice[k as usize] = data.get(k);
@@ -814,8 +796,7 @@ impl<'a, B: IBackend> CapnpWrite<'a> for Layer<B> {
                 let mut capnp_weight = weights.borrow().get(i as u32);
                 capnp_weight.set_name(name);
 
-                let mut weight_lock = weight.write().unwrap();
-                weight_lock.sync(native_backend.device()).unwrap();
+                let weight_lock = weight.write().unwrap();
 
                 let mut tensor = capnp_weight.init_tensor();
                 {
@@ -825,7 +806,8 @@ impl<'a, B: IBackend> CapnpWrite<'a> for Layer<B> {
                     }
                 }
                 {
-                    let native_slice = weight_lock.get(native_backend.device()).unwrap().as_native().unwrap().as_slice::<f32>();
+                    let native_slice = weight_lock.read(native_backend.device())
+                        .unwrap().as_native().unwrap().as_slice::<f32>();
                     let mut tensor_data = tensor.borrow().init_data(native_slice.len() as u32);
                     for (i, datum) in native_slice.iter().enumerate() {
                         tensor_data.set(i as u32, *datum);
@@ -1023,74 +1005,6 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
         let mut weights_gradients_: Vec<&mut SharedTensor<f32>> = weights_gradient.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
 
         self.compute_parameters_gradient(backend, &output_data_, &output_gradients_, &input_data_, &mut weights_gradients_);
-    }
-
-    /// Synchronize the blobs before doing a forward or backward operation.
-    ///
-    /// This is necessary because the forward_layer and backward_layer methods only immutably
-    /// borrow the corresponding input blobs and weights which they are not supposed to change.
-    /// However synchronizing all blobs to the same device may be neccessary for some computations,
-    /// which can only be done with a mutable borrow.
-    fn sync(&self,
-            backend: &B,
-            input_data: &mut [ArcLock<SharedTensor<f32>>],
-            input_gradients: &mut [ArcLock<SharedTensor<f32>>],
-            weights_data: &mut [ArcLock<SharedTensor<f32>>],
-            weights_gradients: &mut [ArcLock<SharedTensor<f32>>],
-            output_data: &mut Vec<ArcLock<SharedTensor<f32>>>,
-            output_gradients: &mut Vec<ArcLock<SharedTensor<f32>>>) {
-        if self.sync_native() {
-            let backend = native_backend();
-            for tensor in input_data {
-                let mut sync = tensor.write().unwrap();
-                match sync.add_device(backend.device()) { _ => sync.sync(backend.device()).unwrap() }
-            }
-            for tensor in input_gradients {
-                let mut sync = tensor.write().unwrap();
-                match sync.add_device(backend.device()) { _ => sync.sync(backend.device()).unwrap() }
-            }
-            for tensor in weights_data {
-                let mut sync = tensor.write().unwrap();
-                match sync.add_device(backend.device()) { _ => sync.sync(backend.device()).unwrap() }
-            }
-            for tensor in weights_gradients {
-                let mut sync = tensor.write().unwrap();
-                match sync.add_device(backend.device()) { _ => sync.sync(backend.device()).unwrap() }
-            }
-            for tensor in output_data {
-                let mut sync = tensor.write().unwrap();
-                match sync.add_device(backend.device()) { _ => sync.sync(backend.device()).unwrap() }
-            }
-            for tensor in output_gradients {
-                let mut sync = tensor.write().unwrap();
-                match sync.add_device(backend.device()) { _ => sync.sync(backend.device()).unwrap() }
-            }
-        } else {
-            for tensor in input_data {
-                let mut sync = tensor.write().unwrap();
-                match sync.add_device(backend.device()) { _ => sync.sync(backend.device()).unwrap() }
-            }
-            for tensor in input_gradients {
-                let mut sync = tensor.write().unwrap();
-                match sync.add_device(backend.device()) { _ => sync.sync(backend.device()).unwrap() }
-            }
-            for tensor in weights_data {
-                let mut sync = tensor.write().unwrap();
-                match sync.add_device(backend.device()) { _ => sync.sync(backend.device()).unwrap() }
-            }
-            for tensor in weights_gradients {
-                let mut sync = tensor.write().unwrap();
-                match sync.add_device(backend.device()) { _ => sync.sync(backend.device()).unwrap() }
-            }
-            for tensor in output_data {
-                let mut sync = tensor.write().unwrap();
-                match sync.add_device(backend.device()) { _ => sync.sync(backend.device()).unwrap() }
-            }
-            for tensor in output_gradients {
-                let mut sync = tensor.write().unwrap();
-                match sync.add_device(backend.device()) { _ => sync.sync(backend.device()).unwrap() }
-            }
-        }
     }
 
     /// Return whether "anonymous" output blobs are created automatically for the layer.

@@ -158,8 +158,10 @@ impl<B: IBackend + LayerOps<f32> + 'static> Sequential<B> {
             info!("Input {} -> {}", self.input_data_tensors.len(), tensor_name);
 
             let ibackend: Rc<IBackend<F=B::F>> = backend;
-            let data_tensor: ArcLock<SharedTensor<f32>> = Arc::new(RwLock::new(SharedTensor::new(ibackend.device(), &input_shape).unwrap()));
-            let gradient_tensor: ArcLock<SharedTensor<f32>> = Arc::new(RwLock::new(SharedTensor::new(ibackend.device(), &input_shape).unwrap()));
+            let data_tensor: ArcLock<SharedTensor<f32>> = Arc::new(RwLock::new(
+                SharedTensor::new(&input_shape)));
+            let gradient_tensor: ArcLock<SharedTensor<f32>> = Arc::new(RwLock::new(
+                SharedTensor::new(&input_shape)));
 
             self.input_data_tensors.push(data_tensor.clone());
             self.input_gradient_tensors.push(gradient_tensor.clone());

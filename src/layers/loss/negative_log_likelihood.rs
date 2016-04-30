@@ -73,8 +73,10 @@ impl<B: IBackend> ComputeOutput<f32, B> for NegativeLogLikelihood {
         let batch_size = Self::batch_size(labels.desc());
 
         let native = native_backend();
-        let native_labels = labels.get(native.device()).unwrap().as_native().unwrap().as_slice::<f32>();
-        let native_probabilities = probabilities.get(native.device()).unwrap().as_native().unwrap().as_slice::<f32>();
+        let native_labels = labels.read(native.device()).unwrap()
+            .as_native().unwrap().as_slice::<f32>();
+        let native_probabilities = probabilities.read(native.device()).unwrap()
+            .as_native().unwrap().as_slice::<f32>();
 
         let mut writable_loss = Vec::<f32>::new();
         for &label_value in native_labels {
@@ -86,7 +88,8 @@ impl<B: IBackend> ComputeOutput<f32, B> for NegativeLogLikelihood {
         loss = loss / (batch_size as f32);
         writable_loss = vec![loss];
 
-        ::util::write_to_memory(output_data[0].get_mut(native.device()).unwrap(), &writable_loss);
+        ::util::write_to_memory(output_data[0].write_only(native.device()).unwrap(),
+                                &writable_loss);
     }
 }
 
@@ -103,15 +106,16 @@ impl<B: IBackend> ComputeInputGradient<f32, B> for NegativeLogLikelihood {
         let num_classes = self.num_classes;
 
         let native = native_backend();
-        let native_labels = labels.get(native.device()).unwrap().as_native().unwrap().as_slice::<f32>();
+        let native_labels = labels.read(native.device()).unwrap()
+            .as_native().unwrap().as_slice::<f32>();
         let mut writable_gradient = vec![0f32; input_gradients[0].desc().size()];
 
         for (batch_n, &label_value) in native_labels.iter().enumerate() {
             let index = (num_classes * batch_n) + label_value as usize;
             writable_gradient[index] = -1f32;
         }
-        input_gradients[0].sync(native.device()).unwrap();
-        ::util::write_to_memory(input_gradients[0].get_mut(native.device()).unwrap(), &writable_gradient);
+        ::util::write_to_memory(input_gradients[0].write_only(native.device()).unwrap(),
+                                &writable_gradient);
     }
 }
 

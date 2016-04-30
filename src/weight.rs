@@ -169,23 +169,20 @@ impl FillerType {
     pub fn fill(&self, weight: &mut SharedTensor<f32>) {
         let native = native_backend();
         let native_device = native.device();
-        let actual_device = weight.latest_device().clone();
-        // sync to native so we can fill
-        match weight.add_device(native_device) { _ => weight.sync(native_device).unwrap() }
 
         match *self {
-            FillerType::Constant { value } => Self::fill_constant(weight, value),
-            FillerType::Glorot { input_size, output_size } => Self::fill_glorot(weight, input_size, output_size),
+            FillerType::Constant { value } =>
+                Self::fill_constant(weight, value),
+            FillerType::Glorot { input_size, output_size } =>
+                Self::fill_glorot(weight, input_size, output_size),
         }
-
-        // sync back to the actual device
-        weight.sync(&actual_device).unwrap();
     }
 
     /// Directly use the [Constant Filler](#variant.Constant).
     pub fn fill_constant(weight: &mut SharedTensor<f32>, value: f32) {
         let native = native_backend();
-        let native_weight = weight.get_mut(native.device()).unwrap().as_mut_native().unwrap();
+        let native_weight = weight.write_only(native.device()).unwrap()
+            .as_mut_native().unwrap();
 
         for e in native_weight.as_mut_slice::<f32>() {
             *e = value;
@@ -195,7 +192,8 @@ impl FillerType {
     /// Directly use the [Glorot Filler](#variant.Glorot).
     pub fn fill_glorot(weight: &mut SharedTensor<f32>, num_inputs: usize, num_outputs: usize) {
         let native = native_backend();
-        let native_weight = weight.get_mut(native.device()).unwrap().as_mut_native().unwrap();
+        let native_weight = weight.write_only(native.device()).unwrap()
+            .as_mut_native().unwrap();
 
         let init_range = (6.0f32 / (num_inputs as f32 + num_outputs as f32)).sqrt();
 

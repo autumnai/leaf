@@ -32,7 +32,7 @@ impl<B: IBackend + conn::LogSoftmax<f32>> ComputeOutput<f32, B> for LogSoftmax {
                       _weights: &[&SharedTensor<f32>],
                       input_data: &[&SharedTensor<f32>],
                       output_data: &mut [&mut SharedTensor<f32>]) {
-        backend.log_softmax_plain(input_data[0], output_data[0]).unwrap();
+        backend.log_softmax(input_data[0], output_data[0]).unwrap();
     }
 }
 
@@ -44,7 +44,8 @@ impl<B: IBackend + conn::LogSoftmax<f32>> ComputeInputGradient<f32, B> for LogSo
                               output_gradients: &[&SharedTensor<f32>],
                               input_data: &[&SharedTensor<f32>],
                               input_gradients: &mut [&mut SharedTensor<f32>]) {
-        backend.log_softmax_grad_plain(output_data[0], output_gradients[0], input_gradients[0]).unwrap();
+        backend.log_softmax_grad(output_data[0], output_gradients[0],
+                                 input_gradients[0]).unwrap();
     }
 }
 
