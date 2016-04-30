@@ -160,8 +160,7 @@ fn bench_alexnet() {
         let func = || {
             let forward_time = timeit_loops!(1, {
                 {
-                    let inp = SharedTensor::<f32>::new(backend.device(), &vec![128, 3, 224, 224]).unwrap();
-
+                    let inp = SharedTensor::<f32>::new(&[128, 3, 224, 224]);
                     let inp_lock = Arc::new(RwLock::new(inp));
                     network.forward(&[inp_lock.clone()]);
                 }
@@ -242,8 +241,7 @@ fn bench_overfeat() {
         let func = || {
             let forward_time = timeit_loops!(1, {
                 {
-                    let inp = SharedTensor::<f32>::new(backend.device(), &vec![128, 3, 231, 231]).unwrap();
-
+                    let inp = SharedTensor::new(&[128, 3, 231, 231]);
                     let inp_lock = Arc::new(RwLock::new(inp));
                     network.forward(&[inp_lock.clone()]);
                 }
@@ -339,7 +337,7 @@ fn bench_vgg_a() {
         let func = || {
             let forward_time = timeit_loops!(1, {
                 {
-                    let inp = SharedTensor::<f32>::new(backend.device(), &vec![64, 3, 224, 224]).unwrap();
+                    let inp = SharedTensor::new(&[64, 3, 224, 224]);
 
                     let inp_lock = Arc::new(RwLock::new(inp));
                     network.forward(&[inp_lock.clone()]);
