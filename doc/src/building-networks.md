@@ -1,6 +1,6 @@
 # Create a Network
 
-In the previous chapters, we learned that in Leaf everything is build by
+In the previous chapters, we learned that in Leaf everything is built by
 layers and that the constructed thing is again a layer, which means it can
 function as a new building block for something bigger. This is possible, because
 a `Layer` can implement any behavior as long as it takes an input and produces
