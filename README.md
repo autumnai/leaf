@@ -59,7 +59,7 @@ For additional information see the [Rust API Documentation][documentation] or th
 Or start by running the **Leaf examples**.
 
 We are providing a [Leaf examples repository][leaf-examples], where we and
-others publish executable machine learning models build with Leaf. It features
+others publish executable machine learning models built with Leaf. It features
 a CLI for easy usage and has a detailed guide in the [project
 README.md][leaf-examples].
 
