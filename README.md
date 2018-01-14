@@ -15,9 +15,6 @@ See the [Leaf - Machine Learning for Hackers][leaf-book] book for more.
 Leaf is a few months old, but thanks to its architecture and Rust, it is already
 one of the fastest Machine Intelligence Frameworks available.
 
-<div align="center">
-  <img src="http://autumnai.com/images/autumn_leaf_benchmarks_alexnet.png"><br><br>
-</div>
 
 > See more Deep Neural Networks benchmarks on [Deep Learning Benchmarks][deep-learning-benchmarks-website].
 
@@ -36,12 +33,9 @@ deployment easily accessible for everyone.
 
 [caffe]: https://github.com/BVLC/caffe
 [rust]: https://www.rust-lang.org/
-[autumn]: http://autumnai.com
-[leaf-book]: http://autumnai.com/leaf/book
 [tensorflow]: https://github.com/tensorflow/tensorflow
 [benchmarks]: #benchmarks
 [leaf-examples]: #examples
-[deep-learning-benchmarks-website]: http://autumnai.com/deep-learning-benchmarks
 [documentation]: http://autumnai.github.io/leaf
 
 > Disclaimer: Leaf is currently in an early stage of development.
