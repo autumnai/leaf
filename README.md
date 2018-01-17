@@ -1,5 +1,9 @@
 # Leaf • [![Join the chat at https://gitter.im/autumnai/leaf](https://img.shields.io/badge/gitter-join%20chat-brightgreen.svg)](https://gitter.im/autumnai/leaf?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/autumnai/leaf.svg?branch=master)](https://travis-ci.org/autumnai/leaf) [![Crates.io](http://meritbadge.herokuapp.com/leaf)](https://crates.io/crates/leaf) [![License](https://img.shields.io/crates/l/leaf.svg)](LICENSE)
 
+## This project is no longer being maintained
+https://medium.com/@mjhirn/tensorflow-wins-89b78b29aafb
+
+
 ## Introduction
 
 Leaf is a open Machine Learning Framework for hackers to build classical, deep
