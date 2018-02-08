@@ -64,7 +64,7 @@ impl<B: conn::Convolution<f32>> Convolution<B> {
     fn create_filter(&self, device: &DeviceType, input_shape: &[usize]) -> SharedTensor<f32> {
         let filter_shape = self.calculate_filter_shape(input_shape);
 
-        SharedTensor::<f32>::new(device, &filter_shape).unwrap()
+        SharedTensor::<f32>::new(&filter_shape)
     }
 }
 
@@ -156,12 +156,12 @@ impl<B: IBackend + conn::Convolution<f32>> ILayer<B> for Convolution<B> {
     fn resize_shared_workspace(&mut self, backend: Rc<B>, workspace: Option<ArcLock<SharedTensor<u8>>>) -> Option<ArcLock<SharedTensor<u8>>> {
         let required_size = self.convolution_config.as_ref().unwrap().workspace_size();
         let new_workspace = if workspace.is_none() {
-            Arc::new(RwLock::new(SharedTensor::<u8>::new(IBackend::device(&*backend), &(required_size)).unwrap()))
+            Arc::new(RwLock::new(SharedTensor::<u8>::new(&[required_size])))
         } else {
             let old_workspace = workspace.as_ref().unwrap().clone();
             let old_workspace_size = old_workspace.read().unwrap().capacity();
             if old_workspace_size < required_size {
-                Arc::new(RwLock::new(SharedTensor::<u8>::new(IBackend::device(&*backend), &(required_size)).unwrap()))
+                Arc::new(RwLock::new(SharedTensor::<u8>::new(&[required_size])))
             } else {
                 workspace.unwrap()
             }
@@ -181,7 +181,8 @@ impl<B: IBackend + conn::Convolution<f32>> ComputeOutput<f32, B> for Convolution
         let filter_data = weights[0];
         let conv_config = self.convolution_config.as_ref().unwrap();
         let mut workspace = self.workspace.as_ref().unwrap().write().unwrap();
-        backend.convolution_plain(filter_data, input_data[0], output_data[0], &mut workspace, conv_config).unwrap();
+        backend.convolution(filter_data, input_data[0], output_data[0],
+                            &mut workspace, conv_config).unwrap();
     }
 }
 
@@ -197,7 +198,9 @@ impl<B: IBackend + conn::Convolution<f32>> ComputeInputGradient<f32, B> for Conv
         let conv_config = self.convolution_config.as_ref().unwrap();
         let mut workspace = self.workspace.as_ref().unwrap().write().unwrap();
         // compute gradient w.r.t. input
-        backend.convolution_grad_data_plain(filter_data, output_gradients[0], input_gradients[0], &mut workspace, conv_config).unwrap();
+        backend.convolution_grad_data(filter_data,
+                                      output_gradients[0], input_gradients[0],
+                                      &mut workspace, conv_config).unwrap();
     }
 }
 
@@ -213,7 +216,9 @@ impl<B: IBackend + conn::Convolution<f32>> ComputeParametersGradient<f32, B> for
         let conv_config = self.convolution_config.as_ref().unwrap();
         let mut workspace = self.workspace.as_ref().unwrap().write().unwrap();
         // compute gradient w.r.t. filter
-        backend.convolution_grad_filter_plain(input_data[0], output_gradients[0], filter_gradient, &mut workspace, conv_config).unwrap();
+        backend.convolution_grad_filter(input_data[0], output_gradients[0],
+                                        filter_gradient, &mut workspace,
+                                        conv_config).unwrap();
     }
 }
 

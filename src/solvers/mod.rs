@@ -68,13 +68,14 @@ trait SGDSolver<SolverB: IBackend + SolverOps<f32>, NetB: IBackend + LayerOps<f3
             let backend = self.backend();
             for net_gradient in net_gradients.clone() {
                 let gradient = net_gradient.read().unwrap();
-                let mut result = SharedTensor::<f32>::new(IBackend::device(backend), &1).unwrap();
+                // PERF: preallocate tensor once
+                let mut result = SharedTensor::new(&[1]);
                 // gradient.sumsq_diff(self.backend(), &mut result);
-                self.backend().dot_plain(&gradient, &gradient, &mut result);
+                self.backend().dot(&gradient, &gradient, &mut result);
 
-                let mut result = SharedTensor::<f32>::new(IBackend::device(backend), &1).unwrap();
-                match result.add_device(native.device()) { _ => result.sync(native.device()).unwrap() }
-                match  result.get(native.device()).unwrap() {
+                // FIXME: I've removed redefinition of `result` that was here.
+                // Code was invalid. Not sure what it meant. It may explode.
+                match  result.read(native.device()).unwrap() {
                     &MemoryType::Native(ref sumsq_result) => {
                         let sumsq_diff_slice = sumsq_result.as_slice::<f32>();
                         sumsq_diff += sumsq_diff_slice[0];

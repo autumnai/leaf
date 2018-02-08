@@ -56,8 +56,8 @@ impl<B: IBackend + Relu<f32> + ReluPointwise<f32>> ComputeOutput<f32, B> for ReL
                       input_data: &[&SharedTensor<f32>],
                       output_data: &mut [&mut SharedTensor<f32>]) {
         match input_data.get(0) {
-            Some(input) => backend.relu_plain(input, output_data[0]).unwrap(),
-            None => backend.relu_pointwise_plain(output_data[0]).unwrap(),
+            Some(input) => backend.relu(input, output_data[0]).unwrap(),
+            None => backend.relu_pointwise(output_data[0]).unwrap(),
         }
     }
 }
@@ -72,8 +72,8 @@ impl<B: IBackend + Relu<f32> + ReluPointwise<f32>> ComputeInputGradient<f32, B> 
                               input_data: &[&SharedTensor<f32>],
                               input_gradients: &mut [&mut SharedTensor<f32>]) {
         match output_data.get(0) {
-            Some(_) => backend.relu_grad_plain(output_data[0], output_gradients[0], input_data[0], input_gradients[0]).unwrap(),
-            None => backend.relu_pointwise_grad_plain(input_data[0], input_gradients[0]).unwrap(),
+            Some(_) => backend.relu_grad(output_data[0], output_gradients[0], input_data[0], input_gradients[0]).unwrap(),
+            None => backend.relu_pointwise_grad(input_data[0], input_gradients[0]).unwrap(),
         }
     }
 }
@@ -115,7 +115,7 @@ impl<B: IBackend + Relu<f32>> ComputeOutput<f32, B> for ReLU {
                       input_data: &[&SharedTensor<f32>],
                       output_data: &mut [&mut SharedTensor<f32>]) {
         match input_data.get(0) {
-            Some(input) => backend.relu_plain(input, output_data[0]).unwrap(),
+            Some(input) => backend.relu(input, output_data[0]).unwrap(),
             None => panic!("No input provided for ReLU layer."),
         }
     }
@@ -131,7 +131,7 @@ impl<B: IBackend + Relu<f32>> ComputeInputGradient<f32, B> for ReLU {
                               input_data: &[&SharedTensor<f32>],
                               input_gradients: &mut [&mut SharedTensor<f32>]) {
         match output_data.get(0) {
-            Some(_) => backend.relu_grad_plain(output_data[0], output_gradients[0], input_data[0], input_gradients[0]).unwrap(),
+            Some(_) => backend.relu_grad(output_data[0], output_gradients[0], input_data[0], input_gradients[0]).unwrap(),
             None => panic!("No output_data provided for ReLU layer backward."),
         }
     }

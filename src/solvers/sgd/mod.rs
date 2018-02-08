@@ -31,8 +31,7 @@ macro_rules! impl_isolver_sgd {
 
                 for weight_gradient in net.learnable_weights_gradients() {
                     let shape = weight_gradient.read().unwrap().desc().clone();
-                    let mut tensor = SharedTensor::new(IBackend::device(&*self.backend),
-                                                       &shape).unwrap();
+                    let mut tensor = SharedTensor::new(&shape);
 
                     let filler = ::weight::FillerType::Constant { value: 0f32 };
                     filler.fill(&mut tensor);

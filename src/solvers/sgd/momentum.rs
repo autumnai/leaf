@@ -46,19 +46,12 @@ impl<SolverB: IBackend + SolverOps<f32>> Momentum<SolverB> {
     ///
     /// [2]: ../../../solver/struct.Solver.html#method.from_config
     pub fn new(backend: Rc<SolverB>) -> Momentum<SolverB> {
-        let (lr, momentum) = {
-            let device = IBackend::device(backend.as_ref());
-
-            (SharedTensor::<f32>::new(device, &1).unwrap(),
-             SharedTensor::<f32>::new(device, &1).unwrap())
-        };
-        
         Momentum {
             history: Vec::new(),
             backend: backend,
 
-            lr: lr,
-            momentum: momentum,
+            lr: SharedTensor::<f32>::new(&[1]),
+            momentum: SharedTensor::<f32>::new(&[1]),
         }
     }
 
@@ -71,6 +64,7 @@ impl<B: IBackend + SolverOps<f32>, NetB: IBackend + LayerOps<f32> + 'static> SGD
                             history_blob_id: usize,
                             global_lr: &f32,
                             blob_lr: &f32) {
+        // PERF: check if value is changed before writing it
         ::weight::FillerType::Constant {
             value: global_lr * blob_lr
         }.fill(&mut self.lr);
@@ -83,20 +77,14 @@ impl<B: IBackend + SolverOps<f32>, NetB: IBackend + LayerOps<f32> + 'static> SGD
         let device = IBackend::device(backend);
 
         let history_blob = &self.history[history_blob_id];
+        Axpby::axpby(backend,
+                     &self.lr,
+                     &weight_gradient.read().unwrap(),
+                     &self.momentum,
+                     &mut history_blob.write().unwrap()).unwrap();
 
-        let _ = weight_gradient.write().unwrap().add_device(device);
-        weight_gradient.write().unwrap().sync(device).unwrap();
-        let _ = history_blob.write().unwrap().add_device(device);
-        history_blob.write().unwrap().sync(device).unwrap();
-
-        Axpby::axpby_plain(backend,
-                           &self.lr,
-                           &weight_gradient.read().unwrap(),
-                           &self.momentum,
-                           &mut history_blob.write().unwrap()).unwrap();
-
-        backend.copy_plain(
-            &history_blob.read().unwrap(), &mut weight_gradient.write().unwrap()).unwrap();
+        backend.copy(&history_blob.read().unwrap(),
+                     &mut weight_gradient.write().unwrap()).unwrap();
     }
 }
 

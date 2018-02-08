@@ -51,16 +51,16 @@ pub fn write_batch_sample<T: NumCast + ::std::marker::Copy>(tensor: &mut SharedT
     let batch_size = tensor.desc().size();
     let sample_size = batch_size / tensor.desc()[0];
 
-    let _ = tensor.add_device(native_backend.device());
-    tensor.sync(native_backend.device()).unwrap();
-    write_to_memory_offset(tensor.get_mut(native_backend.device()).unwrap(), &data, i * sample_size);
+    write_to_memory_offset(tensor.write_only(native_backend.device()).unwrap(),
+                           &data,
+                           i * sample_size);
 }
 
 /// Create a Collenchyma SharedTensor for a scalar value.
 pub fn native_scalar<T: NumCast + ::std::marker::Copy>(scalar: T) -> SharedTensor<T> {
     let native = native_backend();
-    let mut shared_scalar = SharedTensor::<T>::new(native.device(), &vec![1]).unwrap();
-    write_to_memory(shared_scalar.get_mut(native.device()).unwrap(), &[scalar]);
+    let mut shared_scalar = SharedTensor::<T>::new(&[1]);
+    write_to_memory(shared_scalar.write_only(native.device()).unwrap(), &[scalar]);
 
     shared_scalar
 }
@@ -79,18 +79,10 @@ pub trait Axpby<F> : Axpy<F> + Scal<F> {
     /// Performs the operation y := a*x + b*y .
     ///
     /// Consists of a scal(b, y) followed by a axpby(a,x,y).
-    fn axpby(&self, a: &mut SharedTensor<F>, x: &mut SharedTensor<F>, b: &mut SharedTensor<F>, y: &mut SharedTensor<F>) -> Result<(), ::co::error::Error> {
+    fn axpby(&self, a: &SharedTensor<F>, x: &SharedTensor<F>, b: &SharedTensor<F>,
+             y: &mut SharedTensor<F>) -> Result<(), ::co::error::Error> {
         try!(self.scal(b, y));
         try!(self.axpy(a, x, y));
-        Ok(())
-    }
-
-    /// Performs the operation y := a*x + b*y .
-    ///
-    /// Consists of a scal(b, y) followed by a axpby(a,x,y).
-    fn axpby_plain(&self, a: &SharedTensor<F>, x: &SharedTensor<F>, b: &SharedTensor<F>, y: &mut SharedTensor<F>) -> Result<(), ::co::error::Error> {
-        try!(self.scal_plain(b, y));
-        try!(self.axpy_plain(a, x, y));
         Ok(())
     }
 }

@@ -33,7 +33,7 @@ impl<B: IBackend + conn::Softmax<f32>> ComputeOutput<f32, B> for Softmax {
                       _weights: &[&SharedTensor<f32>],
                       input_data: &[&SharedTensor<f32>],
                       output_data: &mut [&mut SharedTensor<f32>]) {
-        backend.softmax_plain(input_data[0], output_data[0]).unwrap();
+        backend.softmax(input_data[0], output_data[0]).unwrap();
     }
 }
 
@@ -45,7 +45,8 @@ impl<B: IBackend + conn::Softmax<f32>> ComputeInputGradient<f32, B> for Softmax 
                               output_gradients: &[&SharedTensor<f32>],
                               input_data: &[&SharedTensor<f32>],
                               input_gradients: &mut [&mut SharedTensor<f32>]) {
-        backend.softmax_grad_plain(output_data[0], output_gradients[0], input_gradients[0]).unwrap();
+        backend.softmax_grad(output_data[0], output_gradients[0],
+                             input_gradients[0]).unwrap();
     }
 }
 

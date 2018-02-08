@@ -48,7 +48,8 @@ impl ConfusionMatrix {
     /// The prediction for each sample of the batch is found by
     /// determining which output value had the smallest loss.
     pub fn get_predictions(&self, network_out: &mut SharedTensor<f32>) -> Vec<usize> {
-        let native_infered = network_out.get(native_backend().device()).unwrap().as_native().unwrap();
+        let native_infered = network_out.read(native_backend().device()).unwrap()
+            .as_native().unwrap();
         let predictions_slice = native_infered.as_slice::<f32>();
 
         let mut predictions = Vec::<usize>::new();

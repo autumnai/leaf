@@ -69,7 +69,7 @@ mod cuda {
     #[bench]
     #[ignore]
     #[cfg(feature = "cuda")]
-    fn bench_mnsit_forward_1(b: &mut Bencher) {
+    fn bench_mnsit_forward_1(_b: &mut Bencher) {
         let mut cfg = SequentialConfig::default();
         // set up input
         cfg.add_input("in", &vec![1, 30, 30]);
@@ -96,7 +96,7 @@ mod cuda {
             backend.clone(), &LayerConfig::new("network", LayerType::Sequential(cfg)));
 
         let _ = timeit_loops!(10, {
-            let inp = SharedTensor::<f32>::new(backend.device(), &vec![1, 30, 30]).unwrap();
+            let inp = SharedTensor::<f32>::new(&[1, 30, 30]);
             let inp_lock = Arc::new(RwLock::new(inp));
 
             network.forward(&[inp_lock]);
@@ -260,7 +260,7 @@ mod cuda {
 
         let func = || {
             let forward_time = timeit_loops!(1, {
-                let inp = SharedTensor::<f32>::new(backend.device(), &vec![128, 3, 112, 112]).unwrap();
+                let inp = SharedTensor::new(&[128, 3, 112, 112]);
 
                 let inp_lock = Arc::new(RwLock::new(inp));
                 network.forward(&[inp_lock]);
@@ -416,7 +416,7 @@ mod cuda {
             backend.clone(), &LayerConfig::new("network", LayerType::Sequential(cfg)));
 
         let mut func = || {
-            let inp = SharedTensor::<f32>::new(backend.device(), &vec![128, 3, 112, 112]).unwrap();
+            let inp = SharedTensor::<f32>::new(&[128, 3, 112, 112]);
 
             let inp_lock = Arc::new(RwLock::new(inp));
             network.forward(&[inp_lock]);

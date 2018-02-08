@@ -66,8 +66,10 @@ mod layer_spec {
             let loaded_weights = loaded_layer.learnable_weights_data();
             let loaded_weight_lock = loaded_weights[0].read().unwrap();
 
-            let original_weight = original_weight_lock.get(native_backend().device()).unwrap().as_native().unwrap().as_slice::<f32>();
-            let loaded_weight = loaded_weight_lock.get(native_backend().device()).unwrap().as_native().unwrap().as_slice::<f32>();
+            let original_weight = original_weight_lock.read(native_backend().device())
+                .unwrap().as_native().unwrap().as_slice::<f32>();
+            let loaded_weight = loaded_weight_lock.read(native_backend().device())
+                .unwrap().as_native().unwrap().as_slice::<f32>();
 
             assert_eq!(original_weight, loaded_weight);
         }
@@ -131,27 +133,28 @@ mod layer_spec {
             let mut reshape_network = Layer::from_config(cuda_backend.clone(), &LayerConfig::new("reshape_model", LayerType::Sequential(reshape_model)));
 
             let input = vec![1f32, 1f32, 2f32];
-            let mut normal_tensor = SharedTensor::<f32>::new(native_backend.device(), &(3)).unwrap();
+            let mut normal_tensor = SharedTensor::<f32>::new(&[3]);
             // let mut normal_tensor_output = SharedTensor::<f32>::new(native_backend.device(), &(3)).unwrap();
-            let mut reshape_tensor = SharedTensor::<f32>::new(native_backend.device(), &(3)).unwrap();
+            let mut reshape_tensor = SharedTensor::<f32>::new(&[3]);
             // let mut reshape_tensor_output = SharedTensor::<f32>::new(native_backend.device(), &(3)).unwrap();
-            write_to_memory(normal_tensor.get_mut(native_backend.device()).unwrap(), &input);
-            write_to_memory(reshape_tensor.get_mut(native_backend.device()).unwrap(), &input);
+            write_to_memory(normal_tensor.write_only(native_backend.device()).unwrap(), &input);
+            write_to_memory(reshape_tensor.write_only(native_backend.device()).unwrap(), &input);
 
             let normal_tensor_output = normal_network.forward(&[Arc::new(RwLock::new(normal_tensor))])[0].clone();
-            let _ = normal_tensor_output.write().unwrap().add_device(native_backend.device());
-            normal_tensor_output.write().unwrap().sync(native_backend.device()).unwrap();
             let normal_tensor_output_native_ = normal_tensor_output.read().unwrap();
-            let normal_tensor_output_native = normal_tensor_output_native_.get(native_backend.device()).unwrap().as_native().unwrap();
-            assert_eq!(&[0.7310585786f32, 0.7310586f32, 0.880797f32], normal_tensor_output_native.as_slice::<f32>());
+            let normal_tensor_output_native = normal_tensor_output_native_
+                .read(native_backend.device()).unwrap().as_native().unwrap();
+            assert_eq!(&[0.7310585786f32, 0.7310586f32, 0.880797f32],
+                       normal_tensor_output_native.as_slice::<f32>());
 
             let reshape_tensor_output = reshape_network.forward(&[Arc::new(RwLock::new(reshape_tensor))])[0].clone();
-            let _ = reshape_tensor_output.write().unwrap().add_device(native_backend.device());
-            reshape_tensor_output.write().unwrap().sync(native_backend.device()).unwrap();
             let reshape_tensor_output_native_ = reshape_tensor_output.read().unwrap();
-            let reshape_tensor_output_native = reshape_tensor_output_native_.get(native_backend.device()).unwrap().as_native().unwrap();
-            assert_eq!(&[0.7310585786f32, 0.7310586f32, 0.880797f32], reshape_tensor_output_native.as_slice::<f32>());
-            assert_eq!(normal_tensor_output_native.as_slice::<f32>(), reshape_tensor_output_native.as_slice::<f32>());
+            let reshape_tensor_output_native = reshape_tensor_output_native_
+                .read(native_backend.device()).unwrap().as_native().unwrap();
+            assert_eq!(&[0.7310585786f32, 0.7310586f32, 0.880797f32],
+                       reshape_tensor_output_native.as_slice::<f32>());
+            assert_eq!(normal_tensor_output_native.as_slice::<f32>(),
+                       reshape_tensor_output_native.as_slice::<f32>());
         }
     }
 
