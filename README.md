@@ -28,7 +28,7 @@ working on making AI algorithms 100x more computational efficient.
 We see Leaf as the core of constructing high-performance machine intelligence
 applications. Leaf's design makes it easy to publish independent modules to make
 e.g. deep reinforcement learning, visualization and monitoring, network
-distribution, [automated preprocessing][cuticula] or scaleable production
+distribution, [automated preprocessing][cuticula] or scalable production
 deployment easily accessible for everyone.
 
 [caffe]: https://github.com/BVLC/caffe
@@ -59,7 +59,7 @@ README.md][leaf-examples].
 
 Leaf comes with an examples directory as well, which features popular neural
 networks (e.g. Alexnet, Overfeat, VGG). To run them on your machine, just follow
-the install guide, clone this repoistory and then run
+the install guide, clone this repository and then run
 
 ```bash
 # The examples currently require CUDA support.
